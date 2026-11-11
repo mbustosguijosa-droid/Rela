@@ -6,6 +6,7 @@ import { signOut, updateProfile } from "@/app/actions";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { ACCENTS } from "@/lib/format";
 import { Avatar } from "./Avatar";
+import { useT } from "./I18n";
 import type { Profile } from "@/lib/auth";
 
 /** Reduce la imagen en el navegador antes de subirla (más rápido y ocupa menos). */
@@ -25,6 +26,7 @@ async function resize(file: File, maxW: number, maxH: number, square: boolean): 
 }
 
 export function ProfileForm({ profile, isNew }: { profile: Profile; isNew: boolean }) {
+  const { t } = useT();
   const [d, setD] = useState({
     name: profile.name, handle: profile.handle.startsWith("user_") ? "" : profile.handle, bio: profile.bio, city: profile.city,
     accent: profile.accent || "#a77bff", avatar_url: profile.avatar_url, banner_url: profile.banner_url,
@@ -38,7 +40,7 @@ export function ProfileForm({ profile, isNew }: { profile: Profile; isNew: boole
   async function upload(kind: "avatar" | "banner", file: File | undefined) {
     if (!file) return;
     const sb = supabaseBrowser(); if (!sb) return;
-    if (!file.type.startsWith("image/")) { setError("Sube una imagen (JPG o PNG)."); return; }
+    if (!file.type.startsWith("image/")) { setError(t.editProfile.onlyImages); return; }
     setError(null); setUploading(kind);
     try {
       const blob = kind === "avatar" ? await resize(file, 400, 400, true) : await resize(file, 1600, 700, false);
@@ -47,7 +49,7 @@ export function ProfileForm({ profile, isNew }: { profile: Profile; isNew: boole
       if (e) throw e;
       set(kind === "avatar" ? "avatar_url" : "banner_url", sb.storage.from("media").getPublicUrl(path).data.publicUrl);
     } catch (e) {
-      setError(`No se ha podido subir la imagen: ${(e as Error).message}. Si dice "Bucket not found", falta ejecutar el archivo 002 en Supabase.`);
+      setError(t.editProfile.uploadError((e as Error).message));
     } finally { setUploading(""); }
   }
 
@@ -62,30 +64,30 @@ export function ProfileForm({ profile, isNew }: { profile: Profile; isNew: boole
 
   return (
     <form onSubmit={save} className="pform">
-      {isNew && <div className="size-note"><b>¡Bienvenida/o a Rela!</b><span className="muted">Elige tu nombre de usuario y ponle foto a tu perfil. Lo podrás cambiar cuando quieras.</span></div>}
+      {isNew && <div className="size-note"><b>{t.editProfile.welcome}</b><span className="muted">{t.editProfile.welcomeText}</span></div>}
       <div className="pf-banner" style={{ backgroundImage: d.banner_url ? `url('${d.banner_url}')` : `linear-gradient(120deg, ${d.accent}, var(--surface-2))` }}>
-        <label className="btn sm file-btn">{uploading === "banner" ? "Subiendo…" : "Cambiar cabecera"}<input type="file" accept="image/*" onChange={(e) => upload("banner", e.target.files?.[0])} /></label>
-        {d.banner_url && <button type="button" className="btn sm" onClick={() => set("banner_url", null)}>Quitar</button>}
+        <label className="btn sm file-btn">{uploading === "banner" ? t.editProfile.uploading : t.editProfile.changeBanner}<input type="file" accept="image/*" onChange={(e) => upload("banner", e.target.files?.[0])} /></label>
+        {d.banner_url && <button type="button" className="btn sm" onClick={() => set("banner_url", null)}>{t.editProfile.remove}</button>}
       </div>
       <div className="pf-avatar">
         <Avatar p={{ ...d, accent: d.accent }} size={104} ring />
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <label className="btn sm file-btn">{uploading === "avatar" ? "Subiendo…" : "Subir foto"}<input type="file" accept="image/*" onChange={(e) => upload("avatar", e.target.files?.[0])} /></label>
-          {d.avatar_url && <button type="button" className="btn sm" onClick={() => set("avatar_url", null)}>Quitar foto</button>}
+          <label className="btn sm file-btn">{uploading === "avatar" ? t.editProfile.uploading : t.editProfile.uploadPhoto}<input type="file" accept="image/*" onChange={(e) => upload("avatar", e.target.files?.[0])} /></label>
+          {d.avatar_url && <button type="button" className="btn sm" onClick={() => set("avatar_url", null)}>{t.editProfile.removePhoto}</button>}
         </div>
       </div>
-      <div className="field"><label className="lbl" htmlFor="pf-name">Nombre</label><input id="pf-name" value={d.name} maxLength={40} onChange={(e) => set("name", e.target.value)} placeholder="Cómo quieres que te vean" /></div>
-      <div className="field"><label className="lbl" htmlFor="pf-handle">Nombre de usuario</label>
-        <div className="handle-input"><span>@</span><input id="pf-handle" required value={d.handle} maxLength={24} onChange={(e) => set("handle", e.target.value.toLowerCase().replace(/[^a-z0-9._]/g, ""))} placeholder="tu_usuario" /></div>
-        <span className="muted" style={{ fontSize: 12 }}>Entre 3 y 24 caracteres: letras minúsculas, números, punto o guion bajo. Tu perfil será rela…/u/{d.handle || "tu_usuario"}</span></div>
-      <div className="field"><label className="lbl" htmlFor="pf-bio">Bio</label><textarea id="pf-bio" value={d.bio} maxLength={160} onChange={(e) => set("bio", e.target.value)} placeholder="Discos de cabecera, conciertos, manías…" /><span className="muted" style={{ fontSize: 12 }}>{d.bio.length}/160</span></div>
-      <div className="field"><label className="lbl" htmlFor="pf-city">Ciudad</label><input id="pf-city" value={d.city} maxLength={40} onChange={(e) => set("city", e.target.value)} /></div>
-      <div className="field"><span className="lbl">Color de tu perfil</span>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>{ACCENTS.map((c) => <button type="button" key={c} className={`sw ${c === d.accent ? "on" : ""}`} style={{ background: c }} aria-label={`Color ${c}`} aria-pressed={c === d.accent} onClick={() => set("accent", c)} />)}</div></div>
+      <div className="field"><label className="lbl" htmlFor="pf-name">{t.editProfile.name}</label><input id="pf-name" value={d.name} maxLength={40} onChange={(e) => set("name", e.target.value)} placeholder={t.editProfile.namePh} /></div>
+      <div className="field"><label className="lbl" htmlFor="pf-handle">{t.editProfile.handle}</label>
+        <div className="handle-input"><span>@</span><input id="pf-handle" required value={d.handle} maxLength={24} onChange={(e) => set("handle", e.target.value.toLowerCase().replace(/[^a-z0-9._]/g, ""))} placeholder={t.editProfile.handle.toLowerCase().replace(/ /g, "_")} /></div>
+        <span className="muted" style={{ fontSize: 12 }}>{t.editProfile.handleHint(d.handle || "tu_usuario")}</span></div>
+      <div className="field"><label className="lbl" htmlFor="pf-bio">{t.editProfile.bio}</label><textarea id="pf-bio" value={d.bio} maxLength={160} onChange={(e) => set("bio", e.target.value)} placeholder={t.editProfile.bioPh} /><span className="muted" style={{ fontSize: 12 }}>{d.bio.length}/160</span></div>
+      <div className="field"><label className="lbl" htmlFor="pf-city">{t.editProfile.city}</label><input id="pf-city" value={d.city} maxLength={40} onChange={(e) => set("city", e.target.value)} /></div>
+      <div className="field"><span className="lbl">{t.editProfile.color}</span>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>{ACCENTS.map((c) => <button type="button" key={c} className={`sw ${c === d.accent ? "on" : ""}`} style={{ background: c }} aria-label={t.editProfile.colorOf(c)} aria-pressed={c === d.accent} onClick={() => set("accent", c)} />)}</div></div>
       {error && <p className="form-error" role="alert">{error}</p>}
       <div style={{ display: "flex", gap: 8, justifyContent: "space-between", flexWrap: "wrap" }}>
-        <button type="button" className="btn" onClick={() => start(() => signOut())}>Cerrar sesión</button>
-        <button className="btn primary" disabled={pending || !!uploading}>{pending ? "Guardando…" : "Guardar perfil"}</button>
+        <button type="button" className="btn" onClick={() => start(() => signOut())}>{t.editProfile.signOut}</button>
+        <button className="btn primary" disabled={pending || !!uploading}>{pending ? t.editProfile.saving : t.editProfile.save}</button>
       </div>
     </form>
   );

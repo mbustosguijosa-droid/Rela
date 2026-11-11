@@ -1,25 +1,26 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getAlbum, getArtist, geniusUrl, spotifyUrl, KIND, tier } from "@/lib/deezer";
+import { getAlbum, getArtist, geniusUrl, spotifyUrl, tier } from "@/lib/deezer";
 import { TrackRater, type RatingState } from "@/components/TrackRater";
 import { ReviewCard } from "@/components/ReviewCard";
 import { ReviewComposer } from "@/components/ReviewComposer";
 import { Avatar } from "@/components/Avatar";
 import { getViewer } from "@/lib/auth";
-import { getFollowedArtists, getFollowing, getReviews, SORTS, SORT_NOTE, type Sort } from "@/lib/reviews";
+import { getFollowedArtists, getFollowing, getReviews, SORTS, type Sort } from "@/lib/reviews";
 import { FollowArtistButton } from "@/components/FollowArtistButton";
 import { cls, f1, nf } from "@/lib/format";
+import { getT } from "@/lib/i18n-server";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ orden?: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const a = await getAlbum(id);
-  if (!a) return { title: "Disco no encontrado" };
+  const [a, { t }] = await Promise.all([getAlbum(id), getT()]);
+  if (!a) return { title: t.album.notFound };
   return {
     title: `${a.title} · ${a.artist.name}`,
-    description: `Puntúa ${a.title} de ${a.artist.name} canción a canción y lee qué opina la gente en Rela.`,
+    description: t.album.metaDesc(a.title, a.artist.name),
     openGraph: { images: [a.cover_big] },
   };
 }
@@ -32,7 +33,7 @@ export default async function AlbumPage({ params, searchParams }: Props) {
   const a = await getAlbum(id);
   if (!a) notFound();
   const releaseId = a.id;
-  const { sb, user, profile } = await getViewer();
+  const [{ sb, user, profile }, { t, locale, lang }] = await Promise.all([getViewer(), getT()]);
   const [artist, following, followedArtists] = await Promise.all([getArtist(a.artist.id), sb ? getFollowing(sb, user?.id) : Promise.resolve([]), sb ? getFollowedArtists(sb, user?.id) : Promise.resolve([])]);
 
   // Datos de la comunidad (solo si Supabase está configurado)
@@ -74,8 +75,8 @@ export default async function AlbumPage({ params, searchParams }: Props) {
   const peak = Math.max(1, ...buckets);
   const featured = sort === "hot" ? reviews[0] : null;
   const fans = artist?.nb_fan ?? 0;
-  const t = tier(fans);
-  const date = new Date(a.release_date + "T12:00").toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+  const ti = tier(fans);
+  const date = new Date(a.release_date + "T12:00").toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" });
   const viewer = user && profile ? { id: user.id, name: profile.name, handle: profile.handle, avatar_url: profile.avatar_url, accent: profile.accent } : null;
 
   return (
@@ -84,20 +85,20 @@ export default async function AlbumPage({ params, searchParams }: Props) {
         <div className="wash" style={{ backgroundImage: `url('${a.cover_medium}')` }} aria-hidden="true" />
         <div className="wrap album-head">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="cover" src={a.cover_big} alt={`Portada de ${a.title}`} />
+          <img className="cover" src={a.cover_big} alt={t.common.coverOf(a.title)} />
           <div style={{ minWidth: 0 }}>
-            <p className="eyebrow"><span>{KIND[a.record_type] ?? "Disco"} · {date}{a.genres?.data?.[0] ? ` · ${a.genres.data[0].name}` : ""}</span><span className={`tier ${t.k}`}>{t.l}</span></p>
+            <p className="eyebrow"><span>{t.kind[a.record_type] ?? t.kind.disc} · {date}{a.genres?.data?.[0] ? ` · ${a.genres.data[0].name}` : ""}</span><span className={`tier ${ti.k}`}>{t.tier[ti.k]}</span></p>
             <h1>{a.title}</h1>
             <p className="byline" style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}><Link href={`/artista/${a.artist.id}`}>{a.artist.name}</Link>
               <FollowArtistButton small artist={{ id: a.artist.id, name: a.artist.name, picture: artist?.picture_medium ?? null, fans: artist?.nb_fan ?? null }} initial={followedArtists.some((f) => Number(f.artist_id) === a.artist.id)} loggedIn={!!user} /></p>
             <div className="community">
               <div>
                 <div className="avg"><span className={`num score s-${cls(avg)}`}>{f1(avg)}</span><span className="of">/10</span></div>
-                <span className="muted" style={{ fontSize: 13 }}>{scores.length ? `Media de ${nf(scores.length)} ${scores.length === 1 ? "nota" : "notas"} en Rela` : "Nadie lo ha puntuado aún: sé la primera persona"} · {a.nb_tracks} {a.nb_tracks === 1 ? "canción" : "canciones"}</span>
-                <div style={{ marginTop: 6 }}><a className="linkbtn" href="#resenas">💬 {reviews.length} {reviews.length === 1 ? "reseña" : "reseñas"}</a></div>
+                <span className="muted" style={{ fontSize: 13 }}>{scores.length ? t.album.avgOf(scores.length.toLocaleString(locale), scores.length === 1) : t.album.nobody} · {t.common.songs(a.nb_tracks)}</span>
+                <div style={{ marginTop: 6 }}><a className="linkbtn" href="#resenas">💬 {t.album.reviewsN(reviews.length)}</a></div>
               </div>
               {scores.length > 0 && (
-                <div aria-label="Reparto de notas">
+                <div aria-label={t.album.distribution}>
                   <div className="bars">{buckets.map((b, i) => <i key={i} className={b === peak ? "peak" : ""} style={{ height: `${Math.max(4, (b / peak) * 100)}%` }} />)}</div>
                   <div className="axis"><span>1</span><span>10</span></div>
                 </div>
@@ -107,10 +108,10 @@ export default async function AlbumPage({ params, searchParams }: Props) {
         </div>
       </section>
       <div className="wrap">
-        {(t.k === "under" || t.k === "culto") && (
+        {(ti.k === "under" || ti.k === "culto") && (
           <div className="size-note" style={{ marginTop: 24 }}>
-            <span className={`tier ${t.k}`} style={{ marginTop: 2 }}>{t.l}</span>
-            <div><b>{a.artist.name} tiene {fans.toLocaleString("es-ES")} fans en Deezer.</b><span className="muted">Tu nota aquí cuenta mucho.</span></div>
+            <span className={`tier ${ti.k}`} style={{ marginTop: 2 }}>{t.tier[ti.k]}</span>
+            <div><b>{a.artist.name} · {t.common.fansDeezer(fans.toLocaleString(locale))}.</b><span className="muted">{t.common.yourVoteCounts}</span></div>
           </div>
         )}
         <TrackRater
@@ -123,26 +124,26 @@ export default async function AlbumPage({ params, searchParams }: Props) {
           inLoop={Number(profile?.loop_release_id) === releaseId}
         >
           {featured && (
-            <div className="featured"><span className="lbl">Reseña destacada</span><ReviewCard rv={featured} viewer={viewer} /></div>
+            <div className="featured"><span className="lbl">{t.album.featured}</span><ReviewCard rv={featured} viewer={viewer} /></div>
           )}
           <section id="resenas">
-            <header className="panel-head"><h2>Reseñas y debate</h2><p>Reacciona y responde: las reseñas con más interacción suben arriba.</p></header>
+            <header className="panel-head"><h2>{t.album.reviewsTitle}</h2><p>{t.album.reviewsIntro}</p></header>
             <ReviewComposer releaseId={releaseId} initial={myReview} viewer={viewer} />
-            <div className="sorttabs">{SORTS.map(([k, l]) => <Link key={k} className={`chip ${k === sort ? "on" : ""}`} href={`/album/${releaseId}?orden=${k}#resenas`} scroll={false}>{l}</Link>)}</div>
-            <p className="sort-note">{SORT_NOTE[sort]}</p>
+            <div className="sorttabs">{SORTS.map(([k]) => <Link key={k} className={`chip ${k === sort ? "on" : ""}`} href={`/album/${releaseId}?orden=${k}#resenas`} scroll={false}>{t.reviews.sorts[k]}</Link>)}</div>
+            <p className="sort-note">{t.reviews.notes[sort]}</p>
             {reviews.length ? reviews.map((rv) => <ReviewCard key={rv.id} rv={rv} viewer={viewer} />)
-              : <p className="empty" style={{ marginTop: 14 }}>Todavía no hay reseñas de este disco. La tuya puede ser la primera.</p>}
+              : <p className="empty" style={{ marginTop: 14 }}>{t.album.noReviews}</p>}
           </section>
           {user && (
             <section>
-              <div className="sec-head"><h2>Tus amigos</h2><span>{friends.length} de {following.length} lo han puntuado</span></div>
+              <div className="sec-head"><h2>{t.album.yourFriends}</h2><span>{t.album.friendsRated(friends.length, following.length)}</span></div>
               {friends.length ? friends.map((f) => (
                 <Link key={f.profile.id} className="fs" href={`/u/${f.profile.handle}`}>
                   <Avatar p={f.profile} size={34} />
                   <span className="nm"><b>{f.profile.name || f.profile.handle}</b><small>@{f.profile.handle}</small>{f.liked && <span style={{ color: "var(--like)" }}> ♥</span>}</span>
                   <span className={`score s-${cls(f.overall)}`}>{f1(f.overall)}</span>
                 </Link>
-              )) : <p className="empty">{following.length ? "Ninguna persona que sigues lo ha puntuado todavía." : <>Aún no sigues a nadie. <Link className="linkbtn" href="/amigos">Busca amigos</Link>.</>}</p>}
+              )) : <p className="empty">{following.length ? t.album.noFriendRated : <>{t.home.noFollowing} <Link className="linkbtn" href="/amigos">{t.home.findFriends}</Link>.</>}</p>}
             </section>
           )}
         </TrackRater>

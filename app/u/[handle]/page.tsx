@@ -9,6 +9,7 @@ import { cls, f1, nf } from "@/lib/format";
 import { Avatar } from "@/components/Avatar";
 import { FollowButton } from "@/components/FollowButton";
 import { ReviewCard } from "@/components/ReviewCard";
+import { getT } from "@/lib/i18n-server";
 
 type Props = { params: Promise<{ handle: string }> };
 
@@ -21,19 +22,19 @@ async function loadProfile(handle: string) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { handle } = await params;
-  const p = await loadProfile(handle);
-  return p ? { title: `${p.name || p.handle} (@${p.handle})`, description: p.bio || `Perfil de @${p.handle} en Rela` } : { title: "Perfil no encontrado" };
+  const [p, { t }] = await Promise.all([loadProfile(handle), getT()]);
+  return p ? { title: `${p.name || p.handle} (@${p.handle})`, description: p.bio || t.profile.metaDesc(p.handle) } : { title: t.profile.notFound };
 }
 
 type RatedRow = { release_id: number; overall: number | null; liked: boolean; updated_at: string; releases: ReleaseRow | null };
 
 const BADGES = [
-  { ic: "⛏", t: "Cazador underground", d: "Un tercio de sus discos son de artistas con menos de 10.000 fans", test: (s: Stats) => s.n >= 3 && s.under / s.n >= 1 / 3 },
-  { ic: "✦", t: "Oído de culto", d: "3 o más discos de artistas de culto", test: (s: Stats) => s.culto >= 3 },
-  { ic: "✎", t: "Crítico exigente", d: "Nota media por debajo de 7", test: (s: Stats) => s.scored >= 5 && (s.mean ?? 10) < 7 },
-  { ic: "♥", t: "Corazón fácil", d: "Le da me gusta a casi todo", test: (s: Stats) => s.n >= 5 && s.liked / s.n > 0.6 },
-  { ic: "☄", t: "Primeros pasos", d: "Ya ha puntuado su primer disco", test: (s: Stats) => s.n >= 1 && s.n < 5 },
-  { ic: "◎", t: "Melómano", d: "Más de 50 discos puntuados", test: (s: Stats) => s.n >= 50 },
+  { k: "under", ic: "⛏", test: (s: Stats) => s.n >= 3 && s.under / s.n >= 1 / 3 },
+  { k: "culto", ic: "✦", test: (s: Stats) => s.culto >= 3 },
+  { k: "strict", ic: "✎", test: (s: Stats) => s.scored >= 5 && (s.mean ?? 10) < 7 },
+  { k: "heart", ic: "♥", test: (s: Stats) => s.n >= 5 && s.liked / s.n > 0.6 },
+  { k: "first", ic: "☄", test: (s: Stats) => s.n >= 1 && s.n < 5 },
+  { k: "meloman", ic: "◎", test: (s: Stats) => s.n >= 50 },
 ];
 type Stats = { n: number; scored: number; mean: number | null; under: number; culto: number; conocido: number; main: number; liked: number };
 
@@ -41,7 +42,7 @@ export default async function ProfilePage({ params }: Props) {
   const { handle } = await params;
   const p = await loadProfile(handle);
   if (!p) notFound();
-  const { sb, user } = await getViewer();
+  const [{ sb, user }, { t, locale }] = await Promise.all([getViewer(), getT()]);
   if (!sb) notFound();
   const own = user?.id === p.id;
 
@@ -102,54 +103,54 @@ export default async function ProfilePage({ params }: Props) {
               <Link className="loop" href={`/album/${loop.id}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={loop.cover_url ?? ""} alt="" />
-                <span><span className="muted">En bucle:</span> <b>{loop.title}</b> · {loop.artist_name}</span>
+                <span><span className="muted">{t.profile.inLoop}</span> <b>{loop.title}</b> · {loop.artist_name}</span>
               </Link>
             )}
           </div>
           <div className="p-actions">
-            {own ? <Link className="btn" href="/perfil/editar">Editar perfil</Link>
+            {own ? <Link className="btn" href="/perfil/editar">{t.profile.edit}</Link>
               : <FollowButton userId={p.id} initial={myFollowing.includes(p.id)} loggedIn={!!user} />}
           </div>
         </section>
 
         <div className="p-stats">
-          <div><b>{nf(st.n)}</b><span>Discos</span></div>
-          <div><b>{f1(st.mean)}</b><span>Nota media</span></div>
-          <div><b>{nf(reviewsN ?? 0)}</b><span>Reseñas</span></div>
-          <div><b>{nf(followers ?? 0)}</b><span>Seguidores</span></div>
-          <div><b>{nf(followingN ?? 0)}</b><span>Siguiendo</span></div>
+          <div><b>{nf(st.n)}</b><span>{t.profile.records}</span></div>
+          <div><b>{f1(st.mean)}</b><span>{t.profile.avg}</span></div>
+          <div><b>{nf(reviewsN ?? 0)}</b><span>{t.profile.reviews}</span></div>
+          <div><b>{nf(followers ?? 0)}</b><span>{t.profile.followers}</span></div>
+          <div><b>{nf(followingN ?? 0)}</b><span>{t.profile.following}</span></div>
         </div>
 
         {compat && (
           <div className="compat">
             <span className="ring" style={{ background: `conic-gradient(${p.accent} ${(compat.v ?? 0)}%, var(--surface-2) 0)` }}><b>{compat.v == null ? "?" : `${compat.v}%`}</b></span>
-            <div><b>Compatibilidad musical</b><div className="muted" style={{ fontSize: 13 }}>
-              {compat.v == null ? "Puntuad al menos 2 discos en común para calcularla." : `Habéis puntuado ${compat.shared.length} discos en común. ${compat.v >= 80 ? "Gemelos musicales." : compat.v >= 60 ? "Buen match: os vais a descubrir cosas." : "Gustos muy distintos: ideal para salir de tu burbuja."}`}
+            <div><b>{t.profile.compat}</b><div className="muted" style={{ fontSize: 13 }}>
+              {compat.v == null ? t.profile.compatNone : t.profile.compatText(compat.shared.length, compat.v)}
             </div></div>
           </div>
         )}
 
         {badges.length > 0 && (
-          <section className="section"><div className="sec-head"><h2>Insignias</h2></div>
-            <div className="badges">{badges.map((b) => <div className="badge" key={b.t}><i>{b.ic}</i><div><b>{b.t}</b><span>{b.d}</span></div></div>)}</div>
+          <section className="section"><div className="sec-head"><h2>{t.profile.badges}</h2></div>
+            <div className="badges">{badges.map((b) => <div className="badge" key={b.k}><i>{b.ic}</i><div><b>{t.profile.badge[b.k][0]}</b><span>{t.profile.badge[b.k][1]}</span></div></div>)}</div>
           </section>
         )}
 
         <section className="section">
-          <div className="sec-head"><h2>{own ? "Mi top 4" : `Top 4 de ${name}`}</h2>{own && <span>Añádelos desde la página de cada disco</span>}</div>
+          <div className="sec-head"><h2>{own ? t.profile.myTop4 : t.profile.top4Of(name)}</h2>{own && <span>{t.profile.addFromAlbum}</span>}</div>
           <div className="favs">
             {[0, 1, 2, 3].map((i) => favs[i] ? (
               <Link key={i} href={`/album/${favs[i].id}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="cover" src={favs[i].cover_url ?? ""} alt={`Portada de ${favs[i].title}`} /><span className="rk">{i + 1}</span>
+                <img className="cover" src={favs[i].cover_url ?? ""} alt={t.common.coverOf(favs[i].title)} /><span className="rk">{i + 1}</span>
               </Link>
-            ) : own ? <Link key={i} className="slot" href="/buscar">+ Elegir disco</Link> : <span key={i} className="slot">—</span>)}
+            ) : own ? <Link key={i} className="slot" href="/buscar">{t.profile.pickRecord}</Link> : <span key={i} className="slot">—</span>)}
           </div>
         </section>
 
         {artistsFollowed.length > 0 && (
           <section className="section">
-            <div className="sec-head"><h2>{own ? "Artistas que sigo" : "Artistas que sigue"}</h2><span>{artistsFollowed.length}</span></div>
+            <div className="sec-head"><h2>{own ? t.profile.myArtists : t.profile.theirArtists}</h2><span>{artistsFollowed.length}</span></div>
             <div className="artist-row">
               {artistsFollowed.slice(0, 16).map((a) => (
                 <Link key={a.artist_id} className="artist-card" href={`/artista/${a.artist_id}`}>
@@ -164,14 +165,14 @@ export default async function ProfilePage({ params }: Props) {
 
         {reviews.length > 0 && (
           <section className="section">
-            <div className="sec-head"><h2>{own ? "Mis reseñas" : `Reseñas de ${name}`}</h2><span>♥ {nf(reviews.reduce((s, r) => s + r.likes, 0))} recibidos</span></div>
+            <div className="sec-head"><h2>{own ? t.profile.myReviews : t.profile.reviewsOf(name)}</h2><span>{t.profile.likesReceived(nf(reviews.reduce((s, r) => s + r.likes, 0)))}</span></div>
             {reviews.map((rv) => <ReviewCard key={rv.id} rv={rv} viewer={null} showRelease />)}
           </section>
         )}
 
         {compat && compat.shared.length > 0 && (
           <section className="section">
-            <div className="sec-head"><h2>Discos en común</h2><span>{name} · tú</span></div>
+            <div className="sec-head"><h2>{t.profile.common}</h2><span>{t.profile.commonSub(name)}</span></div>
             {compat.shared.slice(0, 12).map((s) => (
               <Link key={s.rel.id} className="fs" href={`/album/${s.rel.id}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -185,38 +186,38 @@ export default async function ProfilePage({ params }: Props) {
         )}
 
         <section className="section">
-          <div className="sec-head"><h2>{own ? "Mis discos" : `Discos de ${name}`}</h2><span>{nf(st.n)}</span></div>
+          <div className="sec-head"><h2>{own ? t.profile.myRecords : t.profile.recordsOf(name)}</h2><span>{nf(st.n)}</span></div>
           {items.length ? (
             <div className="igrid">
               {items.map((r) => (
                 <Link key={r.release_id} href={`/album/${r.release_id}`} title={r.releases!.title}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="cover" src={r.releases!.cover_url ?? ""} alt={`Portada de ${r.releases!.title}`} loading="lazy" />
+                  <img className="cover" src={r.releases!.cover_url ?? ""} alt={t.common.coverOf(r.releases!.title)} loading="lazy" />
                   {r.overall != null && <span className="sc">{f1(r.overall)}</span>}
                   {r.liked && <span className="lk">♥</span>}
                 </Link>
               ))}
             </div>
-          ) : <p className="empty">{own ? <>Aún no has puntuado nada. <Link className="linkbtn" href="/buscar">Busca un disco</Link> y empieza.</> : "Todavía no ha puntuado ningún disco."}</p>}
+          ) : <p className="empty">{own ? <>{t.profile.emptyOwn} <Link className="linkbtn" href="/buscar">{t.profile.searchRecord}</Link> {t.profile.emptyOwn2}</> : t.profile.emptyOther}</p>}
         </section>
 
         {st.n > 0 && (
           <div className="prof-split">
             <section className="section">
-              <div className="sec-head"><h2>Cómo puntúa</h2></div>
+              <div className="sec-head"><h2>{t.profile.howRates}</h2></div>
               <div className="dist">{buckets.map((b, i) => <div key={i}><i style={{ height: `${(b / mx) * 100}%` }} /><span>{i + 1}</span></div>)}</div>
             </section>
             <section className="section">
-              <div className="sec-head"><h2>Tamaño de lo que escucha</h2></div>
+              <div className="sec-head"><h2>{t.profile.size}</h2></div>
               <div className="meter">
                 <i style={{ width: `${(st.under / tot) * 100}%`, background: "var(--t-under)" }} /><i style={{ width: `${(st.culto / tot) * 100}%`, background: "var(--t-culto)" }} />
                 <i style={{ width: `${(st.conocido / tot) * 100}%`, background: "var(--t-conocido)" }} /><i style={{ width: `${(st.main / tot) * 100}%`, background: "var(--t-main)" }} />
               </div>
               <div className="legend">
-                <span style={{ ["--c" as string]: "var(--t-under)" }}>Underground {Math.round((st.under / tot) * 100)}%</span>
-                <span style={{ ["--c" as string]: "var(--t-culto)" }}>De culto {Math.round((st.culto / tot) * 100)}%</span>
-                <span style={{ ["--c" as string]: "var(--t-conocido)" }}>Conocido {Math.round((st.conocido / tot) * 100)}%</span>
-                <span style={{ ["--c" as string]: "var(--t-main)" }}>Mainstream {Math.round((st.main / tot) * 100)}%</span>
+                <span style={{ ["--c" as string]: "var(--t-under)" }}>{t.tier.under} {Math.round((st.under / tot) * 100)}%</span>
+                <span style={{ ["--c" as string]: "var(--t-culto)" }}>{t.tier.culto} {Math.round((st.culto / tot) * 100)}%</span>
+                <span style={{ ["--c" as string]: "var(--t-conocido)" }}>{t.tier.conocido} {Math.round((st.conocido / tot) * 100)}%</span>
+                <span style={{ ["--c" as string]: "var(--t-main)" }}>{t.tier.main} {Math.round((st.main / tot) * 100)}%</span>
               </div>
             </section>
           </div>

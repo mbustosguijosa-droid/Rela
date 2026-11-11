@@ -2,16 +2,17 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
 import { ProfileForm } from "@/components/ProfileForm";
+import { getT } from "@/lib/i18n-server";
 
-export const metadata: Metadata = { title: "Editar perfil" };
+export async function generateMetadata(): Promise<Metadata> { const { t } = await getT(); return { title: t.editProfile.title }; }
 
 export default async function Editar({ searchParams }: { searchParams: Promise<{ nuevo?: string }> }) {
   const { nuevo } = await searchParams;
-  const { user, profile } = await getViewer();
+  const [{ user, profile }, { t }] = await Promise.all([getViewer(), getT()]);
   if (!user || !profile) redirect("/entrar?next=/perfil/editar");
   return (
     <div className="wrap" style={{ maxWidth: 640 }}>
-      <section className="hello"><h1>{nuevo ? "Crea tu perfil" : "Editar perfil"}</h1><p>Así te verán tus amigos. Ponle tu foto, una cabecera y tu color.</p></section>
+      <section className="hello"><h1>{nuevo ? t.editProfile.create : t.editProfile.title}</h1><p>{t.editProfile.intro}</p></section>
       <section className="section"><ProfileForm profile={profile} isNew={!!nuevo || profile.handle.startsWith("user_")} /></section>
     </div>
   );

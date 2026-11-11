@@ -3,8 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toggleFollow } from "@/app/actions";
+import { useT } from "./I18n";
 
 export function FollowButton({ userId, initial, loggedIn, small = false }: { userId: string; initial: boolean; loggedIn: boolean; small?: boolean }) {
+  const { t } = useT();
   const [on, setOn] = useState(initial);
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -15,7 +17,7 @@ export function FollowButton({ userId, initial, loggedIn, small = false }: { use
         const next = !on; setOn(next);
         start(async () => { const r = await toggleFollow(userId, next); if (!r.ok) setOn(!next); else router.refresh(); });
       }}>
-      {on ? "✓ Siguiendo" : "Seguir"}
+      {on ? t.follow.following : t.follow.follow}
     </button>
   );
 }
