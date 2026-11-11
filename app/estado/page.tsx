@@ -40,6 +40,18 @@ async function runChecks(): Promise<Check[]> {
       checks.push({ name: "Conexión con la base de datos", ok: false, detail: `No se pudo conectar: ${(e as Error).message}` });
     }
   }
+  if (env) {
+    try {
+      const res = await fetch(`${env.url}/auth/v1/settings`, { headers: { apikey: env.key }, cache: "no-store" });
+      const st = await res.json();
+      checks.push({ name: "Inicio de sesión con email", ok: !!st?.external?.email, detail: st?.external?.email ? "Activado." : "Desactivado en Supabase (Authentication → Sign In / Providers → Email)." });
+      checks.push({ name: "Inicio de sesión con Google", ok: !!st?.external?.google, detail: st?.external?.google
+        ? "Activado en este proyecto de Supabase. Si aún falla, revisa la URI de redireccionamiento en Google y los usuarios de prueba."
+        : `Desactivado en el proyecto ${env.url}. Actívalo en Authentication → Sign In / Providers → Google y pulsa Save (comprueba que es este mismo proyecto).` });
+    } catch {
+      checks.push({ name: "Ajustes de inicio de sesión", ok: false, detail: "No se pudieron leer." });
+    }
+  }
   const a = await getAlbum(302867697);
   checks.push({ name: "Catálogo de Deezer", ok: !!a, detail: a ? `Responde (ejemplo: ${a.title})` : "No responde ahora mismo." });
   return checks;
