@@ -29,13 +29,13 @@ async function runChecks(): Promise<Check[]> {
             : `Error: ${error.message}`
           : "Conecta y las tablas existen.",
       });
-      const tables = ["releases", "ratings", "track_ratings", "reviews", "review_reactions", "replies", "follows", "reports"];
+      const tables = ["releases", "ratings", "track_ratings", "reviews", "review_reactions", "replies", "follows", "reports", "artist_follows"];
       const missing: string[] = [];
       for (const t of tables) {
         const { error: e } = await sb!.from(t).select("*", { count: "exact", head: true });
         if (e) missing.push(t);
       }
-      checks.push({ name: "Tablas de Rela", ok: missing.length === 0, detail: missing.length ? `Faltan: ${missing.join(", ")}` : `Las ${tables.length + 1} tablas están creadas.` });
+      checks.push({ name: "Tablas de Rela", ok: missing.length === 0, detail: missing.length ? `Faltan: ${missing.join(", ")}. Ejecuta en Supabase los archivos SQL que falten (schema, 002 y 003).` : `Las ${tables.length + 1} tablas están creadas.` });
     } catch (e) {
       checks.push({ name: "Conexión con la base de datos", ok: false, detail: `No se pudo conectar: ${(e as Error).message}` });
     }

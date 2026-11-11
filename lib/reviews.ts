@@ -62,3 +62,11 @@ export async function getFollowing(sb: SupabaseClient, userId: string | null | u
   const { data } = await sb.from("follows").select("followee_id").eq("follower_id", userId);
   return (data ?? []).map((f) => f.followee_id as string);
 }
+
+export type FollowedArtist = { artist_id: number; artist_name: string; picture_url: string | null; fans: number | null; created_at: string };
+/** Artistas que sigue una persona (vacío si aún no existe la tabla). */
+export async function getFollowedArtists(sb: SupabaseClient, userId: string | null | undefined): Promise<FollowedArtist[]> {
+  if (!userId) return [];
+  const { data, error } = await sb.from("artist_follows").select("artist_id, artist_name, picture_url, fans, created_at").eq("user_id", userId).order("created_at", { ascending: false });
+  return error ? [] : (data as FollowedArtist[]);
+}

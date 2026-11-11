@@ -72,13 +72,25 @@ export async function getArtistReleases(id: string | number) {
   return r?.data ?? [];
 }
 
+export type TopTrack = { id: number; title: string; artist: Artist; album: { id: number; title: string; cover_medium: string; cover_big: string } };
+
+export async function getRelated(id: string | number, limit = 6) {
+  const r = await get<{ data: Artist[] }>(`/artist/${id}/related?limit=${limit}`, 86400);
+  return r?.data ?? [];
+}
+
+export async function getTopTracks(id: string | number, limit = 3) {
+  const r = await get<{ data: TopTrack[] }>(`/artist/${id}/top?limit=${limit}`, 86400);
+  return r?.data ?? [];
+}
+
 export async function getChartAlbums(limit = 12) {
   const r = await get<{ data: AlbumSummary[] }>(`/chart/0/albums?limit=${limit}`);
   return r?.data ?? [];
 }
 
 /** Ejecuta tareas de pocas en pocas para no pasar el límite de Deezer (50 peticiones cada 5 s). */
-async function pool<T, R>(items: T[], size: number, fn: (x: T) => Promise<R>): Promise<R[]> {
+export async function pool<T, R>(items: T[], size: number, fn: (x: T) => Promise<R>): Promise<R[]> {
   const out: R[] = new Array(items.length);
   let i = 0;
   await Promise.all(Array.from({ length: size }, async () => {
@@ -117,3 +129,26 @@ export const geniusUrl = (artist: string, title: string) =>
   "https://genius.com/search?q=" + encodeURIComponent(`${artist} ${cleanTitle(title)}`);
 export const spotifyUrl = (artist: string, title: string) =>
   "https://open.spotify.com/search/" + encodeURIComponent(`${artist} ${cleanTitle(title)}`);
+
+export type Recommendation = { track: TopTrack; because: Artist };
+
+/**
+ * Recomendaciones "de tu nicho": artistas parecidos a los que sigues (que aún no sigues)
+ * y una canción destacada de cada uno, alternando entre los artistas de origen.
+ */
+export async function getRecommendations(followed: { artist_id: number; artist_name: string }[], limit = 12): Promise<Recommendation[]> {
+  const sources = followed.slice(0, 8);
+  const followedIds = new Set(followed.map((f) => Number(f.artist_id)));
+  const relatedLists = await pool(sources, 4, async (f) => (await getRelated(f.artist_id, 6)).map((a) => ({ a, because: { id: Number(f.artist_id), name: f.artist_name } as Artist })));
+  const picked: { a: Artist; because: Artist }[] = [];
+  const seen = new Set<number>();
+  for (let round = 0; picked.length < limit && round < 6; round++) {
+    for (const list of relatedLists) {
+      const cand = list[round];
+      if (cand && !followedIds.has(cand.a.id) && !seen.has(cand.a.id)) { seen.add(cand.a.id); picked.push(cand); }
+      if (picked.length >= limit) break;
+    }
+  }
+  const tracks = await pool(picked, 4, async (p) => (await getTopTracks(p.a.id, 1))[0] ?? null);
+  return picked.map((p, i) => (tracks[i] ? { track: tracks[i]!, because: p.because } : null)).filter(Boolean) as Recommendation[];
+}

@@ -3,7 +3,8 @@ import { getChartAlbums, getLatestFrom } from "@/lib/deezer";
 import { SEED_ARTISTS } from "@/lib/seed";
 import { Poster, fmtDate } from "@/components/Poster";
 import { getViewer } from "@/lib/auth";
-import { getFollowing, getReviews } from "@/lib/reviews";
+import { getFollowedArtists, getFollowing, getReviews } from "@/lib/reviews";
+import { getRecommendations } from "@/lib/deezer";
 import { releasesByIds } from "@/lib/releases";
 import { ReviewCard } from "@/components/ReviewCard";
 import { Avatar } from "@/components/Avatar";
@@ -13,14 +14,16 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const { sb, user, profile } = await getViewer();
-  const following = sb ? await getFollowing(sb, user?.id) : [];
-  const [fresh, chart, trending, activity] = await Promise.all([
-    getLatestFrom(SEED_ARTISTS, 1),
+  const [following, followedArtists] = sb ? await Promise.all([getFollowing(sb, user?.id), getFollowedArtists(sb, user?.id)]) : [[], []];
+  const followedIds = followedArtists.map((f) => Number(f.artist_id));
+  const [fresh, chart, trending, activity, recs] = await Promise.all([
+    getLatestFrom([...new Set([...followedIds.slice(0, 20), ...SEED_ARTISTS])].slice(0, 45), 1),
     getChartAlbums(12),
     sb ? getReviews(sb, { sort: "hot", limit: 6, viewerId: user?.id, following }) : Promise.resolve([]),
     sb && following.length
       ? sb.from("ratings").select("user_id, release_id, overall, liked, updated_at").in("user_id", following).order("updated_at", { ascending: false }).limit(12).then((r) => r.data ?? [])
       : Promise.resolve([]),
+    followedArtists.length ? getRecommendations(followedArtists, 12) : Promise.resolve([]),
   ]);
   let feed: { key: string; rel: { id: number; title: string; cover_url: string | null }; who: { handle: string; name: string; avatar_url: string | null; accent: string }; overall: number | null; liked: boolean }[] = [];
   if (sb && activity.length) {
@@ -46,6 +49,27 @@ export default async function Home() {
           <div className="row">{fresh.slice(0, 6).map((a) => <Poster key={a.id} a={a} meta={<div className="m">{fmtDate(a.release_date!)}</div>} />)}</div>
         ) : <p className="empty">No se han podido cargar las novedades. Prueba en un rato.</p>}
       </section>
+
+      {user && (
+        <section className="section">
+          <div className="sec-head"><h2>Para ti · canciones de tu nicho</h2><span>{followedArtists.length ? `Según los ${followedArtists.length} artistas que sigues` : "Sigue artistas para activarlo"}</span></div>
+          {recs.length ? (
+            <div className="row">{recs.slice(0, 12).map((r) => (
+              <Link key={r.track.id} className="poster" href={`/album/${r.track.album.id}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="cover" src={r.track.album.cover_medium} alt={`Portada de ${r.track.album.title}`} loading="lazy" />
+                <div><div className="t">{r.track.title}</div><div className="a">Canción · {r.track.artist.name}</div></div>
+                <div className="m">Porque sigues a {r.because.name}</div>
+              </Link>
+            ))}</div>
+          ) : (
+            <div className="size-note" style={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
+              <div><b>Sigue a tus artistas favoritos</b><span className="muted">Busca un artista y pulsa “Seguir artista”: aquí te recomendaremos canciones de grupos parecidos, sobre todo pequeños.</span></div>
+              <Link className="btn primary sm" href="/buscar">Buscar artistas</Link>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="section">
         <div className="sec-head"><h2>Reseñas en tendencia</h2><span>Ordenadas por interacción</span></div>

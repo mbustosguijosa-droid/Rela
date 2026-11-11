@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { getViewer, type Profile } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
 import { releasesByIds, type ReleaseRow } from "@/lib/releases";
-import { getFollowing, getReviews } from "@/lib/reviews";
+import { getFollowedArtists, getFollowing, getReviews } from "@/lib/reviews";
 import { cls, f1, nf } from "@/lib/format";
 import { Avatar } from "@/components/Avatar";
 import { FollowButton } from "@/components/FollowButton";
@@ -53,6 +53,7 @@ export default async function ProfilePage({ params }: Props) {
     getReviews(sb, { userId: p.id, sort: "hot", limit: 6, viewerId: user?.id }),
     sb.from("reviews").select("*", { count: "exact", head: true }).eq("user_id", p.id),
   ]);
+  const artistsFollowed = await getFollowedArtists(sb, p.id);
   const items = ((rated ?? []) as unknown as RatedRow[]).filter((r) => r.releases);
   const favIds = (p.favorites ?? []).map(Number);
   const extra = await releasesByIds(sb, [...favIds, ...(p.loop_release_id ? [Number(p.loop_release_id)] : [])]);
@@ -145,6 +146,21 @@ export default async function ProfilePage({ params }: Props) {
             ) : own ? <Link key={i} className="slot" href="/buscar">+ Elegir disco</Link> : <span key={i} className="slot">—</span>)}
           </div>
         </section>
+
+        {artistsFollowed.length > 0 && (
+          <section className="section">
+            <div className="sec-head"><h2>{own ? "Artistas que sigo" : "Artistas que sigue"}</h2><span>{artistsFollowed.length}</span></div>
+            <div className="artist-row">
+              {artistsFollowed.slice(0, 16).map((a) => (
+                <Link key={a.artist_id} className="artist-card" href={`/artista/${a.artist_id}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={a.picture_url ?? ""} alt="" loading="lazy" />
+                  <b>{a.artist_name}</b>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {reviews.length > 0 && (
           <section className="section">

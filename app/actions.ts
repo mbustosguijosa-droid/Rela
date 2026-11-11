@@ -118,6 +118,17 @@ export async function toggleFollow(userId: string, on: boolean): Promise<Result>
   return { ok: true };
 }
 
+/* ---------- Seguir artistas ---------- */
+export async function toggleArtistFollow(artist: { id: number; name: string; picture: string | null; fans: number | null }, on: boolean): Promise<Result> {
+  const v = await viewerOrNull(); if (!v) return NEED_LOGIN;
+  const { error } = on
+    ? await v.sb.from("artist_follows").upsert({ user_id: v.user.id, artist_id: artist.id, artist_name: artist.name, picture_url: artist.picture, fans: artist.fans })
+    : await v.sb.from("artist_follows").delete().eq("user_id", v.user.id).eq("artist_id", artist.id);
+  if (error) return { ok: false, error: error.code === "42P01" || error.message.includes("artist_follows") ? "Falta ejecutar el archivo 003 en Supabase." : error.message };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
 /* ---------- Perfil ---------- */
 export async function updateProfile(input: {
   name: string; handle: string; bio: string; city: string; accent: string;

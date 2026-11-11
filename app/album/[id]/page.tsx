@@ -7,7 +7,8 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { ReviewComposer } from "@/components/ReviewComposer";
 import { Avatar } from "@/components/Avatar";
 import { getViewer } from "@/lib/auth";
-import { getFollowing, getReviews, SORTS, SORT_NOTE, type Sort } from "@/lib/reviews";
+import { getFollowedArtists, getFollowing, getReviews, SORTS, SORT_NOTE, type Sort } from "@/lib/reviews";
+import { FollowArtistButton } from "@/components/FollowArtistButton";
 import { cls, f1, nf } from "@/lib/format";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ orden?: string }> };
@@ -32,7 +33,7 @@ export default async function AlbumPage({ params, searchParams }: Props) {
   if (!a) notFound();
   const releaseId = a.id;
   const { sb, user, profile } = await getViewer();
-  const [artist, following] = await Promise.all([getArtist(a.artist.id), sb ? getFollowing(sb, user?.id) : Promise.resolve([])]);
+  const [artist, following, followedArtists] = await Promise.all([getArtist(a.artist.id), sb ? getFollowing(sb, user?.id) : Promise.resolve([]), sb ? getFollowedArtists(sb, user?.id) : Promise.resolve([])]);
 
   // Datos de la comunidad (solo si Supabase está configurado)
   let initial: RatingState | null = null;
@@ -87,7 +88,8 @@ export default async function AlbumPage({ params, searchParams }: Props) {
           <div style={{ minWidth: 0 }}>
             <p className="eyebrow"><span>{KIND[a.record_type] ?? "Disco"} · {date}{a.genres?.data?.[0] ? ` · ${a.genres.data[0].name}` : ""}</span><span className={`tier ${t.k}`}>{t.l}</span></p>
             <h1>{a.title}</h1>
-            <p className="byline"><Link href={`/artista/${a.artist.id}`}>{a.artist.name}</Link></p>
+            <p className="byline" style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}><Link href={`/artista/${a.artist.id}`}>{a.artist.name}</Link>
+              <FollowArtistButton small artist={{ id: a.artist.id, name: a.artist.name, picture: artist?.picture_medium ?? null, fans: artist?.nb_fan ?? null }} initial={followedArtists.some((f) => Number(f.artist_id) === a.artist.id)} loggedIn={!!user} /></p>
             <div className="community">
               <div>
                 <div className="avg"><span className={`num score s-${cls(avg)}`}>{f1(avg)}</span><span className="of">/10</span></div>

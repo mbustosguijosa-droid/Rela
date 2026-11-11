@@ -280,3 +280,4 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 .pcard .nm { font-weight: 700; font-family: var(--f-display); font-size: 17px; line-height: 1.2 }
 .pcard .hd { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .pcard .row2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted) }
+.artist-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 16px }
