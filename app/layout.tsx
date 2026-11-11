@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main>{children}</main>
         <TabBar />
-        <footer className="wrap">Rela · versión en desarrollo. Catálogo: Deezer.</footer>
+        <footer className="wrap" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}><span>Rela · versión en pruebas. Catálogo: Deezer.</span><a href="/privacidad">Privacidad</a><a href="/terminos">Términos</a></footer>
       </body>
     </html>
   );
