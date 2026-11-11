@@ -139,3 +139,144 @@ input[type=range].unset::-webkit-slider-thumb { background: var(--muted) }
 .notice { font-size: 12px; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; padding: 8px 10px }
 footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important } }
+
+/* Cuentas */
+.btn.sm { height: 34px; padding: 0 12px; font-size: 13px; border-radius: 8px }
+.btn:disabled { opacity: .6; cursor: default }
+.me-chip { display: block; flex: none; border-radius: 50% }
+@media (max-width: 760px) { .me-chip, .enter-btn { display: none } }
+.login-card { display: flex; flex-direction: column; gap: 14px; padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface) }
+.btn.google { background: #fff; color: #1f1f1f; border-color: #dadce0; height: 46px }
+.btn.google svg { width: 20px; height: 20px }
+.or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line) }
+.login-email { display: flex; flex-direction: column; gap: 8px }
+.field-input, .login-email input, .field input, .field textarea { width: 100%; height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); padding: 0 14px; font: inherit }
+.field textarea { height: auto; min-height: 84px; padding: 11px 14px; resize: vertical }
+.form-error { color: var(--lo); font-size: 14px; margin: 0 }
+.sent { margin: 0; padding: 14px; border-radius: 10px; background: color-mix(in srgb, var(--hi) 14%, transparent) }
+.toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 500; max-width: calc(100% - 32px); box-shadow: var(--shadow) }
+@media (min-width: 761px) { .toast { bottom: 28px } }
+
+/* Reseñas sociales */
+.col-main { display: flex; flex-direction: column; gap: 32px; min-width: 0 }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--accent-text); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
+.btn.on { color: var(--accent-text); border-color: var(--accent-text) }
+.btn.like.on { color: var(--like); border-color: var(--like) }
+.rv { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; padding-block: 18px; border-bottom: 1px solid var(--line) }
+.rv.with-cover { grid-template-columns: 64px minmax(0, 1fr) }
+.rv:last-child { border-bottom: 0 }
+.rv-body { min-width: 0 }
+.rv-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; min-width: 0 }
+.rv-head .score { margin-left: auto; font-size: 18px }
+.who-l { display: inline-flex; align-items: center; gap: 8px; min-width: 0 }
+.who-l b { font-weight: 600 }
+.pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); white-space: nowrap }
+.pill.hot { background: color-mix(in srgb, var(--lo) 18%, transparent); color: var(--lo) }
+.pill.acc { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent-text) }
+.rv-album { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.rv-album b { color: var(--fg); font-weight: 600 }
+.rv-text { margin: 8px 0 0; font-size: 16px; line-height: 1.55; max-width: 64ch; overflow-wrap: anywhere; white-space: pre-line }
+.reacts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; align-items: center }
+.react { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 11px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted) }
+.react:hover { border-color: var(--muted); color: var(--fg) }
+.react.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--fg) }
+.rv-time { margin-left: auto; font-size: 12px; color: var(--muted) }
+.replies { margin-top: 14px; padding-left: 16px; border-left: 2px solid var(--line); display: flex; flex-direction: column; gap: 12px }
+.reply { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; font-size: 14px }
+.reply p { margin: 2px 0 0; overflow-wrap: anywhere }
+.reply b { font-weight: 600 }
+.reply small { color: var(--muted); margin-left: 6px }
+.reply-form { display: flex; gap: 8px; flex-wrap: wrap }
+.reply-form input { flex: 1 1 180px; min-width: 0; height: 36px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 0 14px; font: inherit; font-size: 14px }
+.sorttabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0 0 }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 13px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-weight: 500; color: var(--muted) }
+.chip.on { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.sort-note { font-size: 12px; color: var(--muted); margin: 8px 0 0 }
+.composer { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface) }
+.composer textarea { width: 100%; min-height: 84px; resize: vertical; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); padding: 11px 14px; font: inherit }
+.composer-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; font-size: 12px; color: var(--muted) }
+.featured { border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); border-radius: 14px; padding: 4px 18px 2px; background: var(--surface) }
+.featured .lbl { display: block; margin-top: 14px; color: var(--accent-text) }
+.fs { display: flex; align-items: center; gap: 10px; padding-block: 9px; border-bottom: 1px solid var(--line) }
+.fs:last-child { border-bottom: 0 }
+.fs .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.fs .nm small { color: var(--muted); margin-left: 6px }
+.fs .score { font-size: 16px }
+.community { display: flex; flex-wrap: wrap; align-items: end; gap: 24px 36px; margin-top: 22px }
+.avg { display: flex; align-items: baseline; gap: 6px }
+.avg .num { font-size: 48px; line-height: 1 }
+.avg .of { color: var(--muted); font-family: var(--f-mono); font-size: 16px }
+.bars { display: flex; align-items: end; gap: 3px; height: 48px }
+.bars i { display: block; width: 14px; background: var(--surface-2); border-radius: 2px 2px 0 0; min-height: 2px }
+.bars i.peak { background: var(--muted) }
+.axis { display: flex; justify-content: space-between; font-family: var(--f-mono); font-size: 10px; color: var(--muted) }
+
+/* Perfil */
+.pform { display: flex; flex-direction: column; gap: 18px }
+.pf-banner { height: 150px; border-radius: 14px; background-size: cover; background-position: center; display: flex; align-items: flex-end; justify-content: flex-end; gap: 8px; padding: 12px }
+.pf-avatar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: -56px; padding-left: 12px }
+.file-btn { position: relative; overflow: hidden; cursor: pointer }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer }
+.field { display: flex; flex-direction: column; gap: 6px }
+.handle-input { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); padding-left: 14px }
+.handle-input span { color: var(--muted) }
+.handle-input input { border: 0; background: transparent; padding-left: 4px }
+.sw { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--line) }
+.sw.on { box-shadow: 0 0 0 2px var(--fg) }
+.p-banner { position: relative; height: clamp(150px, 24vw, 250px); overflow: hidden; background: var(--surface-2) }
+.p-banner .bimg { position: absolute; inset: 0; background-size: cover; background-position: center }
+.p-banner .bimg.blur { inset: -30px; filter: blur(22px) saturate(1.35) }
+.p-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 35%, var(--bg)) }
+.p-head { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px 22px; margin-top: -64px; z-index: 1 }
+.p-id { flex: 1 1 260px; min-width: 0; padding-bottom: 6px }
+.p-id h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; line-height: 1.05 }
+.p-id .handle { color: var(--muted); font-size: 15px; margin-top: 2px }
+.p-id .bio { margin: 10px 0 0; max-width: 56ch; white-space: pre-line }
+.p-actions { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 6px }
+.loop { display: inline-flex; align-items: center; gap: 10px; margin-top: 12px; padding: 6px 14px 6px 6px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; max-width: 100% }
+.loop img { width: 30px; height: 30px; border-radius: 50%; animation: spin 6s linear infinite; flex: none; object-fit: cover }
+.loop span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
+@keyframes spin { to { transform: rotate(360deg) } }
+@media (prefers-reduced-motion: reduce) { .loop img { animation: none } }
+.p-stats { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 22px; padding-block: 14px; border-block: 1px solid var(--line) }
+.p-stats div { display: flex; flex-direction: column }
+.p-stats b { font-family: var(--f-display); font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1 }
+.p-stats span { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em }
+.compat { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); margin-top: 18px }
+.compat .ring { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; flex: none }
+.compat .ring b { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; font-family: var(--f-mono); font-size: 13px }
+.badges { display: flex; flex-wrap: wrap; gap: 10px }
+.badge { display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 8px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; max-width: 100% }
+.badge i { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-style: normal; font-size: 17px; background: color-mix(in srgb, var(--pa, var(--accent)) 22%, transparent); flex: none }
+.badge b { display: block; font-size: 13px }
+.badge span { color: var(--muted); font-size: 12px }
+.favs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px }
+.favs a { position: relative; display: block; min-width: 0 }
+.favs .cover { box-shadow: var(--shadow) }
+.favs .rk { position: absolute; left: 8px; top: 8px; width: 26px; height: 26px; border-radius: 50%; background: var(--pa, var(--accent)); color: #1b1424; font-family: var(--f-mono); font-weight: 700; font-size: 13px; display: grid; place-items: center }
+.slot { aspect-ratio: 1; width: 100%; border: 1.5px dashed var(--line); border-radius: 4px; display: grid; place-items: center; color: var(--muted); font-size: 13px; text-align: center; padding: 8px }
+.igrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px }
+@media (max-width: 760px) { .igrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px } }
+.igrid a { position: relative; display: block }
+.igrid .cover { border-radius: 2px }
+.igrid .sc { position: absolute; left: 6px; bottom: 6px; background: rgba(12,10,16,.82); color: #fff; font-family: var(--f-mono); font-weight: 700; font-size: 12px; padding: 2px 7px; border-radius: 6px }
+.igrid .lk { position: absolute; right: 6px; bottom: 6px; color: #ff6f91; font-size: 14px; text-shadow: 0 1px 4px rgba(0,0,0,.6) }
+.prof-split { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 40px }
+@media (max-width: 900px) { .prof-split { grid-template-columns: 1fr; gap: 0 } }
+.meter { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; display: flex; margin-top: 10px }
+.meter i { display: block; height: 100% }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 12px; color: var(--muted) }
+.legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c); margin-right: 6px }
+.dist { display: flex; align-items: end; gap: 6px; height: 110px; margin-top: 10px }
+.dist div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end }
+.dist i { display: block; width: 100%; background: var(--pa, var(--accent)); border-radius: 3px 3px 0 0; min-height: 2px; opacity: .9 }
+.dist span { font-family: var(--f-mono); font-size: 11px; color: var(--muted) }
+.people { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px }
+.pcard { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); min-width: 0 }
+.pcard .pb { height: 64px; background-size: cover; background-position: center }
+.pcard .pc { position: relative; padding: 0 14px 14px; display: flex; flex-direction: column; gap: 8px }
+.pcard .pc > a:first-child { margin-top: -26px; width: max-content; border-radius: 50%; border: 3px solid var(--surface) }
+.pcard .nm { font-weight: 700; font-family: var(--f-display); font-size: 17px; line-height: 1.2 }
+.pcard .hd { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.pcard .row2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted) }
