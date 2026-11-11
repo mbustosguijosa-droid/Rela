@@ -143,26 +143,44 @@ alter table public.replies enable row level security;
 alter table public.follows enable row level security;
 alter table public.reports enable row level security;
 
+drop policy if exists "leer perfiles" on public.profiles;
 create policy "leer perfiles" on public.profiles for select using (true);
+drop policy if exists "editar mi perfil" on public.profiles;
 create policy "editar mi perfil" on public.profiles for update using (auth.uid() = id);
 
+drop policy if exists "leer releases" on public.releases;
 create policy "leer releases" on public.releases for select using (true);
+drop policy if exists "cachear releases" on public.releases;
 create policy "cachear releases" on public.releases for insert to authenticated with check (true);
+drop policy if exists "actualizar releases" on public.releases;
 create policy "actualizar releases" on public.releases for update to authenticated using (true);
 
+drop policy if exists "leer notas" on public.ratings;
 create policy "leer notas" on public.ratings for select using (true);
+drop policy if exists "mis notas" on public.ratings;
 create policy "mis notas" on public.ratings for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "leer notas canciones" on public.track_ratings;
 create policy "leer notas canciones" on public.track_ratings for select using (true);
+drop policy if exists "mis notas canciones" on public.track_ratings;
 create policy "mis notas canciones" on public.track_ratings for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop policy if exists "leer reseñas" on public.reviews;
 create policy "leer reseñas" on public.reviews for select using (true);
+drop policy if exists "mis reseñas" on public.reviews;
 create policy "mis reseñas" on public.reviews for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "leer reacciones" on public.review_reactions;
 create policy "leer reacciones" on public.review_reactions for select using (true);
+drop policy if exists "mis reacciones" on public.review_reactions;
 create policy "mis reacciones" on public.review_reactions for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "leer respuestas" on public.replies;
 create policy "leer respuestas" on public.replies for select using (true);
+drop policy if exists "mis respuestas" on public.replies;
 create policy "mis respuestas" on public.replies for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop policy if exists "leer follows" on public.follows;
 create policy "leer follows" on public.follows for select using (true);
+drop policy if exists "mis follows" on public.follows;
 create policy "mis follows" on public.follows for all to authenticated using (auth.uid() = follower_id) with check (auth.uid() = follower_id);
 
+drop policy if exists "denunciar" on public.reports;
 create policy "denunciar" on public.reports for insert to authenticated with check (auth.uid() = reporter_id);
