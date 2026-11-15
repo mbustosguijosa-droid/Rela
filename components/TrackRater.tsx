@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { saveRating, setLoop, toggleTop4 } from "@/app/actions";
 import { cls, f1 } from "@/lib/format";
 import { useT } from "./I18n";
+import { ShareRating } from "./ShareRating";
 
 export type RatingState = { tracks: Record<number, number>; overall: number | null; fav: number | null; listened: boolean; liked: boolean };
 const empty: RatingState = { tracks: {}, overall: null, fav: null, listened: false, liked: false };
@@ -18,16 +19,19 @@ type Props = {
   loggedIn: boolean;
   inTop4: boolean;
   inLoop: boolean;
+  album: { title: string; artist: string; year: string; cover: string };
+  viewer: { handle: string; name: string; avatar_url: string | null; accent: string } | null;
   children?: React.ReactNode; // contenido extra de la columna principal (reseñas, amigos…)
 };
 
-export function TrackRater({ albumId, tracks, links, initial, loggedIn, inTop4, inLoop, children }: Props) {
+export function TrackRater({ albumId, tracks, links, initial, loggedIn, inTop4, inLoop, album, viewer, children }: Props) {
   const { t } = useT();
   const key = `rela:rating:${albumId}`;
   const [r, setR] = useState<RatingState>(initial ?? empty);
   const [status, setStatus] = useState<"" | "saving" | "saved" | "error">("");
   const [msg, setMsg] = useState<string | null>(null);
   const [top4, setTop4] = useState(inTop4);
+  const [sharing, setSharing] = useState(false);
   const [loop, setLoopState] = useState(inLoop);
   const [, start] = useTransition();
   const dirty = useRef(false);
@@ -106,6 +110,8 @@ export function TrackRater({ albumId, tracks, links, initial, loggedIn, inTop4, 
               <button className={`btn ${top4 ? "on" : ""}`} onClick={() => start(async () => { const res = await toggleTop4(albumId); if (res.ok) { setTop4(!top4); flash(top4 ? t.rater.removedTop4 : t.rater.addedTop4); } else flash(res.error); })}>{top4 ? t.rater.inTop4 : t.rater.addTop4}</button>
               <button className={`btn ${loop ? "on" : ""}`} onClick={() => start(async () => { const res = await setLoop(loop ? null : albumId); if (res.ok) { setLoopState(!loop); flash(loop ? t.rater.removedLoop : t.rater.addedLoop); } else flash(res.error); })}>{loop ? t.rater.inLoop : t.rater.setLoop}</button>
             </>}
+            <button className="btn primary wide" onClick={() => { if (score == null) { flash(t.share.noScore); return; } setSharing(true); }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 15V3m0 0 4 4m-4-4L8 7" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" /></svg>{t.share.button}</button>
             <a className="btn" href={links.spotify} target="_blank" rel="noopener">Spotify ↗</a>
             <a className="btn" href={links.deezer} target="_blank" rel="noopener">Deezer ↗</a>
             <a className="btn wide" href={links.genius} target="_blank" rel="noopener">{t.rater.lyricsGenius}</a>
@@ -116,6 +122,7 @@ export function TrackRater({ albumId, tracks, links, initial, loggedIn, inTop4, 
         </div>
       </aside>
       {msg && <div className="toast" role="status">{msg}</div>}
+      {sharing && <ShareRating album={{ id: albumId, ...album, tracks: tracks.map((x) => x.title) }} r={r} viewer={viewer} onClose={() => setSharing(false)} />}
     </div>
   );
 }

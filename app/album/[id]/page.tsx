@@ -12,16 +12,19 @@ import { FollowArtistButton } from "@/components/FollowArtistButton";
 import { cls, f1, nf } from "@/lib/format";
 import { getT } from "@/lib/i18n-server";
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ orden?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ orden?: string; de?: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { id } = await params;
-  const [a, { t }] = await Promise.all([getAlbum(id), getT()]);
+  const { de } = await searchParams;
+  const [a, { t, lang }] = await Promise.all([getAlbum(id), getT()]);
   if (!a) return { title: t.album.notFound };
   return {
     title: `${a.title} · ${a.artist.name}`,
     description: t.album.metaDesc(a.title, a.artist.name),
-    openGraph: { images: [a.cover_big] },
+    ...(de && /^[a-z0-9._]{3,24}$/i.test(de)
+      ? { openGraph: { images: [{ url: `/api/og?r=${a.id}&u=${encodeURIComponent(de.toLowerCase())}&l=${lang}`, width: 1200, height: 630 }] }, twitter: { card: "summary_large_image" as const } }
+      : { openGraph: { images: [a.cover_big] } }),
   };
 }
 
@@ -122,6 +125,8 @@ export default async function AlbumPage({ params, searchParams }: Props) {
           loggedIn={!!user}
           inTop4={!!profile?.favorites?.map(Number).includes(releaseId)}
           inLoop={Number(profile?.loop_release_id) === releaseId}
+          album={{ title: a.title, artist: a.artist.name, year: (a.release_date || "").slice(0, 4), cover: a.cover_big }}
+          viewer={viewer ? { handle: viewer.handle, name: viewer.name, avatar_url: viewer.avatar_url, accent: viewer.accent } : null}
         >
           {featured && (
             <div className="featured"><span className="lbl">{t.album.featured}</span><ReviewCard rv={featured} viewer={viewer} /></div>

@@ -3,10 +3,14 @@ import "./globals.css";
 import { Header, TabBar } from "@/components/Header";
 import { I18nProvider, LangSwitch } from "@/components/I18n";
 import { getT } from "@/lib/i18n-server";
+import { headers } from "next/headers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
-  return { title: { default: "Rela", template: "%s · Rela" }, description: t.meta.description };
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return { metadataBase: new URL(`${proto}://${host}`), title: { default: "Rela", template: "%s · Rela" }, description: t.meta.description };
 }
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
