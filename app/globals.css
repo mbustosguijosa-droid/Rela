@@ -319,10 +319,10 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 .intro.go .prop { opacity: .4 }
 .intro-copy { position: absolute; left: 0; right: 0; top: 0; padding: max(28px, env(safe-area-inset-top, 0px)) 20px 70px; display: flex; flex-direction: column; align-items: center; text-align: center;
   background: linear-gradient(to bottom, rgba(9,7,12,.85), rgba(9,7,12,.45) 65%, transparent); pointer-events: none; transition: opacity .4s ease, transform .5s ease }
-.il { display: block; font-family: var(--f-display); font-weight: 600; letter-spacing: -.03em; line-height: 1.02; font-size: clamp(30px, 6vw, 68px); opacity: 0; transform: translateY(18px); filter: blur(6px); animation: word-in .9s cubic-bezier(.2,.8,.2,1) forwards; text-shadow: 0 4px 30px rgba(0,0,0,.4) }
+.il { display: block; font-family: var(--f-display); font-weight: 600; letter-spacing: -.03em; line-height: 1.04; font-size: clamp(26px, 4.4vw, 50px); opacity: 0; transform: translateY(18px); filter: blur(6px); animation: word-in .9s cubic-bezier(.2,.8,.2,1) forwards; text-shadow: 0 4px 30px rgba(0,0,0,.4) }
 .il1 { animation-delay: .25s }
 .il2 { animation-delay: .6s; font-style: italic; color: #c9b0ff }
-.il3 { animation-delay: .95s; font-family: var(--f-body); font-weight: 500; font-size: clamp(15px, 2.1vw, 21px); letter-spacing: 0; color: #e8d9ca; margin-top: 12px }
+.il3 { animation-delay: .95s; font-family: var(--f-body); font-weight: 500; font-size: clamp(14px, 1.5vw, 18px); letter-spacing: 0; color: #e8d9ca; margin-top: 12px }
 .intro-cta { position: absolute; left: 0; right: 0; bottom: max(26px, env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; align-items: center; gap: 12px; transition: opacity .35s ease; opacity: 0; animation: fade-in .6s ease 1.3s forwards }
 .intro.go .intro-copy { opacity: 0; transform: translateY(-24px) }
 .intro.go .intro-cta { opacity: 0 !important; animation: none }
@@ -330,6 +330,9 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 .intro-enter:hover { background: rgba(139,92,246,.25); border-color: #a77bff }
 .intro-enter .pulse { width: 10px; height: 10px; border-radius: 50%; background: #a77bff; box-shadow: 0 0 0 0 rgba(139,92,246,.7); animation: pulse 1.6s ease-out infinite }
 .intro-skip { border: 0; background: none; color: rgba(251,243,234,.6); font: 500 13px var(--f-body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
+@media (min-width: 900px) and (min-aspect-ratio: 5/4) {
+  .intro-copy { left: auto; width: min(560px, 46vw); align-items: flex-end; text-align: right; padding: 40px 48px 90px 20px; background: radial-gradient(120% 100% at 100% 0%, rgba(9,7,12,.8), rgba(9,7,12,.35) 60%, transparent 80%) }
+}
 @keyframes desk-in { from { opacity: 0; transform: scale(1.08) } to { opacity: 1; transform: none } }
 @keyframes word-in { to { opacity: 1; transform: none; filter: none } }
 @keyframes fade-in { to { opacity: 1 } }
