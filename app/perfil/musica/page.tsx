@@ -25,6 +25,28 @@ export default async function MusicaPage({ searchParams }: Props) {
 
       <section className="section music-cards">
         <div className="mcard">
+          <SourceIcon s="lastfm" />
+          <div className="mc-body">
+            <b>{t.music.lastfm}</b>
+            <span className="muted">{link?.lastfm_user ? t.music.connectedAs(link.lastfm_user) : t.music.lastfmHelp}</span>
+            {!lastfmConfigured() && !link?.lastfm_user && <small className="muted">{t.music.lfmNoKey}</small>}
+          </div>
+          <LastfmForm current={link?.lastfm_user ?? null} />
+          {!link?.lastfm_user && (
+            <div className="lfm-steps">
+              <ol>{t.music.lfmSteps.map((x) => <li key={x}>{x}</li>)}</ol>
+              <p>
+                <a className="btn sm" href="https://www.last.fm/join" target="_blank" rel="noopener">{t.music.lfmSignup} ↗</a>{" "}
+                <a className="btn sm" href="https://www.last.fm/settings/applications" target="_blank" rel="noopener">{t.music.lfmApps} ↗</a>
+              </p>
+              <small className="muted">{t.music.lfmNote}</small>
+            </div>
+          )}
+        </div>
+
+        {/* Conexión directa con Spotify: solo si se activa (Spotify limita a 5 cuentas en modo desarrollo) */}
+        {(process.env.SPOTIFY_DIRECT === "1" || link?.spotify_id) && (
+        <div className="mcard">
           <SourceIcon s="spotify" />
           <div className="mc-body">
             <b>{t.music.spotify}</b>
@@ -33,16 +55,7 @@ export default async function MusicaPage({ searchParams }: Props) {
           {link?.spotify_id ? <Disconnect source="spotify" />
             : <a className="btn primary sm spotify-btn" href="/api/spotify/login" aria-disabled={!spotifyConfigured()}>{t.music.connectSpotify}</a>}
         </div>
-
-        <div className="mcard">
-          <SourceIcon s="lastfm" />
-          <div className="mc-body">
-            <b>{t.music.lastfm}</b>
-            <span className="muted">{link?.lastfm_user ? t.music.connectedAs(link.lastfm_user) : t.music.lastfmHelp}</span>
-            {!lastfmConfigured() && !link?.lastfm_user && <small className="muted">{t.music.lfmNoKey}</small>}
-          </div>
-          <LastfmForm current={link?.lastfm_user ?? null} />
-        </div>
+        )}
 
         {(link?.spotify_id || link?.lastfm_user) && <ShareToggle initial={link.share_listening} />}
         <p className="muted small-note">✦ {t.music.ai}</p>

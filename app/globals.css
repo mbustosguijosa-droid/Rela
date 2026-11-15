@@ -597,3 +597,6 @@ body { background:
 .small-note { font-size: 13px; line-height: 1.5 }
 .track.focus { background: color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 10px; box-shadow: inset 3px 0 0 var(--accent) }
 .logo-sub { font-family: var(--f-body); font-weight: 600; font-size: .5em; letter-spacing: .14em; text-transform: uppercase; margin-left: 5px; color: var(--accent-text); vertical-align: .35em }
+.lfm-steps { width: 100%; font-size: 14px; border-top: 1px solid var(--line); padding-top: 12px }
+.lfm-steps ol { margin: 0 0 10px; padding-left: 20px; display: grid; gap: 6px }
+.lfm-steps p { margin: 0 0 8px; display: flex; gap: 8px; flex-wrap: wrap }
