@@ -619,3 +619,20 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 90; pointer-event
 .hero h1 { text-wrap: balance }
 .hero-copy { position: relative; z-index: 2 }
 .hero-search { max-width: 560px }
+
+/* ---------- Respuesta inmediata al tocar ---------- */
+a, button, [role="button"], label, summary { touch-action: manipulation; -webkit-tap-highlight-color: transparent }
+.btn:active, .q:active, .tab:active, .nav-link:active, .icon-btn:active { transform: scale(.96); transition: transform .06s }
+.poster:active .cover, .artist-card:active img, .fnow-card:active { transform: scale(.97); transition: transform .06s }
+/* Esqueleto de carga */
+.sk { background: linear-gradient(100deg, var(--surface-2) 30%, color-mix(in srgb, var(--surface-2) 60%, var(--surface)) 50%, var(--surface-2) 70%); background-size: 300% 100%; animation: sk 1.2s linear infinite; border-radius: 10px }
+@keyframes sk { from { background-position: 100% 0 } to { background-position: 0 0 } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none } }
+.sk-page { padding-top: 36px }
+.sk-title { height: 44px; width: min(420px, 80%); margin-bottom: 12px }
+.sk-line { height: 14px; width: min(300px, 60%); margin-bottom: 26px }
+.sk-t { height: 13px; width: 80%; margin-top: 10px } .sk-a { height: 11px; width: 55%; margin-top: 6px }
+.cover.sk { aspect-ratio: 1; width: 100% }
+.sk-album { display: flex; gap: 24px; align-items: flex-end; margin-bottom: 30px }
+.sk-cover { width: clamp(140px, 30vw, 260px); aspect-ratio: 1; flex: none }
+.sk-track { height: 52px; margin-bottom: 8px }

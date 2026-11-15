@@ -32,7 +32,7 @@ export default async function Home() {
   const tasteIds = new Set(taste.map((a) => a.artist_id));
   const recSources = [...taste, ...followedArtists.map((f) => ({ artist_id: Number(f.artist_id), artist_name: f.artist_name }))];
   const [fresh, chart, trending, activity, recs] = await Promise.all([
-    getLatestFrom([...new Set([...followedIds.slice(0, 20), ...SEED_ARTISTS])].slice(0, 45), 1),
+    getLatestFrom([...new Set([...followedIds.slice(0, 16), ...SEED_ARTISTS])].slice(0, 30), 1),
     getChartAlbums(12),
     sb ? getReviews(sb, { sort: "hot", limit: 6, viewerId: user?.id, following }) : Promise.resolve([]),
     sb && following.length
