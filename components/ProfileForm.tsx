@@ -29,7 +29,7 @@ export function ProfileForm({ profile, isNew }: { profile: Profile; isNew: boole
   const { t } = useT();
   const [d, setD] = useState({
     name: profile.name, handle: profile.handle.startsWith("user_") ? "" : profile.handle, bio: profile.bio, city: profile.city,
-    accent: profile.accent || "#a77bff", avatar_url: profile.avatar_url, banner_url: profile.banner_url,
+    accent: profile.accent || "#ee9a62", avatar_url: profile.avatar_url, banner_url: profile.banner_url,
   });
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState<"" | "avatar" | "banner">("");

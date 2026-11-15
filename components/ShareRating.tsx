@@ -43,11 +43,11 @@ export function ShareRating({ album, r, viewer, onClose }: { album: Album; r: Ra
 
   const draw = useCallback(async () => {
     const canvas = cv.current; if (!canvas) return;
-    await Promise.all(["800 60px 'Funnel Display'", "500 30px 'Funnel Sans'", "700 30px 'Funnel Sans'", "600 40px 'Martian Mono'"].map((f) => document.fonts?.load(f).catch(() => null)));
+    await Promise.all(["700 60px 'Fraunces'", "500 30px 'Figtree'", "700 30px 'Figtree'", "600 40px 'Figtree'"].map((f) => document.fonts?.load(f).catch(() => null)));
     const W = 1080, H = fmt === "story" ? 1920 : 1080; canvas.width = W; canvas.height = H;
     const c = canvas.getContext("2d")!;
     const paper = sty === "paper", ink = paper ? "#17141c" : "#f4f0f7", mute = paper ? "#6b6577" : "#b7afc4";
-    const disp = "'Funnel Display', Arial, sans-serif", body = "'Funnel Sans', Arial, sans-serif", mono = "'Martian Mono', Menlo, monospace";
+    const disp = "'Fraunces', Georgia, serif", body = "'Figtree', Arial, sans-serif", mono = "'Figtree', Arial, sans-serif";
     const cover = await loadImg(album.cover);
     if (sty === "color" && cover) { c.save(); c.filter = "blur(60px) saturate(1.4)"; c.drawImage(cover, -200, -200, W + 400, H + 400); c.restore(); c.fillStyle = "rgba(12,10,16,.58)"; c.fillRect(0, 0, W, H); }
     else { c.fillStyle = paper ? "#efece4" : "#121016"; c.fillRect(0, 0, W, H); }
@@ -61,7 +61,7 @@ export function ShareRating({ album, r, viewer, onClose }: { album: Album; r: Ra
       c.restore(); c.fillStyle = ink; c.font = `800 ${size}px ${disp}`; c.fillText("Rela", x + size * 1.45, y);
     };
     const avatar = async (x: number, y: number, size: number) => {
-      const accent = viewer?.accent ?? "#a77bff";
+      const accent = viewer?.accent ?? "#ee9a62";
       c.save(); c.beginPath(); c.arc(x + size / 2, y + size / 2, size / 2, 0, 7); c.clip();
       const im = viewer?.avatar_url ? await loadImg(viewer.avatar_url) : null;
       if (im) c.drawImage(im, x, y, size, size);

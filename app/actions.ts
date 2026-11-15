@@ -177,7 +177,7 @@ export async function updateProfile(input: {
   if (input.bio.length > 160) return { ok: false, error: (await E()).bioLong };
   const patch: Record<string, unknown> = {
     name: input.name.trim().slice(0, 40), handle, bio: input.bio.trim(), city: input.city.trim().slice(0, 40),
-    accent: /^#[0-9a-f]{6}$/i.test(input.accent) ? input.accent : "#a77bff",
+    accent: /^#[0-9a-f]{6}$/i.test(input.accent) ? input.accent : "#ee9a62",
   };
   if (input.avatar_url !== undefined) patch.avatar_url = input.avatar_url;
   if (input.banner_url !== undefined) patch.banner_url = input.banner_url;
