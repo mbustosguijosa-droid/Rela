@@ -119,6 +119,15 @@ const es = {
     invite: "Invita a tus amigos", inviteText: "Rela es mejor con tu gente: comparte el enlace.", profileOf: (n: string) => `Perfil de ${n}`,
     share: "Compartir invitación", copied: "✓ Enlace copiado", shareText: "Puntúa tus discos canción a canción conmigo en Rela",
   },
+  dm: {
+    title: "Mensajes", nav: "Mensajes", message: "Mensaje", sendMessage: "Enviar mensaje", empty: "Aún no tienes conversaciones.",
+    emptyHint: "Entra en el perfil de alguien y pulsa “Mensaje” para empezar a hablar.", findPeople: "Buscar personas", you: "Tú:",
+    placeholder: (n: string) => `Escribe a ${n}…`, send: "Enviar", sending: "Enviando…", newChat: (n: string) => `Empieza la conversación con ${n}. Recomiéndale un disco 🎧`,
+    block: "Bloquear", unblock: "Desbloquear", blocked: "Has bloqueado a esta persona: no podrá escribirte.", blockedToast: "Persona bloqueada.", unblockedToast: "Persona desbloqueada.",
+    cantSend: "No puedes enviar mensajes a esta persona.", tooLong: "El mensaje es demasiado largo (máximo 2.000 caracteres).", sql004: "Falta ejecutar el archivo 004 en Supabase.",
+    enter: "Entra", enterToChat: "para enviar mensajes.", unread: (n: number) => `${n} sin leer`, back: "← Mensajes", seen: "Visto", report: "Denunciar", reported: "Gracias. Revisaremos esta conversación.",
+    notifTitle: (n: string) => `Mensaje nuevo de ${n}`,
+  },
   share: {
     button: "Compartir mi nota", title: "Comparte tu nota", intro: "La tarjeta enseña tu nota de cada canción, con tu favorita y tu peor tema marcados. Perfecta para abrir debate.",
     content: "Contenido", allTracks: "Nota de cada canción", summary: "Resumen con portada grande", format: "Formato", story: "Story 9:16", post: "Post 1:1",
@@ -259,6 +268,15 @@ const en: Dict = {
     enterToFollow: "to follow your friends and see their scores on your home page.", newPeople: "New people on Rela", fewPeople: "There aren't many people yet. Invite your friends to get started.",
     invite: "Invite your friends", inviteText: "Rela is better with your people: share the link.", profileOf: (n) => `${n}'s profile`,
     share: "Share invite", copied: "✓ Link copied", shareText: "Rate your records track by track with me on Rela",
+  },
+  dm: {
+    title: "Messages", nav: "Messages", message: "Message", sendMessage: "Send message", empty: "No conversations yet.",
+    emptyHint: "Go to someone's profile and tap “Message” to start talking.", findPeople: "Find people", you: "You:",
+    placeholder: (n) => `Write to ${n}…`, send: "Send", sending: "Sending…", newChat: (n) => `Start the conversation with ${n}. Recommend them a record 🎧`,
+    block: "Block", unblock: "Unblock", blocked: "You've blocked this person: they can't message you.", blockedToast: "Person blocked.", unblockedToast: "Person unblocked.",
+    cantSend: "You can't message this person.", tooLong: "The message is too long (2,000 characters max).", sql004: "File 004 still needs to be run in Supabase.",
+    enter: "Sign in", enterToChat: "to send messages.", unread: (n) => `${n} unread`, back: "← Messages", seen: "Seen", report: "Report", reported: "Thanks. We'll review this conversation.",
+    notifTitle: (n) => `New message from ${n}`,
   },
   share: {
     button: "Share my score", title: "Share your score", intro: "The card shows your score for every song, with your favourite and worst track marked. Perfect for starting a debate.",

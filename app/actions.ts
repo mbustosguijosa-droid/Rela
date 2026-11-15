@@ -103,7 +103,7 @@ export async function addReply(reviewId: string, body: string): Promise<{ ok: tr
   return { ok: true, reply: data };
 }
 
-export async function report(targetType: "review" | "reply" | "profile", targetId: string, reason = ""): Promise<Result> {
+export async function report(targetType: "review" | "reply" | "profile" | "conversation", targetId: string, reason = ""): Promise<Result> {
   const v = await viewerOrNull(); if (!v) return needLogin();
   const { error } = await v.sb.from("reports").insert({ reporter_id: v.user.id, target_type: targetType, target_id: targetId, reason });
   return error ? { ok: false, error: error.message } : { ok: true };
@@ -130,6 +130,39 @@ export async function toggleArtistFollow(artist: { id: number; name: string; pic
   if (error) return { ok: false, error: error.code === "42P01" || error.message.includes("artist_follows") ? (await E()).sql003 : error.message };
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+/* ---------- Mensajes ---------- */
+export async function sendMessage(toId: string, body: string): Promise<{ ok: true; message: { id: string; body: string; created_at: string; sender_id: string; recipient_id: string; read_at: string | null } } | { ok: false; error: string }> {
+  const v = await viewerOrNull(); if (!v) return needLogin();
+  const t = (await getT()).t;
+  const text = body.trim();
+  if (!text) return { ok: false, error: (await E()).writeSomething };
+  if (text.length > 2000) return { ok: false, error: t.dm.tooLong };
+  if (toId === v.user.id) return { ok: false, error: t.dm.cantSend };
+  const { data, error } = await v.sb.from("messages").insert({ sender_id: v.user.id, recipient_id: toId, body: text }).select("*").single();
+  if (error || !data) {
+    const m = error?.message ?? "";
+    const msg = error?.code === "42P01" || error?.code === "PGRST205" || /messages.*(does not exist|not find)/i.test(m) ? t.dm.sql004
+      : error?.code === "42501" || /row-level security/i.test(m) ? t.dm.cantSend : m || t.dm.cantSend;
+    return { ok: false, error: msg };
+  }
+  return { ok: true, message: data };
+}
+
+export async function markRead(otherId: string): Promise<Result> {
+  const v = await viewerOrNull(); if (!v) return needLogin();
+  await v.sb.from("messages").update({ read_at: new Date().toISOString() }).eq("recipient_id", v.user.id).eq("sender_id", otherId).is("read_at", null);
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+export async function toggleBlock(userId: string, on: boolean): Promise<Result> {
+  const v = await viewerOrNull(); if (!v) return needLogin();
+  const { error } = on
+    ? await v.sb.from("blocks").upsert({ user_id: v.user.id, blocked_id: userId })
+    : await v.sb.from("blocks").delete().eq("user_id", v.user.id).eq("blocked_id", userId);
+  return error ? { ok: false, error: error.message } : { ok: true };
 }
 
 /* ---------- Perfil ---------- */

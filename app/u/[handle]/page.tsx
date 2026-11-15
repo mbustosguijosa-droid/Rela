@@ -109,7 +109,7 @@ export default async function ProfilePage({ params }: Props) {
           </div>
           <div className="p-actions">
             {own ? <Link className="btn" href="/perfil/editar">{t.profile.edit}</Link>
-              : <FollowButton userId={p.id} initial={myFollowing.includes(p.id)} loggedIn={!!user} />}
+              : <><FollowButton userId={p.id} initial={myFollowing.includes(p.id)} loggedIn={!!user} /><Link className="btn" href={user ? `/mensajes/${p.handle}` : `/entrar?next=/mensajes/${p.handle}`}>{t.dm.message}</Link></>}
           </div>
         </section>
 
