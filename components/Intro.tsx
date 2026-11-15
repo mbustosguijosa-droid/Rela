@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { useT } from "./I18n";
 import { useOnline } from "@/lib/presence";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import type { Scene3D, ScreenAction, ScreenInfo } from "./scene3d";
+import type { Album, Scene3D, ScreenAction, ScreenInfo } from "./scene3d";
 
 const KEY = "rela:intro";
 type Me = { id: string; name: string; handle: string; avatar_url: string | null; accent: string } | null;
+type Friend = { id: string; handle: string; name: string; avatar_url: string | null; accent: string };
 
 /** Botón para volver a ver la entrada. */
 export function ReplayIntro({ label }: { label: string }) {
@@ -24,7 +25,7 @@ export function ReplayIntro({ label }: { label: string }) {
  * La pantalla del móvil es una pantalla de inicio con tu foto, la gente conectada y,
  * si no has entrado, "Entrar con Google". Todo está quieto hasta que tocas el móvil.
  */
-export function Intro({ me }: { me: Me }) {
+export function Intro({ me, friends = [], top4 = [] }: { me: Me; friends?: Friend[]; top4?: Album[] }) {
   const { t } = useT();
   const router = useRouter();
   const holder = useRef<HTMLDivElement>(null);
@@ -36,17 +37,21 @@ export function Intro({ me }: { me: Me }) {
 
   const info: ScreenInfo = useMemo(() => {
     const others = online.filter((u) => !u.anon && u.key !== me?.id);
+    const onlineIds = new Set(online.map((u) => u.key));
     return {
       me: me ? { name: me.name || me.handle, handle: me.handle, avatar_url: me.avatar_url, accent: me.accent } : null,
       online: others.map((u) => ({ name: u.name, handle: u.handle, avatar_url: u.avatar_url, accent: u.accent })),
+      friends: [...friends].sort((a, b) => Number(onlineIds.has(b.id)) - Number(onlineIds.has(a.id))).map((f) => ({ ...f, online: onlineIds.has(f.id) })),
+      top4,
       onlineCount: online.length,
       labels: {
         online: t.home.online(online.length), onlineNow: t.home.onlineNow, you: t.intro.you, google: t.intro.google, email: t.intro.email,
         enter: t.intro.enter, messages: t.dm.nav, friends: t.nav.friends, explore: t.intro.explore, nobody: t.intro.nobody,
+        top4: t.intro.top4, noFriends: t.intro.noFriends, profile: t.intro.profile, hi: t.home.hi((me?.name || me?.handle || "").split(" ")[0]),
       },
       bg: typeof window === "undefined" ? "#121016" : getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#121016",
     };
-  }, [online, me, t]);
+  }, [online, me, t, friends, top4]);
 
   const finish = useCallback(() => {
     try { sessionStorage.setItem(KEY, "1"); } catch {}
@@ -76,6 +81,7 @@ export function Intro({ me }: { me: Me }) {
     }
     const routes: Record<string, string> = { email: "/entrar", profile: "/perfil", messages: "/mensajes", friends: "/amigos", explore: "/buscar" };
     if (a.startsWith("person:")) { enter(`/u/${a.slice(7)}`); return; }
+    if (a.startsWith("album:")) { enter(`/album/${a.slice(6)}`); return; }
     enter(routes[a]);
   }, [enter]);
 

@@ -8,4 +8,4 @@ export function timeAgo(iso: string) {
   const d = Math.round(h / 24);
   return d < 30 ? `hace ${d} d` : d < 365 ? `hace ${Math.round(d / 30)} mes` : `hace ${Math.round(d / 365)} a`;
 }
-export const ACCENTS = ["#ee9a62", "#a77bff", "#ff6f91", "#ffb547", "#b6e35a", "#6cc4ff", "#ff8a4c"];
+export const ACCENTS = ["#a77bff", "#ee9a62", "#ff6f91", "#ffb547", "#b6e35a", "#6cc4ff", "#ff8a4c"];

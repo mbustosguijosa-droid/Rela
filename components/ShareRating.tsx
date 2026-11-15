@@ -61,7 +61,7 @@ export function ShareRating({ album, r, viewer, onClose }: { album: Album; r: Ra
       c.restore(); c.fillStyle = ink; c.font = `800 ${size}px ${disp}`; c.fillText("Rela", x + size * 1.45, y);
     };
     const avatar = async (x: number, y: number, size: number) => {
-      const accent = viewer?.accent ?? "#ee9a62";
+      const accent = viewer?.accent ?? "#a77bff";
       c.save(); c.beginPath(); c.arc(x + size / 2, y + size / 2, size / 2, 0, 7); c.clip();
       const im = viewer?.avatar_url ? await loadImg(viewer.avatar_url) : null;
       if (im) c.drawImage(im, x, y, size, size);

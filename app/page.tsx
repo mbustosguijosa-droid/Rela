@@ -50,12 +50,16 @@ export default async function Home() {
   let fanItems: FanItem[] = [...favItems, ...dropItems];
   if (fanItems.length < 3) fanItems = [...fanItems, ...fresh.slice(0, 6 - fanItems.length).map((a) => ({ id: a.id, cover: a.cover_big ?? a.cover_medium, title: a.title, artist: a.artist?.name ?? "", tag: t.home.fanNew, kind: "new" as const }))];
   fanItems = fanItems.slice(0, 7);
+  // Para la pantalla del móvil de la entrada: tus amigos y tu top 4
+  const { data: friendRows } = sb && following.length ? await sb.from("profiles").select("id, handle, name, avatar_url, accent").in("id", following.slice(0, 8)) : { data: null };
+  const introFriends = (friendRows ?? []).map((f: { id: string; handle: string; name: string; avatar_url: string | null; accent: string }) => ({ id: f.id, handle: f.handle, name: f.name || f.handle, avatar_url: f.avatar_url, accent: f.accent }));
+  const introTop4 = favItems.map((f) => ({ id: f.id, cover: f.cover, title: f.title }));
   const meLite = user && profile ? { id: user.id, name: profile.name, handle: profile.handle, avatar_url: profile.avatar_url, accent: profile.accent } : null;
   const viewer = user && profile ? { id: user.id, name: profile.name, handle: profile.handle, avatar_url: profile.avatar_url, accent: profile.accent } : null;
 
   return (
     <div className="wrap">
-      <Intro me={meLite} />
+      <Intro me={meLite} friends={introFriends} top4={introTop4} />
       <section className="hero">
         <div className="hero-copy">
           {user && profile ? (
