@@ -297,7 +297,7 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 .intro { display: none }
 .show-intro body { overflow: hidden }
 .show-intro .intro { display: block; position: fixed; inset: 0; z-index: 100; overflow: hidden; background: #1c130d; color: #fbf3ea }
-.intro-3d { position: absolute; inset: 0; animation: desk-in 1.2s cubic-bezier(.2,.8,.2,1) backwards }
+.intro-3d { position: absolute; inset: 0; animation: desk-in .6s ease-out backwards }
 .intro-3d canvas { display: block; width: 100% !important; height: 100% !important; touch-action: manipulation }
 .intro.nogl .intro-3d { background: radial-gradient(60% 50% at 50% 55%, #6a4a32, #2a1b12) }
 .intro-online { display: inline-flex; align-items: center; gap: 8px; font: 600 13px var(--f-body); color: #e8d9ca; padding: 6px 12px; border-radius: 99px; background: rgba(20,12,8,.55); backdrop-filter: blur(8px) }

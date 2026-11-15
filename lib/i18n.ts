@@ -146,7 +146,7 @@ const es = {
     tipMobile: "En el móvil se abre el menú de compartir: elige Instagram, TikTok o WhatsApp.",
     ogTitle: (h: string, s: string, title: string) => `@${h} le ha puesto un ${s} a ${title}`,
   },
-  intro: { l1: "Descubre música.", l2: "Puntúala canción a canción.", l3: "Conoce gente con tu mismo oído.", skip: "Saltar intro", hint: "Toca el móvil para entrar", enter: "Entrar" },
+  intro: { l1: "Descubre música.", l2: "Puntúala canción a canción.", l3: "Conoce gente con tu mismo oído.", skip: "Saltar intro", hint: "Toca el móvil para entrar", enter: "Entrar", you: "Tú", google: "Google", email: "Email", explore: "Explorar", nobody: "Nadie más conectado ahora" },
   notFound: { title: "No encontramos esta página", text: "Puede que el disco ya no esté en el catálogo.", other: "Busca otro" },
   time: { now: "ahora", h: (n: number) => `hace ${n} h`, d: (n: number) => `hace ${n} d`, mo: (n: number) => `hace ${n} mes`, y: (n: number) => `hace ${n} a` },
   errors: {
@@ -301,7 +301,7 @@ const en: Dict = {
     tipMobile: "On your phone the share menu opens: pick Instagram, TikTok or WhatsApp.",
     ogTitle: (h, s, title) => `@${h} gave ${title} a ${s}`,
   },
-  intro: { l1: "Discover music.", l2: "Rate it track by track.", l3: "Meet people who hear it like you.", skip: "Skip intro", hint: "Tap the phone to enter", enter: "Enter" },
+  intro: { l1: "Discover music.", l2: "Rate it track by track.", l3: "Meet people who hear it like you.", skip: "Skip intro", hint: "Tap the phone to enter", enter: "Enter", you: "You", google: "Google", email: "Email", explore: "Explore", nobody: "Nobody else online right now" },
   notFound: { title: "We couldn't find this page", text: "The record may no longer be in the catalogue.", other: "Search for another" },
   time: { now: "now", h: (n) => `${n} h ago`, d: (n) => `${n} d ago`, mo: (n) => `${n} mo ago`, y: (n) => `${n} y ago` },
   errors: {

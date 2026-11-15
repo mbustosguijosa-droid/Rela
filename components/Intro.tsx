@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useT } from "./I18n";
 import { useOnline } from "@/lib/presence";
-import type { Person, Scene3D, ScreenInfo } from "./scene3d";
+import { supabaseBrowser } from "@/lib/supabase/client";
+import type { Scene3D, ScreenAction, ScreenInfo } from "./scene3d";
 
 const KEY = "rela:intro";
 type Me = { id: string; name: string; handle: string; avatar_url: string | null; accent: string } | null;
@@ -18,12 +20,13 @@ export function ReplayIntro({ label }: { label: string }) {
 }
 
 /**
- * Entrada de Rela en 3D: un escritorio con unos cascos de cable conectados al móvil.
- * La pantalla del móvil muestra tu foto, tu nombre y cuánta gente está conectada.
- * Al tocar el móvil, la cámara lo pone en vertical y entra en la pantalla.
+ * Entrada de Rela en 3D: mesa con cascos de cable conectados al móvil y un double cup.
+ * La pantalla del móvil es una pantalla de inicio con tu foto, la gente conectada y,
+ * si no has entrado, "Entrar con Google". Todo está quieto hasta que tocas el móvil.
  */
 export function Intro({ me }: { me: Me }) {
   const { t } = useT();
+  const router = useRouter();
   const holder = useRef<HTMLDivElement>(null);
   const scene = useRef<Scene3D | null>(null);
   const [visible, setVisible] = useState(false);
@@ -35,15 +38,13 @@ export function Intro({ me }: { me: Me }) {
     const others = online.filter((u) => !u.anon && u.key !== me?.id);
     return {
       me: me ? { name: me.name || me.handle, handle: me.handle, avatar_url: me.avatar_url, accent: me.accent } : null,
-      online: (me ? [{ name: me.name || me.handle, avatar_url: me.avatar_url, accent: me.accent }] as Person[] : ([] as Person[])).concat(others.map((u) => ({ name: u.name, avatar_url: u.avatar_url, accent: u.accent }))),
+      online: others.map((u) => ({ name: u.name, handle: u.handle, avatar_url: u.avatar_url, accent: u.accent })),
+      onlineCount: online.length,
       labels: {
-        hi: t.home.hi((me?.name || me?.handle || "").split(" ")[0]),
-        guest: t.intro.hint,
-        online: t.home.online(online.length),
-        onlineNow: t.home.onlineNow,
-        apps: ["fresh", "forYou", "reviews", "friends", "messages", "profile"].map((k) => t.home.apps[k]),
+        online: t.home.online(online.length), onlineNow: t.home.onlineNow, you: t.intro.you, google: t.intro.google, email: t.intro.email,
+        enter: t.intro.enter, messages: t.dm.nav, friends: t.nav.friends, explore: t.intro.explore, nobody: t.intro.nobody,
       },
-      bg: getComputedStyleSafe("--bg") || "#121016",
+      bg: typeof window === "undefined" ? "#121016" : getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#121016",
     };
   }, [online, me, t]);
 
@@ -54,13 +55,32 @@ export function Intro({ me }: { me: Me }) {
     scene.current?.dispose(); scene.current = null;
   }, []);
 
-  const enter = useCallback(() => {
+  /** Animación de entrar en el móvil; después, opcionalmente, ir a otra página. */
+  const enter = useCallback((to?: string) => {
     if (go) return;
     setGo(true);
+    const done = () => { if (to) router.push(to); setTimeout(finish, to ? 60 : 120); };
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!scene.current || reduce) { setTimeout(finish, 300); return; }
-    scene.current.enter(() => setTimeout(finish, 120));
-  }, [go, finish]);
+    if (!scene.current || reduce) { setTimeout(done, 250); return; }
+    scene.current.enter(done);
+  }, [go, finish, router]);
+
+  const onAction = useCallback(async (a: ScreenAction) => {
+    if (a === "google") {
+      const sb = supabaseBrowser();
+      if (!sb) { enter("/entrar"); return; }
+      try { sessionStorage.setItem(KEY, "1"); } catch {}
+      const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback?next=/` } });
+      if (error) enter("/entrar");
+      return;
+    }
+    const routes: Record<string, string> = { email: "/entrar", profile: "/perfil", messages: "/mensajes", friends: "/amigos", explore: "/buscar" };
+    if (a.startsWith("person:")) { enter(`/u/${a.slice(7)}`); return; }
+    enter(routes[a]);
+  }, [enter]);
+
+  // Empieza a descargar la escena 3D cuanto antes si se va a mostrar
+  useEffect(() => { if (document.documentElement.classList.contains("show-intro")) import("./scene3d"); }, []);
 
   // Mostrar si toca (primera vez en la sesión o al pulsar "Ver la intro")
   useEffect(() => {
@@ -71,12 +91,14 @@ export function Intro({ me }: { me: Me }) {
   }, []);
 
   // Cargar la escena 3D solo cuando se muestra
+  const actionRef = useRef(onAction);
+  actionRef.current = onAction;
   useEffect(() => {
     if (!visible || scene.current || !holder.current) return;
     let cancelled = false;
     import("./scene3d").then(({ createScene }) => {
       if (cancelled || !holder.current) return;
-      try { scene.current = createScene(holder.current, info); } catch { setNoGL(true); }
+      try { scene.current = createScene(holder.current, info, (a) => actionRef.current(a)); } catch { setNoGL(true); }
     }).catch(() => setNoGL(true));
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -99,23 +121,17 @@ export function Intro({ me }: { me: Me }) {
       {/* Decide antes de pintar si se muestra (evita parpadeos) */}
       <script dangerouslySetInnerHTML={{ __html: `try{if(!sessionStorage.getItem("${KEY}"))document.documentElement.classList.add("show-intro")}catch(e){}` }} />
       <div className={`intro ${go ? "go" : ""} ${noGL ? "nogl" : ""}`} role="dialog" aria-label="Rela">
-        <div ref={holder} className="intro-3d" onClick={(e) => { if (scene.current?.hitsPhone(e.clientX, e.clientY)) enter(); }} />
+        <div ref={holder} className="intro-3d" />
         <div className="intro-copy">
           <span className="il il1">{t.intro.l1}</span>
           <span className="il il2">{t.intro.l2}</span>
           <span className="il il3">{t.intro.l3}</span>
         </div>
         <div className="intro-cta">
-          <span className="intro-online"><i />{t.home.online(online.length)}</span>
-          <button type="button" className="intro-enter" onClick={enter}><span className="pulse" />{t.intro.hint}</button>
+          <button type="button" className="intro-enter" onClick={() => enter()}><span className="pulse" />{t.intro.hint}</button>
           <button type="button" className="intro-skip" onClick={finish}>{t.intro.skip}</button>
         </div>
       </div>
     </>
   );
-}
-
-function getComputedStyleSafe(name: string) {
-  if (typeof window === "undefined") return "";
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
