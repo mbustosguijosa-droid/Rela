@@ -6,9 +6,9 @@ export const LANGS: Lang[] = ["es", "en"];
 export const LOCALE: Record<Lang, string> = { es: "es-ES", en: "en-GB" };
 
 const es = {
-  meta: { description: "Puntúa tus discos canción a canción, lee lo que opina la gente y comparte tus notas." },
-  nav: { home: "Inicio", explore: "Explorar", friends: "Amigos", myProfile: "Mi perfil", profile: "Perfil", search: "Buscar", enter: "Entrar", searchPh: "Álbumes, singles o artistas", searchLabel: "Buscar", homeLabel: "Rela, inicio", main: "Principal", tabs: "Pestañas" },
-  footer: { beta: "Rela · versión en pruebas. Catálogo: Deezer.", privacy: "Privacidad", terms: "Términos", language: "Idioma" },
+  meta: { tagline: "Puntúa tu música canción a canción", description: "Rela Music es el sitio para la gente que vive la música: puntúa tus discos y singles canción a canción, descubre artistas de tu nicho, conecta tu Spotify y comparte tus notas con tus amigos." },
+  nav: { home: "Inicio", explore: "Explorar", friends: "Amigos", myProfile: "Mi perfil", profile: "Perfil", search: "Buscar", enter: "Entrar", searchPh: "Álbumes, singles o artistas", searchLabel: "Buscar", homeLabel: "Rela Music, inicio", main: "Principal", tabs: "Pestañas" },
+  footer: { beta: "Rela Music · versión en pruebas. Catálogo: Deezer.", privacy: "Privacidad", terms: "Términos", language: "Idioma" },
   kind: { album: "Álbum", single: "Single", ep: "EP", compile: "Recopilatorio", disc: "Disco" } as Record<string, string>,
   tier: { under: "Underground", culto: "De culto", conocido: "Conocido", main: "Mainstream" } as Record<string, string>,
   common: {
@@ -80,7 +80,7 @@ const es = {
   },
   follow: { follow: "Seguir", following: "✓ Siguiendo" },
   login: {
-    title: "Entrar", heading: "Entra en Rela", intro: "Guarda tus notas, escribe reseñas, sigue a tus amigos y personaliza tu perfil.",
+    title: "Entrar", heading: "Entra en Rela Music", intro: "Guarda tus notas, escribe reseñas, sigue a tus amigos y personaliza tu perfil.",
     failed: "No se ha podido iniciar sesión", retry: "Vuelve a intentarlo. Si usaste el email, abre el enlace en este mismo navegador.", tech: "Mensaje técnico:",
     errVerifier: "Abriste el enlace en otro navegador o app. Pide un enlace nuevo y ábrelo en este mismo navegador.",
     errExpired: "El enlace ha caducado o ya se usó. Pide uno nuevo.",
@@ -109,7 +109,7 @@ const es = {
   },
   editProfile: {
     title: "Editar perfil", create: "Crea tu perfil", intro: "Así te verán tus amigos. Ponle tu foto, una cabecera y tu color.",
-    welcome: "¡Bienvenida/o a Rela!", welcomeText: "Elige tu nombre de usuario y ponle foto a tu perfil. Lo podrás cambiar cuando quieras.",
+    welcome: "¡Bienvenida/o a Rela Music!", welcomeText: "Elige tu nombre de usuario y ponle foto a tu perfil. Lo podrás cambiar cuando quieras.",
     uploading: "Subiendo…", changeBanner: "Cambiar cabecera", remove: "Quitar", uploadPhoto: "Subir foto", removePhoto: "Quitar foto",
     name: "Nombre", namePh: "Cómo quieres que te vean", handle: "Nombre de usuario", handleHint: (h: string) => `Entre 3 y 24 caracteres: letras minúsculas, números, punto o guion bajo. Tu perfil será rela…/u/${h}`,
     bio: "Bio", bioPh: "Discos de cabecera, conciertos, manías…", city: "Ciudad", color: "Color de tu perfil", colorOf: (c: string) => `Color ${c}`,
@@ -122,7 +122,7 @@ const es = {
     following: "Siguiendo", noFollowing: "Todavía no sigues a nadie. Busca a tus amigos o mira las sugerencias.", enter: "Entra",
     enterToFollow: "para seguir a tus amigos y ver sus notas en tu inicio.", newPeople: "Gente nueva en Rela", fewPeople: "Aún hay poca gente. Invita a tus amigos para empezar.",
     invite: "Invita a tus amigos", inviteText: "Rela es mejor con tu gente: comparte el enlace.", profileOf: (n: string) => `Perfil de ${n}`,
-    share: "Compartir invitación", copied: "✓ Enlace copiado", shareText: "Puntúa tus discos canción a canción conmigo en Rela",
+    share: "Compartir invitación", copied: "✓ Enlace copiado", shareText: "Puntúa tus discos canción a canción conmigo en Rela Music",
   },
   dm: {
     title: "Mensajes", nav: "Mensajes", message: "Mensaje", sendMessage: "Enviar mensaje", empty: "Aún no tienes conversaciones.",
@@ -185,9 +185,9 @@ const es = {
 export type Dict = typeof es;
 
 const en: Dict = {
-  meta: { description: "Rate your records track by track, read what people think and share your scores." },
-  nav: { home: "Home", explore: "Explore", friends: "Friends", myProfile: "My profile", profile: "Profile", search: "Search", enter: "Sign in", searchPh: "Albums, singles or artists", searchLabel: "Search", homeLabel: "Rela, home", main: "Main", tabs: "Tabs" },
-  footer: { beta: "Rela · beta version. Catalogue: Deezer.", privacy: "Privacy", terms: "Terms", language: "Language" },
+  meta: { tagline: "Rate your music track by track", description: "Rela Music is the place for people who live music: rate your albums and singles track by track, discover artists from your niche, connect your Spotify and share your scores with your friends." },
+  nav: { home: "Home", explore: "Explore", friends: "Friends", myProfile: "My profile", profile: "Profile", search: "Search", enter: "Sign in", searchPh: "Albums, singles or artists", searchLabel: "Search", homeLabel: "Rela Music, home", main: "Main", tabs: "Tabs" },
+  footer: { beta: "Rela Music · beta version. Catalogue: Deezer.", privacy: "Privacy", terms: "Terms", language: "Language" },
   kind: { album: "Album", single: "Single", ep: "EP", compile: "Compilation", disc: "Record" },
   tier: { under: "Underground", culto: "Cult", conocido: "Known", main: "Mainstream" },
   common: {
@@ -259,7 +259,7 @@ const en: Dict = {
   },
   follow: { follow: "Follow", following: "✓ Following" },
   login: {
-    title: "Sign in", heading: "Sign in to Rela", intro: "Save your scores, write reviews, follow your friends and customise your profile.",
+    title: "Sign in", heading: "Sign in to Rela Music", intro: "Save your scores, write reviews, follow your friends and customise your profile.",
     failed: "Couldn't sign in", retry: "Try again. If you used email, open the link in this same browser.", tech: "Technical message:",
     errVerifier: "You opened the link in another browser or app. Request a new link and open it in this same browser.",
     errExpired: "The link has expired or was already used. Request a new one.",
@@ -288,7 +288,7 @@ const en: Dict = {
   },
   editProfile: {
     title: "Edit profile", create: "Create your profile", intro: "This is how your friends will see you. Add your photo, a header and your colour.",
-    welcome: "Welcome to Rela!", welcomeText: "Pick your username and add a photo to your profile. You can change it whenever you like.",
+    welcome: "Welcome to Rela Music!", welcomeText: "Pick your username and add a photo to your profile. You can change it whenever you like.",
     uploading: "Uploading…", changeBanner: "Change header", remove: "Remove", uploadPhoto: "Upload photo", removePhoto: "Remove photo",
     name: "Name", namePh: "How you want people to see you", handle: "Username", handleHint: (h) => `3 to 24 characters: lowercase letters, numbers, dot or underscore. Your profile will be rela…/u/${h}`,
     bio: "Bio", bioPh: "Desert-island records, gigs, quirks…", city: "City", color: "Profile colour", colorOf: (c) => `Colour ${c}`,
@@ -301,7 +301,7 @@ const en: Dict = {
     following: "Following", noFollowing: "You don't follow anyone yet. Search for your friends or check the suggestions.", enter: "Sign in",
     enterToFollow: "to follow your friends and see their scores on your home page.", newPeople: "New people on Rela", fewPeople: "There aren't many people yet. Invite your friends to get started.",
     invite: "Invite your friends", inviteText: "Rela is better with your people: share the link.", profileOf: (n) => `${n}'s profile`,
-    share: "Share invite", copied: "✓ Link copied", shareText: "Rate your records track by track with me on Rela",
+    share: "Share invite", copied: "✓ Link copied", shareText: "Rate your records track by track with me on Rela Music",
   },
   dm: {
     title: "Messages", nav: "Messages", message: "Message", sendMessage: "Send message", empty: "No conversations yet.",

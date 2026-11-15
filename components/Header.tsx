@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BRAND } from "@/lib/brand";
 import { LogoMark } from "./Logo";
 import { Avatar } from "./Avatar";
 import { LangSwitch } from "./I18n";
@@ -28,7 +29,7 @@ export async function Header() {
     <header className="top">
       <div className="wrap">
         <div className="bar">
-          <Link className="logo" href="/" aria-label={t.nav.homeLabel}><LogoMark /><span>Rela</span></Link>
+          <Link className="logo" href="/" aria-label={t.nav.homeLabel}><LogoMark /><span>{BRAND.short}<small className="logo-sub">{BRAND.sub}</small></span></Link>
           <nav className="nav" aria-label={t.nav.main}><NavLinks items={items} className="nav-link" /></nav>
           <form className="search" action="/buscar" role="search">
             {I.search}

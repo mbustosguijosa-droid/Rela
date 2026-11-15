@@ -126,7 +126,7 @@ export function Intro({ me, friends = [], top4 = [] }: { me: Me; friends?: Frien
     <>
       {/* Decide antes de pintar si se muestra (evita parpadeos) */}
       <script dangerouslySetInnerHTML={{ __html: `try{if(!sessionStorage.getItem("${KEY}"))document.documentElement.classList.add("show-intro")}catch(e){}` }} />
-      <div className={`intro ${go ? "go" : ""} ${noGL ? "nogl" : ""}`} role="dialog" aria-label="Rela">
+      <div className={`intro ${go ? "go" : ""} ${noGL ? "nogl" : ""}`} role="dialog" aria-label="Rela Music">
         <div ref={holder} className="intro-3d" />
         <div className="intro-copy">
           <span className="il il1">{t.intro.l1}</span>

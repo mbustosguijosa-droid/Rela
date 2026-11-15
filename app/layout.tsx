@@ -4,13 +4,15 @@ import { Header, TabBar } from "@/components/Header";
 import { I18nProvider, LangSwitch } from "@/components/I18n";
 import { getT } from "@/lib/i18n-server";
 import { headers } from "next/headers";
+import { BRAND } from "@/lib/brand";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
   const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return { metadataBase: new URL(`${proto}://${host}`), title: { default: "Rela", template: "%s · Rela" }, description: t.meta.description };
+  return { metadataBase: new URL(`${proto}://${host}`), title: { default: `${BRAND.name} · ${t.meta.tagline}`, template: `%s · ${BRAND.name}` }, description: t.meta.description,
+    applicationName: BRAND.name, appleWebApp: { title: BRAND.short, capable: true }, openGraph: { siteName: BRAND.name, type: "website" } };
 }
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };

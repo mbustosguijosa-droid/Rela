@@ -596,3 +596,4 @@ body { background:
 .share-toggle span { display: flex; flex-direction: column; font-size: 14px }
 .small-note { font-size: 13px; line-height: 1.5 }
 .track.focus { background: color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 10px; box-shadow: inset 3px 0 0 var(--accent) }
+.logo-sub { font-family: var(--f-body); font-weight: 600; font-size: .5em; letter-spacing: .14em; text-transform: uppercase; margin-left: 5px; color: var(--accent-text); vertical-align: .35em }
