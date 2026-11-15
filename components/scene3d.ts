@@ -9,6 +9,7 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { drawLogoTile } from "@/lib/brand";
 
 export type Person = { id?: string; name: string; handle?: string; avatar_url?: string | null; accent?: string };
 export type Album = { id: number; cover: string; title: string };
@@ -98,24 +99,78 @@ const boothRoomTex = () => canvasTex(256, 256, (g) => {
   g.fillStyle = bg; g.fillRect(0, 0, 256, 256);
   g.globalAlpha = 0.18; g.fillStyle = "#000"; for (let i = 0; i < 8; i++) g.fillRect(i * 32, 0, 14, 256);
 });
-/** Silueta de quien canta (de perfil hacia el micro), con fondo transparente. */
-const singerTex = () => canvasTex(512, 768, (g) => {
-  g.fillStyle = "#06040a";
-  // cuerpo y hombros
-  g.beginPath(); g.moveTo(120, 768); g.bezierCurveTo(110, 560, 170, 470, 260, 455); g.bezierCurveTo(350, 460, 400, 540, 410, 768); g.closePath(); g.fill();
-  // cuello y cabeza (mirando a la izquierda, hacia el micro)
-  g.beginPath(); g.moveTo(232, 470); g.lineTo(236, 380); g.lineTo(292, 380); g.lineTo(300, 470); g.closePath(); g.fill();
-  g.beginPath(); g.ellipse(262, 318, 64, 78, -0.12, 0, 7); g.fill();
-  g.beginPath(); g.moveTo(206, 312); g.quadraticCurveTo(186, 330, 198, 352); g.lineTo(214, 350); g.fill(); // nariz y boca
-  // pelo
-  g.beginPath(); g.ellipse(282, 266, 70, 48, 0.3, Math.PI, Math.PI * 2.1); g.fill();
-  // cascos
-  g.lineWidth = 15; g.strokeStyle = "#06040a"; g.beginPath(); g.arc(266, 318, 88, Math.PI * 1.05, Math.PI * 1.98); g.stroke();
-  g.beginPath(); g.ellipse(300, 326, 30, 42, 0, 0, 7); g.fill();
-  // mano en el casco
-  g.beginPath(); g.moveTo(360, 560); g.quadraticCurveTo(390, 420, 334, 336); g.lineTo(312, 352); g.quadraticCurveTo(350, 440, 330, 560); g.closePath(); g.fill();
-  // contorno iluminado
-  g.globalCompositeOperation = "source-atop"; const rim = g.createLinearGradient(160, 0, 300, 0); rim.addColorStop(0, "rgba(230,190,255,.55)"); rim.addColorStop(0.25, "rgba(230,190,255,0)"); g.fillStyle = rim; g.fillRect(0, 0, 512, 768);
+/**
+ * Siluetas de la cabina (fondo transparente). Cada vez que se abre la entrada sale una distinta:
+ * quien canta de perfil al micro, gorra y camiseta de baloncesto con cadenas, rastas largas con
+ * chaqueta, y pelo despeinado con sudadera y mochila.
+ */
+const SILHOUETTES: ((g: CanvasRenderingContext2D) => void)[] = [
+  // 1. De perfil cantando al micro, con cascos y la mano en el auricular
+  (g) => {
+    g.beginPath(); g.moveTo(120, 768); g.bezierCurveTo(110, 560, 170, 470, 260, 455); g.bezierCurveTo(350, 460, 400, 540, 410, 768); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(232, 470); g.lineTo(236, 380); g.lineTo(292, 380); g.lineTo(300, 470); g.closePath(); g.fill();
+    g.beginPath(); g.ellipse(262, 318, 64, 78, -0.12, 0, 7); g.fill();
+    g.beginPath(); g.moveTo(206, 312); g.quadraticCurveTo(186, 330, 198, 352); g.lineTo(214, 350); g.fill();
+    g.beginPath(); g.ellipse(282, 266, 70, 48, 0.3, Math.PI, Math.PI * 2.1); g.fill();
+    g.lineWidth = 15; g.beginPath(); g.arc(266, 318, 88, Math.PI * 1.05, Math.PI * 1.98); g.stroke();
+    g.beginPath(); g.ellipse(300, 326, 30, 42, 0, 0, 7); g.fill();
+    g.beginPath(); g.moveTo(360, 560); g.quadraticCurveTo(390, 420, 334, 336); g.lineTo(312, 352); g.quadraticCurveTo(350, 440, 330, 560); g.closePath(); g.fill();
+  },
+  // 2. Gorra con visera, cabeza agachada, camiseta de tirantes y cadenas largas
+  (g) => {
+    g.beginPath(); g.moveTo(96, 768); g.lineTo(118, 560); g.quadraticCurveTo(130, 470, 196, 452); g.lineTo(316, 452); g.quadraticCurveTo(384, 470, 396, 560); g.lineTo(418, 768); g.closePath(); g.fill();
+    // brazos sueltos a los lados
+    g.beginPath(); g.moveTo(118, 520); g.quadraticCurveTo(84, 620, 92, 740); g.lineTo(124, 742); g.quadraticCurveTo(122, 640, 146, 560); g.fill();
+    g.beginPath(); g.moveTo(396, 520); g.quadraticCurveTo(440, 600, 410, 690); g.lineTo(382, 676); g.quadraticCurveTo(396, 610, 368, 560); g.fill();
+    g.beginPath(); g.moveTo(232, 456); g.lineTo(236, 400); g.lineTo(282, 400); g.lineTo(286, 456); g.closePath(); g.fill();
+    g.beginPath(); g.ellipse(258, 352, 56, 66, 0.15, 0, 7); g.fill();
+    // rastas cortas bajo la gorra
+    for (let i = 0; i < 7; i++) { g.beginPath(); g.ellipse(214 + i * 14, 400 + (i % 2) * 8, 6, 26, 0, 0, 7); g.fill(); }
+    // gorra con visera hacia delante-arriba
+    g.beginPath(); g.ellipse(262, 300, 70, 44, 0.12, Math.PI, Math.PI * 2.05); g.fill();
+    g.beginPath(); g.moveTo(186, 300); g.quadraticCurveTo(150, 270, 140, 236); g.quadraticCurveTo(190, 250, 230, 292); g.fill();
+    // cadenas: brillo morado claro sobre la silueta
+    g.save(); g.strokeStyle = "rgba(225,200,255,.55)"; g.lineWidth = 4;
+    [[60, 70], [78, 104], [96, 150]].forEach(([w, d]) => { g.beginPath(); g.ellipse(258, 456, w, d, 0, 0.15, Math.PI - 0.15); g.stroke(); });
+    g.restore();
+  },
+  // 3. Rastas largas y chaqueta abierta, girado de tres cuartos y sonriendo
+  (g) => {
+    g.beginPath(); g.moveTo(70, 768); g.quadraticCurveTo(70, 560, 150, 500); g.quadraticCurveTo(210, 470, 258, 476); g.quadraticCurveTo(330, 470, 384, 510); g.quadraticCurveTo(450, 570, 446, 768); g.closePath(); g.fill();
+    // solapas de la chaqueta
+    g.beginPath(); g.moveTo(150, 500); g.lineTo(96, 560); g.lineTo(140, 600); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(232, 470); g.lineTo(240, 400); g.lineTo(290, 400); g.lineTo(292, 470); g.closePath(); g.fill();
+    g.beginPath(); g.ellipse(262, 336, 60, 74, -0.08, 0, 7); g.fill();
+    // rastas cayendo a los lados
+    for (let i = 0; i < 9; i++) {
+      const x = 196 + i * 17, len = 150 + ((i * 37) % 70);
+      g.beginPath(); g.moveTo(x, 280); g.quadraticCurveTo(x + (i < 4 ? -30 : 26), 280 + len / 2, x + (i < 4 ? -40 : 38), 280 + len); g.lineWidth = 11; g.lineCap = "round"; g.stroke();
+    }
+    g.beginPath(); g.ellipse(262, 288, 70, 40, 0, Math.PI, Math.PI * 2); g.fill();
+    g.save(); g.strokeStyle = "rgba(225,200,255,.45)"; g.lineWidth = 3; g.beginPath(); g.ellipse(262, 474, 44, 18, 0, 0.2, Math.PI - 0.2); g.stroke(); g.restore();
+  },
+  // 4. Pelo despeinado, sudadera ancha, mochila y la mano en la cabeza
+  (g) => {
+    g.beginPath(); g.moveTo(112, 768); g.quadraticCurveTo(100, 600, 150, 520); g.quadraticCurveTo(200, 480, 258, 482); g.quadraticCurveTo(318, 480, 362, 520); g.quadraticCurveTo(410, 600, 400, 768); g.closePath(); g.fill();
+    // brazo levantado hasta la cabeza
+    g.beginPath(); g.moveTo(150, 530); g.quadraticCurveTo(110, 440, 150, 330); g.quadraticCurveTo(170, 290, 214, 288); g.lineTo(222, 322); g.quadraticCurveTo(186, 330, 180, 360); g.quadraticCurveTo(168, 440, 196, 520); g.closePath(); g.fill();
+    // asa de la mochila asomando
+    g.beginPath(); g.moveTo(368, 520); g.quadraticCurveTo(420, 560, 424, 680); g.lineTo(398, 690); g.quadraticCurveTo(392, 590, 352, 548); g.fill();
+    g.beginPath(); g.moveTo(236, 486); g.lineTo(240, 420); g.lineTo(284, 420); g.lineTo(288, 486); g.closePath(); g.fill();
+    g.beginPath(); g.ellipse(262, 362, 56, 68, 0.05, 0, 7); g.fill();
+    // flequillo y mechones despeinados
+    for (let i = 0; i < 14; i++) {
+      const a = Math.PI * (1.0 + i / 13), r = 70 + ((i * 29) % 26);
+      g.beginPath(); g.moveTo(262 + Math.cos(a) * 30, 338 + Math.sin(a) * 30); g.lineTo(262 + Math.cos(a) * r, 340 + Math.sin(a) * r * 0.9 + (i % 3) * 6); g.lineWidth = 16; g.lineCap = "round"; g.stroke();
+    }
+    g.beginPath(); g.ellipse(262, 330, 66, 52, 0, Math.PI * 0.95, Math.PI * 2.05); g.fill();
+  },
+];
+const singerTex = (variant: number) => canvasTex(512, 768, (g) => {
+  g.fillStyle = "#06040a"; g.strokeStyle = "#06040a"; g.lineJoin = "round";
+  SILHOUETTES[variant % SILHOUETTES.length](g);
+  // contorno iluminado por la luz de la cabina
+  g.globalCompositeOperation = "source-atop"; const rim = g.createLinearGradient(140, 0, 320, 0); rim.addColorStop(0, "rgba(230,190,255,.5)"); rim.addColorStop(0.3, "rgba(230,190,255,0)"); g.fillStyle = rim; g.fillRect(0, 0, 512, 768);
 });
 /** Neón "for real music lovers": tubo fino + halo. */
 const neonCanvas = async (text: string, sub: string) => {
@@ -140,7 +195,9 @@ function roundRect(g: CanvasRenderingContext2D, x: number, y: number, w: number,
 function fitText(g: CanvasRenderingContext2D, t: string, max: number) { let s = t; while (g.measureText(s).width > max && s.length > 2) s = s.slice(0, -2); return s === t ? s : s + "…"; }
 
 async function drawScreen(g: CanvasRenderingContext2D, info: ScreenInfo): Promise<Hit[]> {
-  const W = g.canvas.width, H = g.canvas.height, hits: Hit[] = [];
+  // Se dibuja a 600 px de ancho lógico y se escala a la resolución real del canvas (más nitidez)
+  const SC = g.canvas.width / 600; g.setTransform(SC, 0, 0, SC, 0, 0);
+  const W = 600, H = g.canvas.height / SC, hits: Hit[] = [];
   const me = info.me;
   const meImg = me?.avatar_url ? await loadImg(me.avatar_url) : null;
   const covers = await Promise.all(info.top4.slice(0, 4).map((a) => loadImg(a.cover)));
@@ -252,11 +309,7 @@ async function drawScreen(g: CanvasRenderingContext2D, info: ScreenInfo): Promis
   const dy = H - 196;
   g.fillStyle = "rgba(255,255,255,.12)"; roundRect(g, 32, dy, W - 64, 156, 50); g.fill();
   const ix = W / 2 - 62, iy = dy + 18;
-  const grd = g.createLinearGradient(ix, iy, ix + 124, iy + 124); grd.addColorStop(0, "#c4a6ff"); grd.addColorStop(1, "#7c4dea");
-  g.fillStyle = grd; roundRect(g, ix, iy, 124, 120, 30); g.fill();
-  g.strokeStyle = "#FFD23F"; g.lineWidth = 11; g.lineCap = "round"; g.beginPath(); g.arc(W / 2, iy + 66, 32, Math.PI, 0); g.stroke();
-  g.fillStyle = "#FFD23F"; roundRect(g, W / 2 - 44, iy + 58, 20, 34, 10); g.fill(); roundRect(g, W / 2 + 24, iy + 58, 20, 34, 10); g.fill();
-  g.strokeStyle = "#1b1424"; g.lineWidth = 3; roundRect(g, W / 2 - 44, iy + 58, 20, 34, 10); g.stroke(); roundRect(g, W / 2 + 24, iy + 58, 20, 34, 10); g.stroke();
+  drawLogoTile(g, ix, iy, 124);
   hits.push({ x: 32, y: dy, w: W - 64, h: 156, action: "enter" });
   g.restore();
   return hits;
@@ -356,7 +409,7 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   glass.position.set(BX, (WIN.y0 + WIN.y1) / 2, BZ + 0.1); scene.add(glass);
   // Quien canta: silueta a contraluz que se balancea al ritmo
   const singerPivot = new THREE.Group(); singerPivot.position.set(BX + 0.35, BY, BZ - 1.15); scene.add(singerPivot);
-  const singer = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 2.18), new THREE.MeshBasicMaterial({ map: singerTex(), transparent: true, toneMapped: false, fog: false, depthWrite: false }));
+  const singer = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 2.18), new THREE.MeshBasicMaterial({ map: singerTex(Math.floor(Math.random() * SILHOUETTES.length)), transparent: true, toneMapped: false, fog: false, depthWrite: false }));
   singer.position.y = 1.09; singerPivot.add(singer);
   // Micro con antipop
   const micMat = new THREE.MeshBasicMaterial({ color: "#07050a", fog: false });
@@ -479,14 +532,14 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
     const cushion = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.095, 16, 64), leather); cushion.rotation.x = Math.PI / 2; cushion.scale.y = 1.2; cushion.position.y = 0.08;
     cup.add(yoke, shell, cap, ring, dot, cushion); cup.position.set(side * bandR, 0, 0); phones.add(cup);
   });
-  phones.scale.setScalar(0.66); phones.position.set(-1.4, 0, 0.95); phones.rotation.y = 0.5; scene.add(phones); blob(1.9, 1.3, -1.35, 1.0, 0.004, -0.5, 0.6);
+  phones.scale.setScalar(0.66); phones.position.set(-1.95, 0, 0.8); phones.rotation.y = 0.55; scene.add(phones); blob(1.9, 1.3, -1.9, 0.85, 0.004, -0.5, 0.6);
 
   /* Móvil de pie en su soporte, bajo el foco */
   const phone = new THREE.Group();
   const PW = 0.88, PL = 1.84, PT = 0.07, TILT = 1.12; // inclinación desde la horizontal
   const body = new THREE.Mesh(new RoundedBoxGeometry(PW, PT, PL, 6, 0.14), new THREE.MeshStandardMaterial({ color: "#1d1b21", metalness: 0.85, roughness: 0.2 }));
   body.position.y = PT / 2; phone.add(body);
-  const screenCanvas = document.createElement("canvas"); screenCanvas.width = 640; screenCanvas.height = Math.round(640 * (PL - 0.08) / (PW - 0.06));
+  const screenCanvas = document.createElement("canvas"); screenCanvas.width = 1200; screenCanvas.height = Math.round(1200 * (PL - 0.08) / (PW - 0.06));
   const sg = screenCanvas.getContext("2d")!;
   const screenTex = new THREE.CanvasTexture(screenCanvas); screenTex.colorSpace = THREE.SRGBColorSpace; screenTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(PW - 0.06, PL - 0.08), new THREE.MeshBasicMaterial({ map: screenTex, transparent: true, toneMapped: false }));
@@ -518,7 +571,7 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   phones.updateMatrixWorld();
   const from = new THREE.Vector3(bandR, 0.1, 0.48).applyMatrix4(phones.matrixWorld);
   const jack = new THREE.Vector3(0, 0.04, bottomZ + 0.2);
-  const curve = new THREE.CatmullRomCurve3([from, new THREE.Vector3(from.x + 0.1, 0.03, from.z + 0.6), new THREE.Vector3(-0.8, 0.028, bottomZ + 0.75), new THREE.Vector3(-0.15, 0.028, bottomZ + 0.55), jack]);
+  const curve = new THREE.CatmullRomCurve3([from, new THREE.Vector3(from.x + 0.1, 0.03, from.z + 0.6), new THREE.Vector3(-1.2, 0.028, bottomZ + 0.8), new THREE.Vector3(-0.3, 0.028, bottomZ + 0.6), jack]);
   scene.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 160, 0.022, 10), rubber));
   const plug = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.22, 16), rubber); plug.rotation.x = Math.PI / 2 - 0.35; plug.position.set(0, 0.07, bottomZ + 0.12); scene.add(plug);
 
@@ -546,9 +599,9 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   function fit() {
     const w = container.clientWidth, h = container.clientHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h;
-    if (camera.aspect < 0.8) { camera.fov = 68; startPos.set(1.09, 1.95, 4.9); target.set(-0.92, 0.85, -3.0); }
-    else if (camera.aspect < 1.25) { camera.fov = 52; startPos.set(-0.1, 2.0, 5.5); target.set(-1.1, 0.85, -3.0); }
-    else { camera.fov = 40; startPos.set(-0.3, 2.05, 5.7); target.set(-0.65, 0.72, -3.0); }
+    if (camera.aspect < 0.8) { camera.fov = 68; startPos.set(0.95, 2.45, 4.25); target.set(-0.95, 0.75, -3.0); }
+    else if (camera.aspect < 1.25) { camera.fov = 52; startPos.set(-0.05, 2.45, 4.7); target.set(-1.1, 0.7, -3.0); }
+    else { camera.fov = 40; startPos.set(-0.25, 2.55, 4.85); target.set(-0.7, 0.55, -3.0); }
     camera.updateProjectionMatrix();
     if (!going) { camera.position.copy(startPos); camera.up.set(0, 1, 0); camera.lookAt(target); }
   }
@@ -641,7 +694,7 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
     raycaster.setFromCamera(new THREE.Vector2(((clientX - r.left) / r.width) * 2 - 1, -(((clientY - r.top) / r.height) * 2 - 1)), camera);
     const onScreen = raycaster.intersectObject(screen)[0];
     if (onScreen?.uv) {
-      const x = onScreen.uv.x * screenCanvas.width, y = (1 - onScreen.uv.y) * screenCanvas.height;
+      const k = screenCanvas.width / 600, x = (onScreen.uv.x * screenCanvas.width) / k, y = ((1 - onScreen.uv.y) * screenCanvas.height) / k;
       return hits.find((h) => x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h)?.action ?? "enter";
     }
     return raycaster.intersectObject(phone, true).length ? "enter" : null;

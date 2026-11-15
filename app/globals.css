@@ -39,8 +39,9 @@ h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; lette
 /* Cabecera */
 .top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line) }
 .top .wrap { display: flex; align-items: center; gap: 20px; height: 60px }
-.logo { display: flex; align-items: center; gap: 9px; font-family: var(--f-display); font-weight: 800; font-size: 23px; letter-spacing: -.03em }
-.logo svg { width: 32px; height: 32px; flex: none }
+.logo { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 600; font-size: 23px; letter-spacing: -.035em }
+.logo svg { width: 30px; height: 30px; flex: none }
+.logo-mark.tile { border-radius: 9px; box-shadow: 0 6px 16px -8px rgba(91,43,214,.7), inset 0 0 0 1px rgba(255,255,255,.12) }
 .nav { display: flex; gap: 4px }
 .nav a { padding: 7px 12px; border-radius: 99px; color: var(--muted); font-weight: 500 }
 .nav a:hover { color: var(--fg) }
@@ -332,6 +333,7 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 .intro-skip { border: 0; background: none; color: rgba(251,243,234,.6); font: 500 13px var(--f-body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
 @media (min-width: 900px) and (min-aspect-ratio: 5/4) {
   .intro-copy { left: auto; width: min(560px, 46vw); align-items: flex-end; text-align: right; padding: 40px 48px 90px 20px; background: radial-gradient(120% 100% at 100% 0%, rgba(9,7,12,.8), rgba(9,7,12,.35) 60%, transparent 80%) }
+  .intro-cta { left: auto; right: 48px; bottom: auto; top: 270px; align-items: flex-end }
 }
 @keyframes desk-in { from { opacity: 0; transform: scale(1.08) } to { opacity: 1; transform: none } }
 @keyframes word-in { to { opacity: 1; transform: none; filter: none } }
@@ -416,7 +418,7 @@ body { background:
 .top .wrap { display: block; height: auto }
 .top .bar { pointer-events: auto; display: flex; align-items: center; gap: 14px; height: 60px; padding: 0 10px 0 16px; border-radius: 20px; border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
   background: color-mix(in srgb, var(--surface) 70%, transparent); backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); box-shadow: 0 14px 40px -24px rgba(0,0,0,.6) }
-.logo span { font-family: var(--f-display); font-weight: 800; letter-spacing: -.04em }
+.logo span { font-family: var(--f-display); font-weight: 600; letter-spacing: -.035em; font-variation-settings: "SOFT" 100, "opsz" 48 }
 .nav { gap: 2px; padding: 4px; border-radius: 14px; background: color-mix(in srgb, var(--bg) 55%, transparent) }
 .nav-link { position: relative; padding: 7px 14px; border-radius: 10px; color: var(--muted); font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 6px }
 .nav-link:hover { color: var(--fg) }
@@ -436,10 +438,10 @@ body { background:
 }
 
 /* Inicio: héroe */
-.hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: 32px; align-items: center; padding-block: 44px 12px }
+.hero { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: 32px; align-items: center; padding-block: 44px 12px }
 @media (max-width: 900px) { .hero { grid-template-columns: 1fr; padding-block: 26px 4px } .fan { display: none } }
 .hero h1 { font-size: clamp(34px, 5.6vw, 64px); font-weight: 800; line-height: .98; letter-spacing: -.045em; max-width: 15ch }
-.hero h1 em { font-style: italic; font-weight: 600; background: linear-gradient(90deg, #c4a6ff, #ff8fc2 55%, #ffd23f); -webkit-background-clip: text; background-clip: text; color: transparent }
+.hero h1 em { font-style: italic; font-weight: 500; background: linear-gradient(100deg, var(--accent) 10%, #c58bff 60%, #ff8fc2); -webkit-background-clip: text; background-clip: text; color: transparent }
 .hero-kicker { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 5px 14px 5px 5px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); font-weight: 600; font-size: 14px }
 .hero-sub { margin: 14px 0 0; color: var(--muted); max-width: 46ch; font-size: 16px }
 .hero-search { position: relative; display: flex; align-items: center; gap: 8px; margin-top: 24px; max-width: 620px; padding: 6px 6px 6px 48px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 20px 50px -30px rgba(0,0,0,.7) }
@@ -599,7 +601,21 @@ body { background:
 .share-toggle span { display: flex; flex-direction: column; font-size: 14px }
 .small-note { font-size: 13px; line-height: 1.5 }
 .track.focus { background: color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 10px; box-shadow: inset 3px 0 0 var(--accent) }
-.logo-sub { font-family: var(--f-body); font-weight: 600; font-size: .5em; letter-spacing: .14em; text-transform: uppercase; margin-left: 5px; color: var(--accent-text); vertical-align: .35em }
+.logo-sub { font-family: var(--f-body); font-weight: 500; font-size: .62em; letter-spacing: .01em; margin-left: 4px; color: var(--muted) }
 .lfm-steps { width: 100%; font-size: 14px; border-top: 1px solid var(--line); padding-top: 12px }
 .lfm-steps ol { margin: 0 0 10px; padding-left: 20px; display: grid; gap: 6px }
 .lfm-steps p { margin: 0 0 8px; display: flex; gap: 8px; flex-wrap: wrap }
+
+/* ---------- Acabado del inicio ---------- */
+body { text-rendering: optimizeLegibility; font-feature-settings: "kern", "liga" }
+/* Grano fino, como una foto de estudio (fijo y sin mezclas: no cuesta al hacer scroll) */
+body::after { content: ""; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: .045;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>") }
+/* Foco de luz sobre el abanico de discos, como en el estudio de la entrada */
+.hero::before { content: ""; position: absolute; z-index: -1; right: -4%; top: -60px; width: min(620px, 55%); height: 560px; pointer-events: none;
+  background: radial-gradient(50% 60% at 55% 55%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%), conic-gradient(from 168deg at 55% -10%, transparent, color-mix(in srgb, var(--accent) 10%, transparent) 12deg, transparent 24deg); filter: blur(8px) }
+@media (max-width: 900px) { .hero::before { display: none } }
+.poster .cover, .sleeve img { image-rendering: auto }
+.hero h1 { text-wrap: balance }
+.hero-copy { position: relative; z-index: 2 }
+.hero-search { max-width: 560px }

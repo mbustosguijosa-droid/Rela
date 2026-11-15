@@ -27,7 +27,7 @@ export default async function Entrar({ searchParams }: Props) {
   return (
     <div className="wrap" style={{ maxWidth: 460 }}>
       <section className="hello" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-        <LogoMark size={64} />
+        <LogoMark tile size={64} />
         <h1>{t.login.heading}</h1>
         <p>{t.login.intro}</p>
       </section>

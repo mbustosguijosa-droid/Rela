@@ -1,5 +1,6 @@
 "use client";
 
+import { drawLogoTile } from "@/lib/brand";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "./I18n";
 import type { RatingState } from "./TrackRater";
@@ -54,11 +55,8 @@ export function ShareRating({ album, r, viewer, onClose }: { album: Album; r: Ra
     c.textBaseline = "alphabetic";
 
     const logo = (x: number, y: number, size: number) => {
-      const k = (size * 1.25) / 32; c.save(); c.translate(x, y - size * 1.05); c.scale(k, k); c.lineCap = "round";
-      const band = new Path2D("M7 19.5V16a9 9 0 0 1 18 0v3.5");
-      c.strokeStyle = "#1b1424"; c.lineWidth = 5; c.stroke(band); c.strokeStyle = "#FFD23F"; c.lineWidth = 2.6; c.stroke(band);
-      [2.8, 20.8].forEach((cx) => { roundRect(c, cx, 16.2, 8.4, 12.6, 4.2); c.fillStyle = "#FFD23F"; c.fill(); c.strokeStyle = "#1b1424"; c.lineWidth = 1.6; c.stroke(); });
-      c.restore(); c.fillStyle = ink; c.font = `800 ${size}px ${disp}`; c.fillText("Rela", x + size * 1.45, y);
+      drawLogoTile(c, x, y - size * 1.05, size * 1.25);
+      c.fillStyle = ink; c.font = `600 ${size}px ${disp}`; c.fillText("Rela", x + size * 1.55, y);
     };
     const avatar = async (x: number, y: number, size: number) => {
       const accent = viewer?.accent ?? "#a77bff";

@@ -125,7 +125,8 @@ export function Intro({ me, friends = [], top4 = [] }: { me: Me; friends?: Frien
   return (
     <>
       {/* Decide antes de pintar si se muestra (evita parpadeos) */}
-      <script dangerouslySetInnerHTML={{ __html: `try{if(!sessionStorage.getItem("${KEY}"))document.documentElement.classList.add("show-intro")}catch(e){}` }} />
+      {/* Se ve siempre que se abre la web (cada carga completa de la página de inicio) */}
+      <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add("show-intro")` }} />
       <div className={`intro ${go ? "go" : ""} ${noGL ? "nogl" : ""}`} role="dialog" aria-label="Rela Music">
         <div ref={holder} className="intro-3d" />
         <div className="intro-copy">

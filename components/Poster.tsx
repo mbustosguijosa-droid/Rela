@@ -8,7 +8,7 @@ export async function Poster({ a, meta }: { a: AlbumSummary; meta?: React.ReactN
   return (
     <Link className="poster" href={`/album/${a.id}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="cover" src={a.cover_medium} alt={t.common.coverOf(a.title)} loading="lazy" />
+      <img className="cover" src={a.cover_big ?? a.cover_medium} alt={t.common.coverOf(a.title)} loading="lazy" />
       <div>
         <div className="t">{a.title}</div>
         <div className="a">{kind}{a.artist?.name}</div>

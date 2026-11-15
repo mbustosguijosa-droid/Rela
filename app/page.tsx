@@ -116,7 +116,7 @@ export default async function Home() {
             <div className="row">{recs.slice(0, 12).map((r) => (
               <Link key={r.track.id} className="poster" href={`/album/${r.track.album.id}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="cover" src={r.track.album.cover_medium} alt={t.common.coverOf(r.track.album.title)} loading="lazy" />
+                <img className="cover" src={r.track.album.cover_big ?? r.track.album.cover_medium} alt={t.common.coverOf(r.track.album.title)} loading="lazy" />
                 <div><div className="t">{r.track.title}</div><div className="a">{t.common.song} · {r.track.artist.name}</div></div>
                 <div className="m">{tasteIds.has(r.because.id) ? t.music.becauseListen(r.because.name) : t.home.because(r.because.name)}</div>
               </Link>
