@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseEnv } from "@/lib/supabase/env";
 import { getAlbum } from "@/lib/deezer";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = { title: "Estado", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -54,6 +55,10 @@ async function runChecks(): Promise<Check[]> {
   }
   const sp = !!(process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET);
   checks.push({ name: "Spotify", ok: sp, detail: sp ? "SPOTIFY_CLIENT_ID y SPOTIFY_CLIENT_SECRET configurados." : "Faltan SPOTIFY_CLIENT_ID y SPOTIFY_CLIENT_SECRET en Vercel (opcional)." });
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+  const redirect = process.env.SPOTIFY_REDIRECT_URI || `https://${host}/api/spotify/callback`;
+  checks.push({ name: "Redirect URI para Spotify (cópiala tal cual)", ok: true, detail: redirect });
   const lf = !!process.env.LASTFM_API_KEY;
   checks.push({ name: "Last.fm", ok: lf, detail: lf ? "LASTFM_API_KEY configurada." : "Falta LASTFM_API_KEY en Vercel (opcional)." });
   const adm = !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY);
