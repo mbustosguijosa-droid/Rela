@@ -119,6 +119,7 @@ const es = {
     invite: "Invita a tus amigos", inviteText: "Rela es mejor con tu gente: comparte el enlace.", profileOf: (n: string) => `Perfil de ${n}`,
     share: "Compartir invitación", copied: "✓ Enlace copiado", shareText: "Puntúa tus discos canción a canción conmigo en Rela",
   },
+  intro: { l1: "Descubre música.", l2: "Puntúala canción a canción.", l3: "Conoce gente con tu mismo oído.", skip: "Saltar intro" },
   notFound: { title: "No encontramos esta página", text: "Puede que el disco ya no esté en el catálogo.", other: "Busca otro" },
   time: { now: "ahora", h: (n: number) => `hace ${n} h`, d: (n: number) => `hace ${n} d`, mo: (n: number) => `hace ${n} mes`, y: (n: number) => `hace ${n} a` },
   errors: {
@@ -246,6 +247,7 @@ const en: Dict = {
     invite: "Invite your friends", inviteText: "Rela is better with your people: share the link.", profileOf: (n) => `${n}'s profile`,
     share: "Share invite", copied: "✓ Link copied", shareText: "Rate your records track by track with me on Rela",
   },
+  intro: { l1: "Discover music.", l2: "Rate it track by track.", l3: "Meet people who hear it like you.", skip: "Skip intro" },
   notFound: { title: "We couldn't find this page", text: "The record may no longer be in the catalogue.", other: "Search for another" },
   time: { now: "now", h: (n) => `${n} h ago`, d: (n) => `${n} d ago`, mo: (n) => `${n} mo ago`, y: (n) => `${n} y ago` },
   errors: {

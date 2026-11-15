@@ -10,6 +10,7 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { Avatar } from "@/components/Avatar";
 import { cls, f1 } from "@/lib/format";
 import { getT } from "@/lib/i18n-server";
+import { Intro } from "@/components/Intro";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,7 @@ export default async function Home() {
 
   return (
     <div className="wrap">
+      <Intro />
       <section className="hello">
         <h1>{t.home.title1} <em>{t.home.title2}</em></h1>
         <p>{t.home.intro}</p>
