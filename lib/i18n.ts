@@ -29,7 +29,9 @@ const es = {
     chart: "Lo más escuchado ahora", chartSub: "Top de Deezer",
     hi: (n: string) => `Hola, ${n}`, whatToday: "¿Qué has escuchado hoy?", searchBig: "Busca un disco, un single o un artista…",
     qRate: "Puntuar un disco", qFriends: "Amigos", qMessages: "Mensajes", qProfile: "Mi perfil", qEnter: "Crear mi perfil",
-    replay: "Ver la intro", freshSub: "Lo último de tus artistas y de la escena", trendingSub: "Lo que más se está comentando",
+    replay: "Ver la intro", online: (n: number) => `${n} ${n === 1 ? "conectado" : "conectados"}`, fanFav: "Tus favoritos", fanDrop: "Nuevo en tu nicho", fanNew: "Recién salido",
+    apps: { fresh: "Novedades", forYou: "Para ti", reviews: "Reseñas", friends: "Amigos", messages: "Mensajes", profile: "Perfil" } as Record<string, string>,
+    onlineNow: "Ahora en Rela", freshSub: "Lo último de tus artistas y de la escena", trendingSub: "Lo que más se está comentando",
   },
   search: {
     title: "Buscar", resultsFor: "Resultados para", anyRecord: "Busca cualquier disco",
@@ -182,7 +184,9 @@ const en: Dict = {
     chart: "Most played right now", chartSub: "Deezer top",
     hi: (n) => `Hi, ${n}`, whatToday: "What have you been listening to?", searchBig: "Search for a record, a single or an artist…",
     qRate: "Rate a record", qFriends: "Friends", qMessages: "Messages", qProfile: "My profile", qEnter: "Create my profile",
-    replay: "Watch the intro", freshSub: "The latest from your artists and the scene", trendingSub: "What people are talking about",
+    replay: "Watch the intro", online: (n) => `${n} online`, fanFav: "Your favourites", fanDrop: "New in your niche", fanNew: "Just out",
+    apps: { fresh: "New", forYou: "For you", reviews: "Reviews", friends: "Friends", messages: "Messages", profile: "Profile" },
+    onlineNow: "On Rela now", freshSub: "The latest from your artists and the scene", trendingSub: "What people are talking about",
   },
   search: {
     title: "Search", resultsFor: "Results for", anyRecord: "Search any record",

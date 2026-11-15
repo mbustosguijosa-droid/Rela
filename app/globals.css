@@ -296,7 +296,13 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 /* ---------- Entrada: escritorio desde arriba ---------- */
 .intro { display: none }
 .show-intro body { overflow: hidden }
-.show-intro .intro { display: block; position: fixed; inset: 0; z-index: 100; overflow: hidden; background: #2f2119; color: #fbf3ea }
+.show-intro .intro { display: block; position: fixed; inset: 0; z-index: 100; overflow: hidden; background: #1c130d; color: #fbf3ea }
+.intro-3d { position: absolute; inset: 0; animation: desk-in 1.2s cubic-bezier(.2,.8,.2,1) backwards }
+.intro-3d canvas { display: block; width: 100% !important; height: 100% !important; touch-action: manipulation }
+.intro.nogl .intro-3d { background: radial-gradient(60% 50% at 50% 55%, #6a4a32, #2a1b12) }
+.intro-online { display: inline-flex; align-items: center; gap: 8px; font: 600 13px var(--f-body); color: #e8d9ca; padding: 6px 12px; border-radius: 99px; background: rgba(20,12,8,.55); backdrop-filter: blur(8px) }
+.intro-online i { width: 8px; height: 8px; border-radius: 50%; background: #5fd39b; box-shadow: 0 0 0 0 rgba(95,211,155,.6); animation: pulse-g 1.6s ease-out infinite }
+@keyframes pulse-g { to { box-shadow: 0 0 0 9px rgba(95,211,155,0) } }
 .intro-desk { position: absolute; inset: 0; width: 100%; height: 100%; animation: desk-in 1.1s cubic-bezier(.2,.8,.2,1) backwards; transition: transform 1.55s cubic-bezier(.66,0,.22,1) }
 .intro.go .intro-desk { transform: rotate(12deg) scale(10) }
 .intro .phone { cursor: pointer; transition: filter .3s ease }
@@ -311,7 +317,6 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 .intro .eqb rect:nth-child(2) { animation-delay: .15s } .intro .eqb rect:nth-child(3) { animation-delay: .3s }
 .intro .prop { transition: opacity .6s ease }
 .intro.go .prop { opacity: .4 }
-.intro.go { animation: intro-fade .4s ease 1.45s forwards }
 .intro-copy { position: absolute; left: 0; right: 0; top: 0; padding: max(28px, env(safe-area-inset-top, 0px)) 20px 70px; display: flex; flex-direction: column; align-items: center; text-align: center;
   background: linear-gradient(to bottom, rgba(20,12,8,.82), rgba(20,12,8,.45) 65%, transparent); pointer-events: none; transition: opacity .4s ease, transform .5s ease }
 .il { display: block; font-family: var(--f-display); font-weight: 600; letter-spacing: -.03em; line-height: 1.02; font-size: clamp(30px, 6vw, 68px); opacity: 0; transform: translateY(18px); filter: blur(6px); animation: word-in .9s cubic-bezier(.2,.8,.2,1) forwards; text-shadow: 0 4px 30px rgba(0,0,0,.4) }
@@ -491,3 +496,36 @@ body { background:
 /* Notas grandes en la tipografía serif */
 .my-score .score, .avg .num { font-family: var(--f-display); font-weight: 600; letter-spacing: -.03em }
 .score { letter-spacing: -.01em }
+
+/* ---------- Abanico 3D de fundas con vinilo ---------- */
+.fan3d { position: relative; height: 380px; perspective: 1100px; perspective-origin: 50% 40% }
+.fan3d-stage { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(calc(12deg + var(--rx, 0deg))) rotateY(var(--ry, 0deg)); transition: transform .3s cubic-bezier(.2,.8,.2,1); animation: stage-float 7s ease-in-out infinite }
+@keyframes stage-float { 50% { translate: 0 -8px } }
+.sleeve { position: absolute; left: 50%; top: 46%; width: clamp(150px, 15vw, 200px); aspect-ratio: 1; transform-style: preserve-3d;
+  transform: translate(-50%, -50%) translateX(calc(var(--i) * clamp(58px, 6vw, 84px))) translateY(var(--lift, 0px)) translateZ(calc(var(--i) * var(--i) * -10px + var(--pop, 0px))) rotateY(calc(var(--i) * -12deg * var(--turn, 1))) rotateZ(calc(var(--i) * 2.5deg * var(--turn, 1)));
+  transition: transform .45s cubic-bezier(.2,.8,.2,1); z-index: calc(10 - var(--i) * var(--i)) }
+.sleeve:hover, .sleeve:focus-visible { --lift: -22px; --pop: 170px; --turn: 0; z-index: 20 }
+.sleeve img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 6px; box-shadow: 0 34px 44px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.08); backface-visibility: hidden }
+.sleeve img::after { content: "" }
+.sleeve::after { content: ""; position: absolute; inset: 0; border-radius: 6px; background: linear-gradient(115deg, rgba(255,255,255,.22), rgba(255,255,255,0) 38%, rgba(0,0,0,.18)); pointer-events: none; transform: translateZ(1px) }
+.sleeve .disc { position: absolute; inset: 3%; border-radius: 50%; transform: translateZ(-3px); transition: transform .6s cubic-bezier(.2,.8,.2,1);
+  background: radial-gradient(circle, #1a130e 0 2.5%, #ee9a62 3% 17%, #0d0c0e 17.5% 19%, transparent 19.5%), repeating-radial-gradient(circle, #121014 0 2px, #1b181d 2px 3px), #0e0d10;
+  box-shadow: 0 20px 30px -16px rgba(0,0,0,.8) }
+.sleeve:hover .disc, .sleeve:focus-visible .disc { transform: translateX(46%) translateZ(-3px) rotate(160deg) }
+.sleeve.fav .disc { background: radial-gradient(circle, #1a130e 0 2.5%, #ffd23f 3% 17%, #0d0c0e 17.5% 19%, transparent 19.5%), repeating-radial-gradient(circle, #121014 0 2px, #1b181d 2px 3px), #0e0d10 }
+.sleeve-tag { position: absolute; left: 8px; top: 8px; transform: translateZ(2px); padding: 3px 9px; border-radius: 99px; font: 700 10.5px var(--f-body); letter-spacing: .04em; text-transform: uppercase; background: rgba(15,11,9,.72); color: #fbf3ea; backdrop-filter: blur(6px); opacity: 0; transition: opacity .25s ease }
+.sleeve.fav .sleeve-tag { background: #ffd23f; color: #2b1607 }
+.sleeve.drop .sleeve-tag { background: #5fd39b; color: #06290f }
+.sleeve:hover .sleeve-tag, .sleeve:focus-visible .sleeve-tag { opacity: 1 }
+.fan3d-legend { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 14px; font-size: 12px; color: var(--muted) }
+.fan3d-legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--c) }
+@media (max-width: 900px) { .fan3d { height: 250px; margin-top: 4px } .hero .fan { display: none } }
+@media (prefers-reduced-motion: reduce) { .fan3d-stage { animation: none } }
+
+/* Conectados ahora */
+.online-now { display: inline-flex; align-items: center; gap: 10px; padding: 6px 12px 6px 12px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); font-size: 13px }
+.online-now > i { width: 9px; height: 9px; border-radius: 50%; background: var(--hi); animation: pulse-g 1.6s ease-out infinite }
+.online-now b { font-weight: 600 }
+.online-faces { display: inline-flex }
+.online-faces > * { margin-left: -6px; box-shadow: 0 0 0 2px var(--surface) }
+.online-faces > *:first-child { margin-left: 0 }

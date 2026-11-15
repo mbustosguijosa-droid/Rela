@@ -152,3 +152,13 @@ export async function getRecommendations(followed: { artist_id: number; artist_n
   const tracks = await pool(picked, 4, async (p) => (await getTopTracks(p.a.id, 1))[0] ?? null);
   return picked.map((p, i) => (tracks[i] ? { track: tracks[i]!, because: p.because } : null)).filter(Boolean) as Recommendation[];
 }
+
+/** Lanzamientos recientes de artistas parecidos a los que sigues ("nuevo en tu nicho"). */
+export async function getNicheDrops(followed: { artist_id: number }[], limit = 6) {
+  const followedIds = new Set(followed.map((f) => Number(f.artist_id)));
+  const related = await pool(followed.slice(0, 6), 3, (f) => getRelated(f.artist_id, 4));
+  const ids: number[] = [];
+  for (let round = 0; round < 4; round++) for (const list of related) { const a = list[round]; if (a && !followedIds.has(a.id) && !ids.includes(a.id)) ids.push(a.id); }
+  const latest = await getLatestFrom(ids.slice(0, 12), 1);
+  return latest.slice(0, limit);
+}

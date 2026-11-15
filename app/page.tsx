@@ -4,7 +4,9 @@ import { SEED_ARTISTS } from "@/lib/seed";
 import { Poster, fmtDate } from "@/components/Poster";
 import { getViewer } from "@/lib/auth";
 import { getFollowedArtists, getFollowing, getReviews } from "@/lib/reviews";
-import { getRecommendations } from "@/lib/deezer";
+import { getNicheDrops, getRecommendations } from "@/lib/deezer";
+import { Fan3D, type FanItem } from "@/components/Fan3D";
+import { OnlineNow } from "@/components/OnlineNow";
 import { releasesByIds } from "@/lib/releases";
 import { ReviewCard } from "@/components/ReviewCard";
 import { Avatar } from "@/components/Avatar";
@@ -28,6 +30,11 @@ export default async function Home() {
       : Promise.resolve([]),
     followedArtists.length ? getRecommendations(followedArtists, 12) : Promise.resolve([]),
   ]);
+  // Abanico del inicio: tus favoritos + lo nuevo de tu nicho (o lo recién salido si no has entrado)
+  const [favRows, drops] = await Promise.all([
+    sb && profile?.favorites?.length ? releasesByIds(sb, profile.favorites.map(Number)) : Promise.resolve(new Map()),
+    followedArtists.length ? getNicheDrops(followedArtists, 4) : Promise.resolve([]),
+  ]);
   let feed: { key: string; rel: { id: number; title: string; cover_url: string | null }; who: { handle: string; name: string; avatar_url: string | null; accent: string }; overall: number | null; liked: boolean }[] = [];
   if (sb && activity.length) {
     const [rels, { data: ps }] = await Promise.all([
@@ -37,12 +44,18 @@ export default async function Home() {
     feed = activity.map((a) => ({ key: a.user_id + a.release_id, rel: rels.get(Number(a.release_id))!, who: ps!.find((p) => p.id === a.user_id)!, overall: a.overall, liked: a.liked })).filter((f) => f.rel && f.who);
   }
   const unread = sb && user ? await unreadCount(sb, user.id) : 0;
-  const fan = fresh.slice(0, 5);
+  const favItems: FanItem[] = (profile?.favorites ?? []).map((id) => favRows.get(Number(id))).filter(Boolean).slice(0, 4)
+    .map((r) => ({ id: r.id, cover: r.cover_url ?? "", title: r.title, artist: r.artist_name, tag: t.home.fanFav, kind: "fav" as const }));
+  const dropItems: FanItem[] = drops.map((a) => ({ id: a.id, cover: a.cover_big ?? a.cover_medium, title: a.title, artist: a.artist?.name ?? "", tag: t.home.fanDrop, kind: "drop" as const }));
+  let fanItems: FanItem[] = [...favItems, ...dropItems];
+  if (fanItems.length < 3) fanItems = [...fanItems, ...fresh.slice(0, 6 - fanItems.length).map((a) => ({ id: a.id, cover: a.cover_big ?? a.cover_medium, title: a.title, artist: a.artist?.name ?? "", tag: t.home.fanNew, kind: "new" as const }))];
+  fanItems = fanItems.slice(0, 7);
+  const meLite = user && profile ? { id: user.id, name: profile.name, handle: profile.handle, avatar_url: profile.avatar_url, accent: profile.accent } : null;
   const viewer = user && profile ? { id: user.id, name: profile.name, handle: profile.handle, avatar_url: profile.avatar_url, accent: profile.accent } : null;
 
   return (
     <div className="wrap">
-      <Intro />
+      <Intro me={meLite} />
       <section className="hero">
         <div className="hero-copy">
           {user && profile ? (
@@ -61,6 +74,7 @@ export default async function Home() {
             <input name="q" type="search" placeholder={t.home.searchBig} aria-label={t.nav.searchLabel} autoComplete="off" />
             <button className="btn primary" type="submit">{t.nav.search}</button>
           </form>
+          <div style={{ marginTop: 18 }}><OnlineNow me={meLite} /></div>
           <div className="quick">
             <Link href="/buscar" className="q"><span className="qi">★</span>{t.home.qRate}</Link>
             <Link href="/amigos" className="q"><span className="qi">☺</span>{t.home.qFriends}</Link>
@@ -71,14 +85,7 @@ export default async function Home() {
             <ReplayIntro label={t.home.replay} />
           </div>
         </div>
-        {fan.length > 0 && (
-          <div className="fan" aria-hidden="true">
-            {fan.map((a, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={a.id} src={a.cover_big ?? a.cover_medium} alt="" style={{ ["--i" as string]: i - (fan.length - 1) / 2 }} />
-            ))}
-          </div>
-        )}
+        {fanItems.length > 0 && <Fan3D items={fanItems} legend={{ fav: t.home.fanFav, drop: t.home.fanDrop, new: t.home.fanNew }} />}
       </section>
 
       <section className="section">
