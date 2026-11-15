@@ -54,13 +54,26 @@ async function runChecks(): Promise<Check[]> {
     }
   }
   const sp = !!(process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET);
-  checks.push({ name: "Spotify", ok: sp, detail: sp ? "SPOTIFY_CLIENT_ID y SPOTIFY_CLIENT_SECRET configurados." : "Faltan SPOTIFY_CLIENT_ID y SPOTIFY_CLIENT_SECRET en Vercel (opcional)." });
+  checks.push({ name: "Spotify directo (opcional)", ok: true, detail: sp ? "Claves configuradas. El botón solo aparece si pones SPOTIFY_DIRECT = 1 en Vercel." : "No hace falta: la música se conecta con Last.fm." });
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
   const redirect = process.env.SPOTIFY_REDIRECT_URI || `https://${host}/api/spotify/callback`;
   checks.push({ name: "Redirect URI para Spotify (cópiala tal cual)", ok: true, detail: redirect });
-  const lf = !!process.env.LASTFM_API_KEY;
-  checks.push({ name: "Last.fm", ok: lf, detail: lf ? "LASTFM_API_KEY configurada." : "Falta LASTFM_API_KEY en Vercel (opcional)." });
+  const lfKey = (process.env.LASTFM_API_KEY ?? "").trim();
+  if (!lfKey) {
+    checks.push({ name: "Last.fm", ok: false, detail: "Falta LASTFM_API_KEY en Vercel (Settings → Environment Variables) y después Redeploy." });
+  } else {
+    let detail = "", ok = false;
+    try {
+      const r = await fetch(`https://ws.audioscrobbler.com/2.0/?method=user.getinfo&user=rj&format=json&api_key=${encodeURIComponent(lfKey)}`, { cache: "no-store" });
+      const j = await r.json();
+      ok = !!j?.user;
+      detail = ok ? "LASTFM_API_KEY configurada y funcionando."
+        : j?.error === 10 ? "La clave no es válida. Copia la línea «API key» de Last.fm (no el «Shared secret»), sin espacios, y haz Redeploy."
+        : `Last.fm responde con un error: ${j?.message ?? r.status}.`;
+    } catch { detail = "No se pudo contactar con Last.fm ahora mismo."; }
+    checks.push({ name: "Last.fm", ok, detail });
+  }
   const adm = !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY);
   checks.push({ name: "Escuchas de amigos en directo (Spotify)", ok: true, detail: adm ? "Clave secreta configurada: se actualiza aunque tus amigos no tengan Rela abierto." : "Sin clave secreta: lo que escuchan tus amigos en Spotify se actualiza cuando ellos abren Rela (opcional)." });
   const a = await getAlbum(302867697);

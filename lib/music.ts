@@ -102,7 +102,7 @@ type LImg = { "#text": string; size: string }[] | undefined;
 const limg = (a: LImg) => { const u = a?.find((i) => i.size === "extralarge")?.["#text"] || a?.[a.length - 1]?.["#text"]; return u && !u.includes(LFM_BLANK) ? u : null; };
 
 async function lastfm<T>(params: Record<string, string>, revalidate = 60): Promise<T | null> {
-  const key = process.env.LASTFM_API_KEY;
+  const key = process.env.LASTFM_API_KEY?.trim();
   if (!key) return null;
   try {
     const res = await fetch("https://ws.audioscrobbler.com/2.0/?" + new URLSearchParams({ ...params, api_key: key, format: "json" }), { next: { revalidate } });
