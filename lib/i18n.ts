@@ -147,8 +147,32 @@ const es = {
     ogTitle: (h: string, s: string, title: string) => `@${h} le ha puesto un ${s} a ${title}`,
   },
   intro: { l1: "Descubre música.", l2: "Puntúala canción a canción.", l3: "Conoce gente con tu mismo oído.", skip: "Saltar intro", hint: "Toca el móvil para entrar", enter: "Entrar", you: "Tú", google: "Google", email: "Email", explore: "Explorar", nobody: "Nadie más conectado ahora", top4: "Tu top 4", noFriends: "Aún no sigues a nadie · Buscar amigos", profile: "Perfil" },
+  music: {
+    title: "Tu música", sub: "Conecta Spotify o Last.fm y Rela sabrá lo que escuchas: tus últimas escuchas para puntuarlas con un toque, tus temas y artistas del mes, tus playlists y lo que suena ahora.",
+    settings: "Conectar música", spotify: "Spotify", lastfm: "Last.fm",
+    connectSpotify: "Conectar Spotify", connectedAs: (n: string) => `Conectado como ${n}`, disconnect: "Desconectar", reconnect: "Volver a conectar",
+    spotifyHelp: "Tus últimas escuchas, temas y artistas top, playlists y lo que suena ahora.",
+    lastfmHelp: "Si tienes Spotify, Apple Music o YouTube Music enlazado a Last.fm, pon tu usuario. Funciona para todo el mundo y no necesita permisos.",
+    lfmPh: "Tu usuario de Last.fm", lfmSave: "Conectar", lfmBad: "Ese usuario de Last.fm no es válido.", lfmNoKey: "Last.fm aún no está activado en Rela (falta LASTFM_API_KEY).",
+    lfmNotFound: (u: string) => `No encontramos el usuario «${u}» en Last.fm.`, sql005: "Falta ejecutar supabase/005_spotify_lastfm.sql en Supabase.",
+    share: "Mostrar lo que escucho en mi perfil y a mis amigos", shareHelp: "Si lo desactivas, solo lo verás tú.",
+    status: {
+      ok: "¡Spotify conectado! Ya puedes ver tus escuchas en el inicio.", cancel: "Has cancelado la conexión con Spotify.",
+      error: "No se pudo conectar con Spotify. Inténtalo otra vez.", config: "Spotify aún no está activado en Rela (faltan SPOTIFY_CLIENT_ID y SPOTIFY_CLIENT_SECRET).",
+      notallowed: "Spotify todavía no deja entrar a tu cuenta: mientras Rela está en pruebas, cada cuenta tiene que estar añadida en el panel de Spotify. Mientras tanto puedes conectar Last.fm.",
+      sql: "Falta ejecutar supabase/005_spotify_lastfm.sql en Supabase.",
+    } as Record<string, string>,
+    ai: "El DJ con IA de Spotify y sus playlists con IA no se pueden usar desde otras apps (Spotify no lo permite). En su lugar, Rela usa lo que escuchas para recomendarte música de tu nicho.",
+    nowPlaying: "Sonando ahora", lastPlayed: "Lo último que sonó", recent: "Tus últimas escuchas", recentSub: "Toca una y puntúala al momento",
+    recentOf: (n: string) => `Lo último que ha escuchado ${n}`, rate: "Puntuar", rated: "Puntuado",
+    topTracks: "Tus temas del mes", topTracksOf: (n: string) => `Temas del mes de ${n}`, topArtists: "Tus artistas del mes", topArtistsOf: (n: string) => `Artistas del mes de ${n}`,
+    playlists: "Tus playlists", playlistsOf: (n: string) => `Playlists de ${n}`, songs: (n: number) => `${n} canciones`,
+    friendsNow: "Tus amigos escuchando", friendsNowSub: "En directo desde Spotify y Last.fm", live: "Ahora", via: (s: string) => `vía ${s}`,
+    connectTitle: "Conecta tu Spotify", connectText: "Verás aquí lo último que has escuchado para puntuarlo con un toque, y Rela te recomendará según tus gustos.", connectCta: "Conectar música",
+    becauseListen: (n: string) => `Porque escuchas a ${n}`, open: "Abrir", empty: "Aún no hay escuchas. Pon algo en Spotify y vuelve en un rato.",
+  },
   notFound: { title: "No encontramos esta página", text: "Puede que el disco ya no esté en el catálogo.", other: "Busca otro" },
-  time: { now: "ahora", h: (n: number) => `hace ${n} h`, d: (n: number) => `hace ${n} d`, mo: (n: number) => `hace ${n} mes`, y: (n: number) => `hace ${n} a` },
+  time: { now: "ahora", m: (n: number) => `hace ${n} min`, h: (n: number) => `hace ${n} h`, d: (n: number) => `hace ${n} d`, mo: (n: number) => `hace ${n} mes`, y: (n: number) => `hace ${n} a` },
   errors: {
     login: "Inicia sesión para hacer esto.", noRecord: "No encontramos este disco.", top4Full: "Tu top 4 está lleno. Quita uno desde tu perfil.",
     reviewLong: "La reseña es demasiado larga (máximo 5.000 caracteres).", badReaction: "Reacción no válida.", writeSomething: "Escribe algo antes de responder.",
@@ -302,8 +326,32 @@ const en: Dict = {
     ogTitle: (h, s, title) => `@${h} gave ${title} a ${s}`,
   },
   intro: { l1: "Discover music.", l2: "Rate it track by track.", l3: "Meet people who hear it like you.", skip: "Skip intro", hint: "Tap the phone to enter", enter: "Enter", you: "You", google: "Google", email: "Email", explore: "Explore", nobody: "Nobody else online right now", top4: "Your top 4", noFriends: "You don't follow anyone yet · Find friends", profile: "Profile" },
+  music: {
+    title: "Your music", sub: "Connect Spotify or Last.fm and Rela will know what you listen to: your latest plays to rate with one tap, your top tracks and artists of the month, your playlists and what's playing now.",
+    settings: "Connect music", spotify: "Spotify", lastfm: "Last.fm",
+    connectSpotify: "Connect Spotify", connectedAs: (n) => `Connected as ${n}`, disconnect: "Disconnect", reconnect: "Connect again",
+    spotifyHelp: "Your latest plays, top tracks and artists, playlists and what's playing now.",
+    lastfmHelp: "If you have Spotify, Apple Music or YouTube Music linked to Last.fm, enter your username. It works for everyone and needs no permissions.",
+    lfmPh: "Your Last.fm username", lfmSave: "Connect", lfmBad: "That Last.fm username isn't valid.", lfmNoKey: "Last.fm isn't enabled on Rela yet (LASTFM_API_KEY is missing).",
+    lfmNotFound: (u) => `We couldn't find the user “${u}” on Last.fm.`, sql005: "Run supabase/005_spotify_lastfm.sql in Supabase first.",
+    share: "Show what I listen to on my profile and to my friends", shareHelp: "If you turn it off, only you will see it.",
+    status: {
+      ok: "Spotify connected! Your plays now show up on the home page.", cancel: "You cancelled the Spotify connection.",
+      error: "We couldn't connect to Spotify. Please try again.", config: "Spotify isn't enabled on Rela yet (SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are missing).",
+      notallowed: "Spotify doesn't let your account in yet: while Rela is in testing, each account has to be added in the Spotify dashboard. Meanwhile you can connect Last.fm.",
+      sql: "Run supabase/005_spotify_lastfm.sql in Supabase first.",
+    },
+    ai: "Spotify's AI DJ and AI playlists can't be used from other apps (Spotify doesn't allow it). Instead, Rela uses what you listen to to recommend music from your niche.",
+    nowPlaying: "Playing now", lastPlayed: "Last played", recent: "Your latest plays", recentSub: "Tap one and rate it right away",
+    recentOf: (n) => `What ${n} listened to lately`, rate: "Rate", rated: "Rated",
+    topTracks: "Your tracks of the month", topTracksOf: (n) => `${n}'s tracks of the month`, topArtists: "Your artists of the month", topArtistsOf: (n) => `${n}'s artists of the month`,
+    playlists: "Your playlists", playlistsOf: (n) => `${n}'s playlists`, songs: (n) => `${n} songs`,
+    friendsNow: "Your friends listening", friendsNowSub: "Live from Spotify and Last.fm", live: "Now", via: (s) => `via ${s}`,
+    connectTitle: "Connect your Spotify", connectText: "You'll see what you've just listened to here so you can rate it with one tap, and Rela will recommend music based on your taste.", connectCta: "Connect music",
+    becauseListen: (n) => `Because you listen to ${n}`, open: "Open", empty: "No plays yet. Play something on Spotify and come back in a bit.",
+  },
   notFound: { title: "We couldn't find this page", text: "The record may no longer be in the catalogue.", other: "Search for another" },
-  time: { now: "now", h: (n) => `${n} h ago`, d: (n) => `${n} d ago`, mo: (n) => `${n} mo ago`, y: (n) => `${n} y ago` },
+  time: { now: "now", m: (n) => `${n} min ago`, h: (n) => `${n} h ago`, d: (n) => `${n} d ago`, mo: (n) => `${n} mo ago`, y: (n) => `${n} y ago` },
   errors: {
     login: "Sign in to do this.", noRecord: "We couldn't find this record.", top4Full: "Your top 4 is full. Remove one from your profile.",
     reviewLong: "The review is too long (5,000 characters max).", badReaction: "Invalid reaction.", writeSomething: "Write something before replying.",
@@ -318,7 +366,7 @@ export const isLang = (v: unknown): v is Lang => v === "es" || v === "en";
 
 export function timeAgoT(t: Dict, iso: string) {
   const h = (Date.now() - new Date(iso).getTime()) / 3.6e6;
-  if (h < 1) return t.time.now;
+  if (h < 1) { const m = Math.round(h * 60); return m < 2 ? t.time.now : t.time.m(m); }
   if (h < 24) return t.time.h(Math.round(h));
   const d = Math.round(h / 24);
   return d < 30 ? t.time.d(d) : d < 365 ? t.time.mo(Math.round(d / 30)) : t.time.y(Math.round(d / 365));

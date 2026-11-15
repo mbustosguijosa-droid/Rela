@@ -10,6 +10,8 @@ import { Avatar } from "@/components/Avatar";
 import { FollowButton } from "@/components/FollowButton";
 import { ReviewCard } from "@/components/ReviewCard";
 import { getT } from "@/lib/i18n-server";
+import { Suspense } from "react";
+import { ProfileMusic } from "@/components/ProfileMusic";
 
 type Props = { params: Promise<{ handle: string }> };
 
@@ -108,7 +110,7 @@ export default async function ProfilePage({ params }: Props) {
             )}
           </div>
           <div className="p-actions">
-            {own ? <Link className="btn" href="/perfil/editar">{t.profile.edit}</Link>
+            {own ? <><Link className="btn" href="/perfil/editar">{t.profile.edit}</Link><Link className="btn" href="/perfil/musica">♪ {t.music.settings}</Link></>
               : <><FollowButton userId={p.id} initial={myFollowing.includes(p.id)} loggedIn={!!user} /><Link className="btn" href={user ? `/mensajes/${p.handle}` : `/entrar?next=/mensajes/${p.handle}`}>{t.dm.message}</Link></>}
           </div>
         </section>
@@ -135,6 +137,8 @@ export default async function ProfilePage({ params }: Props) {
             <div className="badges">{badges.map((b) => <div className="badge" key={b.k}><i>{b.ic}</i><div><b>{t.profile.badge[b.k][0]}</b><span>{t.profile.badge[b.k][1]}</span></div></div>)}</div>
           </section>
         )}
+
+        <Suspense fallback={null}><ProfileMusic userId={p.id} name={name} own={own} /></Suspense>
 
         <section className="section">
           <div className="sec-head"><h2>{own ? t.profile.myTop4 : t.profile.top4Of(name)}</h2>{own && <span>{t.profile.addFromAlbum}</span>}</div>

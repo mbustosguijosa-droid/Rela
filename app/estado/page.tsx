@@ -29,13 +29,13 @@ async function runChecks(): Promise<Check[]> {
             : `Error: ${error.message}`
           : "Conecta y las tablas existen.",
       });
-      const tables = ["releases", "ratings", "track_ratings", "reviews", "review_reactions", "replies", "follows", "reports", "artist_follows", "messages", "blocks"];
+      const tables = ["releases", "ratings", "track_ratings", "reviews", "review_reactions", "replies", "follows", "reports", "artist_follows", "messages", "blocks", "music_links", "now_playing", "music_snapshots"];
       const missing: string[] = [];
       for (const t of tables) {
         const { error: e } = await sb!.from(t).select("*", { count: "exact", head: true });
         if (e) missing.push(t);
       }
-      checks.push({ name: "Tablas de Rela", ok: missing.length === 0, detail: missing.length ? `Faltan: ${missing.join(", ")}. Ejecuta en Supabase los archivos SQL que falten (schema, 002, 003 y 004).` : `Las ${tables.length + 1} tablas están creadas.` });
+      checks.push({ name: "Tablas de Rela", ok: missing.length === 0, detail: missing.length ? `Faltan: ${missing.join(", ")}. Ejecuta en Supabase los archivos SQL que falten (schema, 002, 003, 004 y 005).` : `Las ${tables.length + 1} tablas están creadas.` });
     } catch (e) {
       checks.push({ name: "Conexión con la base de datos", ok: false, detail: `No se pudo conectar: ${(e as Error).message}` });
     }
@@ -52,6 +52,12 @@ async function runChecks(): Promise<Check[]> {
       checks.push({ name: "Ajustes de inicio de sesión", ok: false, detail: "No se pudieron leer." });
     }
   }
+  const sp = !!(process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET);
+  checks.push({ name: "Spotify", ok: sp, detail: sp ? "SPOTIFY_CLIENT_ID y SPOTIFY_CLIENT_SECRET configurados." : "Faltan SPOTIFY_CLIENT_ID y SPOTIFY_CLIENT_SECRET en Vercel (opcional)." });
+  const lf = !!process.env.LASTFM_API_KEY;
+  checks.push({ name: "Last.fm", ok: lf, detail: lf ? "LASTFM_API_KEY configurada." : "Falta LASTFM_API_KEY en Vercel (opcional)." });
+  const adm = !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY);
+  checks.push({ name: "Escuchas de amigos en directo (Spotify)", ok: true, detail: adm ? "Clave secreta configurada: se actualiza aunque tus amigos no tengan Rela abierto." : "Sin clave secreta: lo que escuchan tus amigos en Spotify se actualiza cuando ellos abren Rela (opcional)." });
   const a = await getAlbum(302867697);
   checks.push({ name: "Catálogo de Deezer", ok: !!a, detail: a ? `Responde (ejemplo: ${a.title})` : "No responde ahora mismo." });
   return checks;

@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { ListenSection, ListenSkeleton } from "@/components/ListenSection";
+import { FriendsNow } from "@/components/FriendsNow";
+import type { TopArtist } from "@/lib/music";
 import { getChartAlbums, getLatestFrom } from "@/lib/deezer";
 import { SEED_ARTISTS } from "@/lib/seed";
 import { Poster, fmtDate } from "@/components/Poster";
@@ -21,6 +25,12 @@ export default async function Home() {
   const [{ sb, user, profile }, { t, locale }] = await Promise.all([getViewer(), getT()]);
   const [following, followedArtists] = sb ? await Promise.all([getFollowing(sb, user?.id), getFollowedArtists(sb, user?.id)]) : [[], []];
   const followedIds = followedArtists.map((f) => Number(f.artist_id));
+  // Tus gustos según lo que escuchas en Spotify/Last.fm (la última foto guardada, sin esperar a Spotify)
+  const { data: snapRow } = sb && user ? await sb.from("music_snapshots").select("top_artists").eq("user_id", user.id).maybeSingle() : { data: null };
+  const taste = ((snapRow?.top_artists ?? []) as TopArtist[]).filter((a) => a.deezer && !followedIds.includes(a.deezer)).slice(0, 5)
+    .map((a) => ({ artist_id: a.deezer!, artist_name: a.name }));
+  const tasteIds = new Set(taste.map((a) => a.artist_id));
+  const recSources = [...taste, ...followedArtists.map((f) => ({ artist_id: Number(f.artist_id), artist_name: f.artist_name }))];
   const [fresh, chart, trending, activity, recs] = await Promise.all([
     getLatestFrom([...new Set([...followedIds.slice(0, 20), ...SEED_ARTISTS])].slice(0, 45), 1),
     getChartAlbums(12),
@@ -28,12 +38,12 @@ export default async function Home() {
     sb && following.length
       ? sb.from("ratings").select("user_id, release_id, overall, liked, updated_at").in("user_id", following).order("updated_at", { ascending: false }).limit(12).then((r) => r.data ?? [])
       : Promise.resolve([]),
-    followedArtists.length ? getRecommendations(followedArtists, 12) : Promise.resolve([]),
+    recSources.length ? getRecommendations(recSources, 12) : Promise.resolve([]),
   ]);
   // Abanico del inicio: tus favoritos + lo nuevo de tu nicho (o lo recién salido si no has entrado)
   const [favRows, drops] = await Promise.all([
     sb && profile?.favorites?.length ? releasesByIds(sb, profile.favorites.map(Number)) : Promise.resolve(new Map()),
-    followedArtists.length ? getNicheDrops(followedArtists, 4) : Promise.resolve([]),
+    recSources.length ? getNicheDrops(recSources, 4) : Promise.resolve([]),
   ]);
   let feed: { key: string; rel: { id: number; title: string; cover_url: string | null }; who: { handle: string; name: string; avatar_url: string | null; accent: string }; overall: number | null; liked: boolean }[] = [];
   if (sb && activity.length) {
@@ -101,14 +111,14 @@ export default async function Home() {
 
       {user && (
         <section className="section">
-          <div className="sec-head"><h2>{t.home.forYou}</h2><span>{followedArtists.length ? t.home.forYouCount(followedArtists.length) : t.home.forYouOff}</span></div>
+          <div className="sec-head"><h2>{t.home.forYou}</h2><span>{followedArtists.length ? t.home.forYouCount(followedArtists.length) : taste.length ? t.music.becauseListen(taste.map((a) => a.artist_name).slice(0, 2).join(", ")) : t.home.forYouOff}</span></div>
           {recs.length ? (
             <div className="row">{recs.slice(0, 12).map((r) => (
               <Link key={r.track.id} className="poster" href={`/album/${r.track.album.id}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img className="cover" src={r.track.album.cover_medium} alt={t.common.coverOf(r.track.album.title)} loading="lazy" />
                 <div><div className="t">{r.track.title}</div><div className="a">{t.common.song} · {r.track.artist.name}</div></div>
-                <div className="m">{t.home.because(r.because.name)}</div>
+                <div className="m">{tasteIds.has(r.because.id) ? t.music.becauseListen(r.because.name) : t.home.because(r.because.name)}</div>
               </Link>
             ))}</div>
           ) : (
@@ -118,6 +128,13 @@ export default async function Home() {
             </div>
           )}
         </section>
+      )}
+
+      {user && (
+        <>
+          <Suspense fallback={<ListenSkeleton title={t.music.recent} />}><ListenSection /></Suspense>
+          <FriendsNow title={t.music.friendsNow} sub={t.music.friendsNowSub} />
+        </>
       )}
 
       <section className="section">

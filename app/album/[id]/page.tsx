@@ -12,7 +12,7 @@ import { FollowArtistButton } from "@/components/FollowArtistButton";
 import { cls, f1, nf } from "@/lib/format";
 import { getT } from "@/lib/i18n-server";
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ orden?: string; de?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ orden?: string; de?: string; pista?: string }> };
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -30,7 +30,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 export default async function AlbumPage({ params, searchParams }: Props) {
   const { id } = await params;
-  const { orden } = await searchParams;
+  const { orden, pista } = await searchParams;
   const sort: Sort = (["hot", "new", "top", "debate"] as const).includes(orden as Sort) ? (orden as Sort) : "hot";
   if (!/^\d+$/.test(id)) notFound();
   const a = await getAlbum(id);
@@ -118,6 +118,7 @@ export default async function AlbumPage({ params, searchParams }: Props) {
           </div>
         )}
         <TrackRater
+          focus={pista}
           albumId={releaseId}
           tracks={a.tracks.data.map((x) => ({ id: x.id, title: x.title }))}
           links={{ spotify: spotifyUrl(a.artist.name, a.title), deezer: a.link, genius: geniusUrl(a.artist.name, a.title), trackGenius: a.tracks.data.map((x) => geniusUrl(a.artist.name, x.title)) }}

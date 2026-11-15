@@ -22,9 +22,12 @@ type Props = {
   album: { title: string; artist: string; year: string; cover: string };
   viewer: { handle: string; name: string; avatar_url: string | null; accent: string } | null;
   children?: React.ReactNode; // contenido extra de la columna principal (reseñas, amigos…)
+  focus?: string; // canción que vienes de escuchar: se resalta y se lleva a la vista
 };
 
-export function TrackRater({ albumId, tracks, links, initial, loggedIn, inTop4, inLoop, album, viewer, children }: Props) {
+const norm = (s: string) => s.toLowerCase().replace(/\s*[\(\[].*?[\)\]]/g, "").replace(/\s+-\s+.*$/, "").replace(/[^\p{L}\p{N}]+/gu, "");
+
+export function TrackRater({ albumId, tracks, links, initial, loggedIn, inTop4, inLoop, album, viewer, children, focus }: Props) {
   const { t } = useT();
   const key = `rela:rating:${albumId}`;
   const [r, setR] = useState<RatingState>(initial ?? empty);
@@ -35,6 +38,12 @@ export function TrackRater({ albumId, tracks, links, initial, loggedIn, inTop4, 
   const [loop, setLoopState] = useState(inLoop);
   const [, start] = useTransition();
   const dirty = useRef(false);
+  const focusIdx = focus ? tracks.findIndex((x) => norm(x.title) === norm(focus) || (norm(focus).length > 3 && norm(x.title).startsWith(norm(focus)))) : -1;
+  useEffect(() => {
+    if (focusIdx < 0) return;
+    const el = document.getElementById(`pista-${focusIdx}`);
+    el?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [focusIdx]);
 
   // Sin sesión: se guarda en el navegador
   useEffect(() => {
@@ -74,7 +83,7 @@ export function TrackRater({ albumId, tracks, links, initial, loggedIn, inTop4, 
             {tracks.map((tr, i) => {
               const v = r.tracks[i];
               return (
-                <li className="track" key={tr.id}>
+                <li className={`track ${i === focusIdx ? "focus" : ""}`} key={tr.id} id={`pista-${i}`}>
                   <span className="n">{i + 1}</span>
                   <span className="tt" title={tr.title}>{tr.title}</span>
                   <a className="icon-btn" href={links.trackGenius[i]} target="_blank" rel="noopener" aria-label={t.rater.lyricsOf(tr.title)} title={t.rater.lyrics}>

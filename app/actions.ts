@@ -165,6 +165,45 @@ export async function toggleBlock(userId: string, on: boolean): Promise<Result> 
   return error ? { ok: false, error: error.message } : { ok: true };
 }
 
+/* ---------- Spotify / Last.fm ---------- */
+export async function connectLastfm(username: string): Promise<Result> {
+  const v = await viewerOrNull(); if (!v) return needLogin();
+  const t = (await getT()).t.music;
+  const u = username.trim().replace(/^@/, "").replace(/^https?:\/\/(www\.)?last\.fm\/user\//i, "").replace(/\/.*$/, "");
+  if (!/^[A-Za-z0-9_-]{2,15}$/.test(u)) return { ok: false, error: t.lfmBad };
+  const { lastfmConfigured, lastfmUserExists } = await import("@/lib/music");
+  if (!lastfmConfigured()) return { ok: false, error: t.lfmNoKey };
+  const name = await lastfmUserExists(u);
+  if (!name) return { ok: false, error: t.lfmNotFound(u) };
+  const { error } = await v.sb.from("music_links").upsert({ user_id: v.user.id, lastfm_user: name, updated_at: new Date().toISOString() });
+  if (error) return { ok: false, error: error.code === "42P01" || error.code === "PGRST205" ? t.sql005 : error.message };
+  await v.sb.from("music_snapshots").delete().eq("user_id", v.user.id);
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+export async function disconnectMusic(source: "spotify" | "lastfm"): Promise<Result> {
+  const v = await viewerOrNull(); if (!v) return needLogin();
+  if (source === "spotify") {
+    await v.sb.from("spotify_tokens").delete().eq("user_id", v.user.id);
+    await v.sb.from("music_links").update({ spotify_id: null, spotify_name: null }).eq("user_id", v.user.id);
+  } else {
+    await v.sb.from("music_links").update({ lastfm_user: null }).eq("user_id", v.user.id);
+  }
+  await v.sb.from("music_snapshots").delete().eq("user_id", v.user.id);
+  await v.sb.from("now_playing").delete().eq("user_id", v.user.id);
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+export async function setShareListening(on: boolean): Promise<Result> {
+  const v = await viewerOrNull(); if (!v) return needLogin();
+  const { error } = await v.sb.from("music_links").upsert({ user_id: v.user.id, share_listening: on, updated_at: new Date().toISOString() });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
 /* ---------- Perfil ---------- */
 export async function updateProfile(input: {
   name: string; handle: string; bio: string; city: string; accent: string;
