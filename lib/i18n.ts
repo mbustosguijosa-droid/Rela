@@ -27,6 +27,9 @@ const es = {
     noReviews: "Todavía no hay reseñas. Abre un disco, puntúalo y escribe la primera.", friendsNews: "Novedades de tus amigos", manageFriends: "Gestionar amigos",
     friendsNothing: "Tus amigos aún no han puntuado nada.", noFollowing: "Todavía no sigues a nadie.", findFriends: "Busca amigos",
     chart: "Lo más escuchado ahora", chartSub: "Top de Deezer",
+    hi: (n: string) => `Hola, ${n}`, whatToday: "¿Qué has escuchado hoy?", searchBig: "Busca un disco, un single o un artista…",
+    qRate: "Puntuar un disco", qFriends: "Amigos", qMessages: "Mensajes", qProfile: "Mi perfil", qEnter: "Crear mi perfil",
+    replay: "Ver la intro", freshSub: "Lo último de tus artistas y de la escena", trendingSub: "Lo que más se está comentando",
   },
   search: {
     title: "Buscar", resultsFor: "Resultados para", anyRecord: "Busca cualquier disco",
@@ -177,6 +180,9 @@ const en: Dict = {
     noReviews: "No reviews yet. Open a record, rate it and write the first one.", friendsNews: "What your friends are rating", manageFriends: "Manage friends",
     friendsNothing: "Your friends haven't rated anything yet.", noFollowing: "You don't follow anyone yet.", findFriends: "Find friends",
     chart: "Most played right now", chartSub: "Deezer top",
+    hi: (n) => `Hi, ${n}`, whatToday: "What have you been listening to?", searchBig: "Search for a record, a single or an artist…",
+    qRate: "Rate a record", qFriends: "Friends", qMessages: "Messages", qProfile: "My profile", qEnter: "Create my profile",
+    replay: "Watch the intro", freshSub: "The latest from your artists and the scene", trendingSub: "What people are talking about",
   },
   search: {
     title: "Search", resultsFor: "Results for", anyRecord: "Search any record",

@@ -11,24 +11,41 @@ const TOTAL_MS = 5600;
  * la pantalla se enciende y la cámara entra en ella para mostrar la web.
  * Solo sale una vez por sesión y nunca si la persona prefiere menos movimiento.
  */
+/** Botón para volver a ver la animación de entrada. */
+export function ReplayIntro({ label }: { label: string }) {
+  return (
+    <button type="button" className="q" onClick={() => {
+      const el = document.querySelector<HTMLElement>(".intro");
+      const root = document.documentElement;
+      root.classList.remove("show-intro");
+      if (el) { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; el.querySelectorAll<HTMLElement | SVGElement>("*").forEach((n) => { (n as HTMLElement).style.animation = "none"; void (n as HTMLElement).getBoundingClientRect(); (n as HTMLElement).style.animation = ""; }); }
+      root.classList.add("show-intro");
+      window.dispatchEvent(new Event("rela:intro"));
+    }}><span className="qi">▶</span>{label}</button>
+  );
+}
+
 export function Intro() {
   const { t } = useT();
 
   useEffect(() => {
     const root = document.documentElement;
-    if (!root.classList.contains("show-intro")) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const finish = () => {
+      clearTimeout(timer);
       try { sessionStorage.setItem(KEY, "1"); } catch {}
       root.classList.remove("show-intro");
     };
     // Termina cuando acaba la animación de salida (o, por seguridad, a los 9 s)
-    const el = document.querySelector(".intro");
     const onEnd = (e: Event) => { if ((e as AnimationEvent).animationName === "intro-out") finish(); };
+    const arm = () => { clearTimeout(timer); timer = setTimeout(finish, TOTAL_MS + 3400); };
+    const el = document.querySelector(".intro");
     el?.addEventListener("animationend", onEnd);
-    const timer = setTimeout(finish, TOTAL_MS + 3400);
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" || e.key === "Enter" || e.key === " ") finish(); };
+    if (root.classList.contains("show-intro")) arm();
+    window.addEventListener("rela:intro", arm);
+    const onKey = (e: KeyboardEvent) => { if (root.classList.contains("show-intro") && (e.key === "Escape" || e.key === "Enter" || e.key === " ")) finish(); };
     window.addEventListener("keydown", onKey);
-    return () => { clearTimeout(timer); el?.removeEventListener("animationend", onEnd); window.removeEventListener("keydown", onKey); };
+    return () => { clearTimeout(timer); el?.removeEventListener("animationend", onEnd); window.removeEventListener("rela:intro", arm); window.removeEventListener("keydown", onKey); };
   }, []);
 
   const skip = () => {

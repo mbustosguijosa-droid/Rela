@@ -10,7 +10,8 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { Avatar } from "@/components/Avatar";
 import { cls, f1 } from "@/lib/format";
 import { getT } from "@/lib/i18n-server";
-import { Intro } from "@/components/Intro";
+import { Intro, ReplayIntro } from "@/components/Intro";
+import { unreadCount } from "@/lib/messages";
 
 export const dynamic = "force-dynamic";
 
@@ -35,21 +36,55 @@ export default async function Home() {
     ]);
     feed = activity.map((a) => ({ key: a.user_id + a.release_id, rel: rels.get(Number(a.release_id))!, who: ps!.find((p) => p.id === a.user_id)!, overall: a.overall, liked: a.liked })).filter((f) => f.rel && f.who);
   }
+  const unread = sb && user ? await unreadCount(sb, user.id) : 0;
+  const fan = fresh.slice(0, 5);
   const viewer = user && profile ? { id: user.id, name: profile.name, handle: profile.handle, avatar_url: profile.avatar_url, accent: profile.accent } : null;
 
   return (
     <div className="wrap">
       <Intro />
-      <section className="hello">
-        <h1>{t.home.title1} <em>{t.home.title2}</em></h1>
-        <p>{t.home.intro}</p>
-        {!user && <p style={{ marginTop: 16 }}><Link className="btn primary" href="/entrar">{t.home.createProfile}</Link></p>}
+      <section className="hero">
+        <div className="hero-copy">
+          {user && profile ? (
+            <>
+              <p className="hero-kicker"><Avatar p={profile} size={26} /> {t.home.hi(profile.name || profile.handle)}</p>
+              <h1>{t.home.whatToday}</h1>
+            </>
+          ) : (
+            <>
+              <h1>{t.home.title1} <em>{t.home.title2}</em></h1>
+              <p className="hero-sub">{t.home.intro}</p>
+            </>
+          )}
+          <form className="hero-search" action="/buscar" role="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" strokeLinecap="round" /></svg>
+            <input name="q" type="search" placeholder={t.home.searchBig} aria-label={t.nav.searchLabel} autoComplete="off" />
+            <button className="btn primary" type="submit">{t.nav.search}</button>
+          </form>
+          <div className="quick">
+            <Link href="/buscar" className="q"><span className="qi">★</span>{t.home.qRate}</Link>
+            <Link href="/amigos" className="q"><span className="qi">☺</span>{t.home.qFriends}</Link>
+            {user ? <>
+              <Link href="/mensajes" className="q"><span className="qi">✉</span>{t.home.qMessages}{unread > 0 && <span className="badge-n">{unread}</span>}</Link>
+              <Link href="/perfil" className="q"><span className="qi">◎</span>{t.home.qProfile}</Link>
+            </> : <Link href="/entrar" className="q q-accent"><span className="qi">+</span>{t.home.qEnter}</Link>}
+            <ReplayIntro label={t.home.replay} />
+          </div>
+        </div>
+        {fan.length > 0 && (
+          <div className="fan" aria-hidden="true">
+            {fan.map((a, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={a.id} src={a.cover_big ?? a.cover_medium} alt="" style={{ ["--i" as string]: i - (fan.length - 1) / 2 }} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="section">
-        <div className="sec-head"><h2>{t.home.fresh}</h2><Link href="/buscar">{t.nav.explore}</Link></div>
+        <div className="sec-head"><div><h2>{t.home.fresh}</h2><span>{t.home.freshSub}</span></div><Link href="/buscar">{t.nav.explore} →</Link></div>
         {fresh.length ? (
-          <div className="row">{fresh.slice(0, 6).map((a) => <Poster key={a.id} a={a} meta={<div className="m">{fmtDate(a.release_date!, locale)}</div>} />)}</div>
+          <div className="row">{fresh.slice(0, 16).map((a) => <Poster key={a.id} a={a} meta={<div className="m">{fmtDate(a.release_date!, locale)}</div>} />)}</div>
         ) : <p className="empty">{t.home.freshError}</p>}
       </section>
 
@@ -75,7 +110,7 @@ export default async function Home() {
       )}
 
       <section className="section">
-        <div className="sec-head"><h2>{t.home.trending}</h2><span>{t.home.byInteraction}</span></div>
+        <div className="sec-head"><div><h2>{t.home.trending}</h2><span>{t.home.trendingSub}</span></div></div>
         {trending.length ? trending.map((rv) => <ReviewCard key={rv.id} rv={rv} viewer={viewer} showRelease />)
           : <p className="empty">{t.home.noReviews}</p>}
       </section>
@@ -84,7 +119,7 @@ export default async function Home() {
         <section className="section">
           <div className="sec-head"><h2>{t.home.friendsNews}</h2><Link href="/amigos">{t.home.manageFriends}</Link></div>
           {feed.length ? (
-            <div className="row">{feed.slice(0, 6).map((f) => (
+            <div className="row">{feed.slice(0, 12).map((f) => (
               <Link key={f.key} className="poster" href={`/album/${f.rel.id}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img className="cover" src={f.rel.cover_url ?? ""} alt={t.common.coverOf(f.rel.title)} loading="lazy" />
@@ -98,7 +133,7 @@ export default async function Home() {
 
       <section className="section">
         <div className="sec-head"><h2>{t.home.chart}</h2><span>{t.home.chartSub}</span></div>
-        <div className="row">{chart.slice(0, 6).map((a) => <Poster key={a.id} a={a} />)}</div>
+        <div className="row">{chart.slice(0, 12).map((a) => <Poster key={a.id} a={a} />)}</div>
       </section>
     </div>
   );

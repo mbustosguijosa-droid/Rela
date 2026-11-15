@@ -385,3 +385,102 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 .nav-badge { position: relative }
 .nav-badge .badge-n { position: absolute; top: -4px; right: -6px; min-width: 18px; height: 18px; font-size: 10px; padding: 0 5px }
 .tabs .nav-badge .badge-n { top: 0; right: 4px }
+
+/* =====================================================================
+   REDISEÑO 2 · más original y más claro
+   ===================================================================== */
+.btn svg { width: 18px; height: 18px; flex: none }
+.btn { border-radius: 12px; transition: transform .15s ease, filter .15s ease, border-color .15s ease }
+.btn:active { transform: scale(.97) }
+.btn.primary { background: linear-gradient(135deg, #9d74ff, var(--accent)); border-color: transparent; box-shadow: 0 8px 22px -12px var(--accent) }
+
+/* Fondo con luz ambiente */
+body { background:
+  radial-gradient(900px 520px at 8% -12%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 62%),
+  radial-gradient(700px 420px at 105% -5%, rgba(255,210,63,.08), transparent 60%),
+  var(--bg); background-attachment: fixed }
+
+/* Cabecera flotante de cristal */
+.top { background: transparent; border-bottom: 0; backdrop-filter: none; -webkit-backdrop-filter: none; padding-top: 10px; pointer-events: none }
+.top .wrap { display: block; height: auto }
+.top .bar { pointer-events: auto; display: flex; align-items: center; gap: 14px; height: 60px; padding: 0 10px 0 16px; border-radius: 20px; border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+  background: color-mix(in srgb, var(--surface) 70%, transparent); backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); box-shadow: 0 14px 40px -24px rgba(0,0,0,.6) }
+.logo span { font-family: var(--f-display); font-weight: 800; letter-spacing: -.04em }
+.nav { gap: 2px; padding: 4px; border-radius: 14px; background: color-mix(in srgb, var(--bg) 55%, transparent) }
+.nav-link { position: relative; padding: 7px 14px; border-radius: 10px; color: var(--muted); font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 6px }
+.nav-link:hover { color: var(--fg) }
+.nav-link.on { color: var(--fg); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line) }
+.nav-link .badge-n { min-width: 18px; height: 18px; font-size: 10px; padding: 0 5px }
+.search input { border-radius: 12px; background: color-mix(in srgb, var(--bg) 60%, transparent) }
+@media (max-width: 760px) {
+  .top { padding-top: 8px }
+  .top .bar { height: 54px; gap: 10px; padding: 0 8px 0 12px; border-radius: 16px }
+  .logo span { display: none }
+  .tabs { left: 10px; right: 10px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); padding: 6px; border-radius: 20px; border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent); background: color-mix(in srgb, var(--surface) 82%, transparent); box-shadow: 0 16px 40px -18px rgba(0,0,0,.7); justify-content: space-between }
+  .tab { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10.5px; color: var(--muted); padding: 6px 2px; border-radius: 14px; font-weight: 600 }
+  .tab svg { width: 22px; height: 22px }
+  .tab.on { color: var(--fg); background: color-mix(in srgb, var(--accent) 22%, transparent) }
+  .tab .badge-n { position: absolute; top: 2px; right: calc(50% - 22px); min-width: 17px; height: 17px; font-size: 9.5px; padding: 0 4px }
+  main { padding-bottom: 96px }
+}
+
+/* Inicio: héroe */
+.hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: 32px; align-items: center; padding-block: 44px 12px }
+@media (max-width: 900px) { .hero { grid-template-columns: 1fr; padding-block: 26px 4px } .fan { display: none } }
+.hero h1 { font-size: clamp(34px, 5.6vw, 64px); font-weight: 800; line-height: .98; letter-spacing: -.045em; max-width: 15ch }
+.hero h1 em { font-style: normal; background: linear-gradient(90deg, #b79bff, #ff8fc2 55%, #ffd23f); -webkit-background-clip: text; background-clip: text; color: transparent }
+.hero-kicker { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 5px 14px 5px 5px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); font-weight: 600; font-size: 14px }
+.hero-sub { margin: 14px 0 0; color: var(--muted); max-width: 46ch; font-size: 16px }
+.hero-search { position: relative; display: flex; align-items: center; gap: 8px; margin-top: 24px; max-width: 620px; padding: 6px 6px 6px 48px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 20px 50px -30px rgba(0,0,0,.7) }
+.hero-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent) }
+.hero-search svg { position: absolute; left: 17px; width: 20px; height: 20px; color: var(--muted) }
+.hero-search input { flex: 1; min-width: 0; height: 46px; border: 0; background: transparent; color: var(--fg); font: 500 16px var(--f-body); outline: none }
+.hero-search .btn { height: 46px; border-radius: 13px; padding: 0 20px }
+.quick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px }
+.q { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px 0 6px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); font: 600 14px var(--f-body); color: var(--fg); transition: transform .15s ease, border-color .15s ease }
+.q:hover { transform: translateY(-2px); border-color: var(--muted) }
+.qi { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); font-size: 13px }
+.q-accent { background: linear-gradient(135deg, #9d74ff, var(--accent)); color: #fff; border-color: transparent }
+.q-accent .qi { background: rgba(255,255,255,.2) }
+.q .badge-n { margin-left: 2px }
+/* Abanico de portadas */
+.fan { position: relative; height: 320px; perspective: 900px }
+.fan img { position: absolute; left: 50%; top: 50%; width: 210px; aspect-ratio: 1; object-fit: cover; border-radius: 14px; box-shadow: 0 30px 50px -24px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.08);
+  transform: translate(-50%, -50%) translateX(calc(var(--i) * 74px)) translateY(calc(var(--i) * var(--i) * 6px)) rotate(calc(var(--i) * 8deg)); transition: transform .5s cubic-bezier(.2,.8,.2,1);
+  animation: fan-float 6s ease-in-out infinite; animation-delay: calc(var(--i) * .4s) }
+.fan img:nth-child(3) { z-index: 3 } .fan img:nth-child(2), .fan img:nth-child(4) { z-index: 2 }
+.fan:hover img { transform: translate(-50%, -50%) translateX(calc(var(--i) * 96px)) translateY(calc(var(--i) * var(--i) * 10px)) rotate(calc(var(--i) * 12deg)) }
+@keyframes fan-float { 50% { margin-top: -8px } }
+@media (prefers-reduced-motion: reduce) { .fan img { animation: none } }
+
+/* Cabeceras de sección más editoriales */
+.section { padding-block: 34px 6px }
+.sec-head { align-items: flex-end; border-bottom: 0; padding-bottom: 0; margin-bottom: 16px }
+.sec-head h2 { font-family: var(--f-display); font-size: clamp(22px, 2.6vw, 28px); font-weight: 700; letter-spacing: -.03em; text-transform: none; color: var(--fg) }
+.sec-head > div > span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px }
+.sec-head > a { font-weight: 600; color: var(--accent-text); white-space: nowrap }
+
+/* Carruseles de portadas */
+.row { display: grid; grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: clamp(148px, 15vw, 188px); gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 14px; scrollbar-width: none;
+  mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent); -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent) }
+.row::-webkit-scrollbar { display: none }
+.row > * { scroll-snap-align: start }
+.cover { border-radius: 12px }
+.poster { gap: 10px }
+.poster .cover { box-shadow: 0 16px 30px -22px rgba(0,0,0,.8) }
+.poster:hover .cover { transform: translateY(-5px) rotate(-1.2deg); box-shadow: 0 26px 40px -24px rgba(0,0,0,.85) }
+.poster .t { font-size: 14.5px }
+.grid { gap: 26px 18px }
+
+/* Reseñas como tarjetas */
+.rv { padding: 18px; border: 1px solid var(--line); border-radius: 20px; background: color-mix(in srgb, var(--surface) 88%, transparent); margin-bottom: 12px }
+.rv:last-child { border-bottom: 1px solid var(--line) }
+.rv.with-cover { grid-template-columns: 72px minmax(0, 1fr) }
+.featured .rv { border: 0; padding: 4px 0 12px; background: transparent; margin: 0 }
+.react { border-radius: 12px }
+
+/* Empty states y avisos */
+.empty { border-radius: 18px; background: color-mix(in srgb, var(--surface) 60%, transparent) }
+.size-note { border-radius: 16px }
+.my { border-radius: 20px }
+.my .actions .btn.primary.wide { height: 46px }
