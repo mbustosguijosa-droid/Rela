@@ -9,6 +9,8 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { drawLogoTile } from "@/lib/brand";
 
 export type Person = { id?: string; name: string; handle?: string; avatar_url?: string | null; accent?: string };
@@ -127,8 +129,8 @@ const SILHOUETTES: ((g: CanvasRenderingContext2D) => void)[] = [
     // rastas cortas bajo la gorra
     for (let i = 0; i < 7; i++) { g.beginPath(); g.ellipse(214 + i * 14, 400 + (i % 2) * 8, 6, 26, 0, 0, 7); g.fill(); }
     // gorra con visera hacia delante-arriba
-    g.beginPath(); g.ellipse(262, 300, 70, 44, 0.12, Math.PI, Math.PI * 2.05); g.fill();
-    g.beginPath(); g.moveTo(186, 300); g.quadraticCurveTo(150, 270, 140, 236); g.quadraticCurveTo(190, 250, 230, 292); g.fill();
+    g.beginPath(); g.ellipse(258, 312, 66, 50, 0.1, Math.PI * 0.98, Math.PI * 2.04); g.fill(); // copa de la gorra
+    g.beginPath(); g.ellipse(196, 318, 74, 13, 0.18, 0, 7); g.fill(); // visera plana hacia un lado
     // cadenas: brillo morado claro sobre la silueta
     g.save(); g.strokeStyle = "rgba(225,200,255,.55)"; g.lineWidth = 4;
     [[60, 70], [78, 104], [96, 150]].forEach(([w, d]) => { g.beginPath(); g.ellipse(258, 456, w, d, 0, 0.15, Math.PI - 0.15); g.stroke(); });
@@ -158,12 +160,42 @@ const SILHOUETTES: ((g: CanvasRenderingContext2D) => void)[] = [
     g.beginPath(); g.moveTo(368, 520); g.quadraticCurveTo(420, 560, 424, 680); g.lineTo(398, 690); g.quadraticCurveTo(392, 590, 352, 548); g.fill();
     g.beginPath(); g.moveTo(236, 486); g.lineTo(240, 420); g.lineTo(284, 420); g.lineTo(288, 486); g.closePath(); g.fill();
     g.beginPath(); g.ellipse(262, 362, 56, 68, 0.05, 0, 7); g.fill();
-    // flequillo y mechones despeinados
-    for (let i = 0; i < 14; i++) {
-      const a = Math.PI * (1.0 + i / 13), r = 70 + ((i * 29) % 26);
-      g.beginPath(); g.moveTo(262 + Math.cos(a) * 30, 338 + Math.sin(a) * 30); g.lineTo(262 + Math.cos(a) * r, 340 + Math.sin(a) * r * 0.9 + (i % 3) * 6); g.lineWidth = 16; g.lineCap = "round"; g.stroke();
+    // melena despeinada: mechones redondeados que caen sobre la frente y las orejas
+    g.beginPath(); g.ellipse(266, 318, 78, 60, 0, 0, 7); g.fill();
+    [[196, 352, 22, 40, 0.3], [328, 350, 22, 42, -0.3], [222, 372, 18, 30, 0.5], [306, 370, 18, 30, -0.4], [240, 280, 34, 22, -0.4], [298, 276, 36, 22, 0.5], [212, 300, 26, 26, 0], [326, 304, 26, 24, 0]]
+      .forEach(([x, y, rx, ry, r]) => { g.beginPath(); g.ellipse(x, y, rx, ry, r, 0, 7); g.fill(); });
+  },
+  // 5. Rastas largas cayendo sobre la cara, cabeza agachada, camiseta y brazos pegados al cuerpo
+  (g) => {
+    g.beginPath(); g.moveTo(150, 768); g.lineTo(158, 600); g.quadraticCurveTo(166, 500, 214, 486); g.lineTo(306, 486); g.quadraticCurveTo(352, 500, 360, 600); g.lineTo(366, 768); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(166, 520); g.quadraticCurveTo(138, 620, 150, 748); g.lineTo(174, 748); g.quadraticCurveTo(170, 640, 190, 560); g.fill();
+    g.beginPath(); g.moveTo(352, 520); g.quadraticCurveTo(384, 620, 370, 748); g.lineTo(346, 748); g.quadraticCurveTo(350, 640, 330, 560); g.fill();
+    g.beginPath(); g.moveTo(240, 490); g.lineTo(244, 432); g.lineTo(282, 432); g.lineTo(288, 490); g.closePath(); g.fill();
+    g.beginPath(); g.ellipse(262, 380, 52, 62, 0.1, 0, 7); g.fill();
+    g.lineCap = "round";
+    for (let i = 0; i < 13; i++) {
+      const x = 200 + i * 10.5, len = 120 + ((i * 41) % 60), sway = (i - 6) * 3;
+      g.lineWidth = 12; g.beginPath(); g.moveTo(x + 4, 312); g.quadraticCurveTo(x + sway, 312 + len * 0.6, x + sway * 1.6, 312 + len); g.stroke();
     }
-    g.beginPath(); g.ellipse(262, 330, 66, 52, 0, Math.PI * 0.95, Math.PI * 2.05); g.fill();
+    g.beginPath(); g.ellipse(262, 318, 70, 34, 0, Math.PI, Math.PI * 2); g.fill();
+  },
+  // 6. Capucha puesta, una mano junto a la cara y los brazos cruzados sobre el pecho
+  (g) => {
+    g.beginPath(); g.moveTo(80, 768); g.quadraticCurveTo(80, 560, 160, 500); g.quadraticCurveTo(210, 470, 262, 470); g.quadraticCurveTo(318, 470, 366, 500); g.quadraticCurveTo(446, 560, 446, 768); g.closePath(); g.fill();
+    // capucha
+    g.beginPath(); g.moveTo(178, 492); g.quadraticCurveTo(160, 380, 196, 300); g.quadraticCurveTo(262, 232, 330, 300); g.quadraticCurveTo(366, 380, 348, 492); g.closePath(); g.fill();
+    // brazos cruzados (bloque horizontal ancho)
+    g.beginPath(); g.moveTo(120, 640); g.quadraticCurveTo(262, 590, 410, 640); g.lineTo(410, 700); g.quadraticCurveTo(262, 660, 120, 700); g.closePath(); g.fill();
+    // mano levantada junto a la cara
+    g.beginPath(); g.moveTo(150, 600); g.quadraticCurveTo(120, 470, 168, 372); g.lineTo(196, 380); g.quadraticCurveTo(170, 470, 190, 590); g.closePath(); g.fill();
+    g.beginPath(); g.ellipse(184, 360, 26, 34, 0.3, 0, 7); g.fill();
+    // borde de la capucha con brillo
+    g.save(); g.strokeStyle = "rgba(225,200,255,.45)"; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(178, 492); g.quadraticCurveTo(160, 380, 196, 300); g.quadraticCurveTo(262, 232, 330, 300); g.quadraticCurveTo(366, 380, 348, 492); g.stroke(); // capucha
+    g.beginPath(); g.moveTo(120, 640); g.quadraticCurveTo(262, 590, 410, 640); g.stroke(); g.beginPath(); g.moveTo(120, 700); g.quadraticCurveTo(262, 660, 410, 700); g.stroke(); // brazos
+    g.beginPath(); g.moveTo(150, 600); g.quadraticCurveTo(120, 470, 168, 372); g.stroke(); g.beginPath(); g.ellipse(184, 360, 26, 34, 0.3, Math.PI * 0.7, Math.PI * 2.1); g.stroke(); // mano
+    g.fillStyle = "rgba(0,0,0,.9)"; g.beginPath(); g.ellipse(262, 380, 50, 56, 0, 0, 7); g.fill(); // cara en sombra dentro de la capucha
+    g.restore();
   },
 ];
 const singerTex = (variant: number) => canvasTex(512, 768, (g) => {
@@ -411,6 +443,9 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   const singerPivot = new THREE.Group(); singerPivot.position.set(BX + 0.35, BY, BZ - 1.15); scene.add(singerPivot);
   const singer = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 2.18), new THREE.MeshBasicMaterial({ map: singerTex(Math.floor(Math.random() * SILHOUETTES.length)), transparent: true, toneMapped: false, fog: false, depthWrite: false }));
   singer.position.y = 1.09; singerPivot.add(singer);
+  // Su sombra proyectada en la pared del fondo de la cabina, más grande y difusa
+  const shadow = new THREE.Mesh(singer.geometry, new THREE.MeshBasicMaterial({ map: (singer.material as THREE.MeshBasicMaterial).map, color: "#000000", transparent: true, opacity: 0.38, toneMapped: false, fog: false, depthWrite: false }));
+  shadow.scale.setScalar(1.25); shadow.position.set(BX + 0.85, BY + 1.3, BZ - 2.56); scene.add(shadow);
   // Micro con antipop
   const micMat = new THREE.MeshBasicMaterial({ color: "#07050a", fog: false });
   const micStand = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.7, 8), micMat); micStand.position.set(BX - 0.55, BY + 0.85, BZ - 0.8); scene.add(micStand);
@@ -498,14 +533,14 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   const speakerMat = new THREE.MeshStandardMaterial({ color: "#121014", roughness: 0.45, metalness: 0.2 });
   const coneMat = new THREE.MeshStandardMaterial({ color: "#2a272e", roughness: 0.35, metalness: 0.4 });
   const ringMat = new THREE.MeshStandardMaterial({ color: ACC, roughness: 0.4, emissive: "#5a2fb0", emissiveIntensity: 0.6 });
-  const woofers: THREE.Mesh[] = [];
+  const woofers: THREE.Mesh[] = [], speakerGroups: THREE.Group[] = [];
   [[-3.0, 0.35], [3.2, -0.5]].forEach(([x, ry]) => {
     const sp = new THREE.Group();
     const box = new THREE.Mesh(new RoundedBoxGeometry(0.62, 0.95, 0.66, 3, 0.05), speakerMat); box.position.y = 0.475; sp.add(box);
     const woofer = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 0.05, 32), coneMat); woofer.rotation.x = Math.PI / 2; woofer.position.set(0, 0.32, 0.34); sp.add(woofer); woofers.push(woofer);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.02, 8, 32), ringMat); ring.position.set(0, 0.32, 0.35); sp.add(ring);
     const tweeter = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.05, 0.04, 24), coneMat); tweeter.rotation.x = Math.PI / 2; tweeter.position.set(0, 0.73, 0.34); sp.add(tweeter);
-    sp.position.set(x, 0, -0.8); sp.rotation.y = ry; scene.add(sp); blob(1.0, 1.0, x, -0.75, 0.004, 0, 0.55);
+    sp.position.set(x, 0, -0.8); sp.rotation.y = ry; scene.add(sp); speakerGroups.push(sp); blob(1.0, 1.0, x, -0.75, 0.004, 0, 0.55);
   });
 
   /* ===== Objetos cercanos ===== */
@@ -593,6 +628,70 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   cupG.scale.setScalar(0.66); cupG.position.set(1.25, 0, 1.0); scene.add(cupG); blob(1.05, 1.05, 1.3, 1.05, 0.004, 0, 0.6);
   halo("#9a4dff", 1.5, new THREE.Vector3(1.25, 0.8, 1.0), 0.18);
 
+  /* ===== Modelos 3D reales: si cargan, sustituyen a las versiones hechas con formas ===== */
+  const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+  const loadGLB = (url: string) => new Promise<THREE.Group | null>((res) => loader.load(url, (g) => res(g.scene), undefined, () => res(null)));
+  const meshesOf = (o: THREE.Object3D) => { const out: THREE.Mesh[] = []; o.traverse((m) => { if ((m as THREE.Mesh).isMesh) out.push(m as THREE.Mesh); }); return out; };
+  /** Se queda con los triángulos de un lado (x<0 o x>0) para separar la pareja de altavoces. */
+  const half = (geo: THREE.BufferGeometry, left: boolean) => {
+    const pos = geo.getAttribute("position"), idx = geo.getIndex();
+    const tri = idx ? idx.array : Array.from({ length: pos.count }, (_, i) => i);
+    const keep: number[] = [];
+    for (let i = 0; i < tri.length; i += 3) { const cx = pos.getX(tri[i]) + pos.getX(tri[i + 1]) + pos.getX(tri[i + 2]); if (left ? cx < 0 : cx >= 0) keep.push(tri[i], tri[i + 1], tri[i + 2]); }
+    const g = new THREE.BufferGeometry(); for (const k of Object.keys(geo.attributes)) g.setAttribute(k, geo.getAttribute(k)); g.setIndex(keep); return g;
+  };
+  const models = Promise.all([
+    // Altavoces: la pareja se separa y cada uno va a un lado de la mesa
+    loadGLB("/models/speakers.glb").then((m) => {
+      if (!m) return; m.updateMatrixWorld(true);
+      const parts = meshesOf(m);
+      speakerGroups.forEach((sp, i) => {
+        const g = new THREE.Group();
+        parts.forEach((p) => { const mesh = new THREE.Mesh(half(p.geometry, i === 0), p.material); mesh.applyMatrix4(p.matrixWorld); g.add(mesh); });
+        const box = new THREE.Box3().setFromObject(g), c = box.getCenter(new THREE.Vector3()), k = 0.95 / (box.max.y - box.min.y);
+        g.children.forEach((ch) => ch.position.sub(new THREE.Vector3(c.x, box.min.y, c.z)));
+        const holder = new THREE.Group(); holder.add(g); g.scale.setScalar(k);
+        holder.position.copy(sp.position); holder.rotation.copy(sp.rotation); scene.add(holder); sp.visible = false;
+      });
+    }),
+    // Vaso: el modelo doble y encima la bebida morada con hielo
+    loadGLB("/models/lean.glb").then((m) => {
+      if (!m) return;
+      const box = new THREE.Box3().setFromObject(m), sz = box.getSize(new THREE.Vector3()), k = 0.74 / sz.y;
+      m.scale.setScalar(k); m.position.set(-(box.min.x + sz.x / 2) * k, -box.min.y * k, -(box.min.z + sz.z / 2) * k);
+      meshesOf(m).forEach((p) => {
+        const mat = p.material as THREE.MeshStandardMaterial;
+        p.material = mat.color.getHex() === 0xe7e7e7 || mat.color.r > 0.85 ? foam : new THREE.MeshStandardMaterial({ color: "#8a3ad6", emissive: "#4d168f", emissiveIntensity: 0.7, roughness: 0.08 });
+      });
+      const real = new THREE.Group(); real.add(m);
+      const rTop = (sz.x / 2) * k, H = sz.y * k;
+      const surf = new THREE.Mesh(new THREE.CircleGeometry(rTop * 0.86, 48), drink.material); surf.rotation.x = -Math.PI / 2; surf.position.y = H * 0.9; real.add(surf);
+      for (let q = 0; q < 6; q++) { const a = q * 2.4, r = rTop * (0.15 + (q % 3) * 0.22); const c = new THREE.Mesh(iceGeo, iceMat); c.scale.setScalar(0.62); c.position.set(Math.cos(a) * r, H * 0.9 + 0.02, Math.sin(a) * r); c.rotation.set(0.3 * (q % 3), a, 0.2); real.add(c); }
+      real.position.copy(cupG.position); scene.add(real); cupG.visible = false;
+    }),
+    // iPhone: el cuerpo real, con nuestra pantalla (la app) encima
+    loadGLB("/models/iphone.glb").then((m) => {
+      if (!m) return;
+      const box = new THREE.Box3().setFromObject(m), k = (PL - 0.08) / ((box.max.y - box.min.y) * 0.965);
+      const holder = new THREE.Group(); holder.add(m);
+      m.position.set(-(box.min.x + box.max.x) / 2, -(box.min.y + box.max.y) / 2, -box.max.z);
+      holder.scale.setScalar(k); holder.rotation.x = -Math.PI / 2; holder.position.y = PT + 0.001;
+      meshesOf(m).forEach((p) => { const mat = p.material as THREE.MeshStandardMaterial; mat.envMapIntensity = 1.4; if (mat.metalness < 0.5 && mat.color.r > 0.5) { mat.metalness = 0.9; mat.roughness = 0.22; } });
+      phone.add(holder); body.visible = false; glassTop.visible = false;
+    }),
+    // Cascos reales tumbados en la mesa
+    loadGLB("/models/headphones.glb").then((m) => {
+      if (!m) return;
+      const inner = new THREE.Group(); inner.add(m); inner.rotation.x = -Math.PI / 2;
+      const box = new THREE.Box3().setFromObject(inner), sz = box.getSize(new THREE.Vector3()), k = 1.4 / sz.x;
+      const holder = new THREE.Group(); holder.add(inner);
+      inner.position.set(-(box.min.x + sz.x / 2), -box.min.y, -(box.min.z + sz.z / 2));
+      holder.scale.setScalar(k); holder.position.set(phones.position.x - 0.05, 0, phones.position.z - 0.2); holder.rotation.y = phones.rotation.y + 0.15;
+      meshesOf(m).forEach((p) => { (p.material as THREE.MeshStandardMaterial).envMapIntensity = 1.3; });
+      scene.add(holder); phones.visible = false;
+    }),
+  ]);
+
   /* Cámara quieta de frente: mesa delante y el estudio abriéndose al fondo */
   const target = new THREE.Vector3(), startPos = new THREE.Vector3();
   let going: { start: number; done: () => void } | null = null;
@@ -677,7 +776,7 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   fit();
   renderer.domElement.style.opacity = "0";
   renderer.domElement.style.transition = "opacity .5s ease";
-  renderer.compileAsync(scene, camera).catch(() => null).then(() => {
+  Promise.race([models, new Promise((r) => setTimeout(r, 5000))]).then(() => renderer.compileAsync(scene, camera)).catch(() => null).then(() => {
     ready = true; t0 = performance.now();
     renderer.domElement.style.opacity = "1";
     if (reduce) { kick(); render(); } else raf = requestAnimationFrame(loop);
