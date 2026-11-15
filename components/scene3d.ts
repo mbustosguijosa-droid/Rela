@@ -617,8 +617,9 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   /** Rehace el cable desde un punto de los cascos hasta el conector del móvil. */
   const buildCable = (start: THREE.Vector3) => {
     scene.remove(cable); cable.geometry.dispose();
-    const c = new THREE.CatmullRomCurve3([start, new THREE.Vector3(start.x + 0.15, 0.022, start.z + 0.35), new THREE.Vector3((start.x - 0.1) * 0.6, 0.022, bottomZ + 0.75), new THREE.Vector3(-0.25, 0.022, bottomZ + 0.55), jack]);
-    cable = new THREE.Mesh(new THREE.TubeGeometry(c, 200, 0.02, 10), rubber); scene.add(cable);
+    // baja del auricular a la mesa, hace una curva suelta hacia delante y entra por abajo en el móvil
+    const c = new THREE.CatmullRomCurve3([start, new THREE.Vector3(start.x + 0.04, 0.03, start.z + 0.12), new THREE.Vector3(start.x + 0.2, 0.024, start.z + 0.55), new THREE.Vector3((start.x + jack.x) / 2, 0.024, bottomZ + 0.8), new THREE.Vector3(-0.2, 0.024, bottomZ + 0.55), jack]);
+    cable = new THREE.Mesh(new THREE.TubeGeometry(c, 220, 0.024, 12), rubber); scene.add(cable);
   };
   const plug = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.22, 16), rubber); plug.rotation.x = Math.PI / 2 - 0.35; plug.position.set(0, 0.07, bottomZ + 0.12); scene.add(plug);
 
@@ -691,22 +692,24 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
       meshesOf(m).forEach((p) => { const mat = p.material as THREE.MeshStandardMaterial; mat.envMapIntensity = 1.4; if (mat.metalness < 0.5 && mat.color.r > 0.5) { mat.metalness = 0.9; mat.roughness = 0.22; } });
       phone.add(holder); body.visible = false; glassTop.visible = false;
     }),
-    // Cascos reales tumbados sobre la mesa, con su sombra de contacto y el cable al móvil
+    // Cascos reales de pie sobre la mesa (apoyados en los auriculares), con sombra y el cable al móvil
     loadGLB("/models/headphones2.glb").then((m) => {
       if (!m) return;
-      const inner = new THREE.Group(); inner.add(m); inner.rotation.x = -Math.PI / 2;
-      inner.updateMatrixWorld(true);
-      const box = new THREE.Box3().setFromObject(inner), sz = box.getSize(new THREE.Vector3()), k = 1.15 / sz.x;
-      inner.position.set(-(box.min.x + sz.x / 2), -box.min.y, -(box.min.z + sz.z / 2));
-      const holder = new THREE.Group(); holder.add(inner); holder.scale.setScalar(k);
-      holder.position.set(-1.62, 0, 0.42); holder.rotation.y = 0.45;
-      meshesOf(m).forEach((p) => { const mat = p.material as THREE.MeshStandardMaterial; mat.envMapIntensity = 1.3; mat.side = THREE.FrontSide; });
+      m.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(m), sz = box.getSize(new THREE.Vector3()), k = 1.05 / sz.x;
+      m.position.set(-(box.min.x + sz.x / 2), -box.min.y, -(box.min.z + sz.z / 2));
+      const holder = new THREE.Group(); holder.add(m); holder.scale.setScalar(k);
+      holder.position.set(-1.75, 0, 0.45); holder.rotation.y = 0.75;
+      meshesOf(m).forEach((p) => { const mat = p.material as THREE.MeshStandardMaterial; mat.envMapIntensity = 1.3; });
       scene.add(holder); phones.visible = false; phonesShadow.visible = false;
       holder.updateMatrixWorld(true);
-      contactShadow(holder, 0.75);
-      // el cable sale del auricular más cercano al móvil
-      const wb = new THREE.Box3().setFromObject(holder);
-      buildCable(new THREE.Vector3(wb.max.x - 0.12, 0.05, wb.max.z - 0.18));
+      // sombra bajo cada auricular y una más suave bajo el conjunto
+      [-1, 1].forEach((side) => { const c = new THREE.Vector3(side * sz.x * 0.4, 0, 0).applyMatrix4(holder.matrixWorld); blob(0.55, 0.55, c.x, c.z, 0.005, 0, 0.8); });
+      contactShadow(holder, 0.35);
+      // el cable sale de la parte baja del auricular más cercano al móvil
+      const a1 = new THREE.Vector3(sz.x * 0.42, sz.y * 0.1, 0).applyMatrix4(holder.matrixWorld), a2 = new THREE.Vector3(-sz.x * 0.42, sz.y * 0.1, 0).applyMatrix4(holder.matrixWorld);
+      const start = a1.distanceTo(jack) < a2.distanceTo(jack) ? a1 : a2;
+      buildCable(start);
     }),
     // Monitor ultrapanorámico con la canción produciéndose en pantalla
     loadGLB("/models/monitor.glb").then((m) => {
