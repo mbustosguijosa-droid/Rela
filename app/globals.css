@@ -636,3 +636,9 @@ a, button, [role="button"], label, summary { touch-action: manipulation; -webkit
 .sk-album { display: flex; gap: 24px; align-items: flex-end; margin-bottom: 30px }
 .sk-cover { width: clamp(140px, 30vw, 260px); aspect-ratio: 1; flex: none }
 .sk-track { height: 52px; margin-bottom: 8px }
+.genre-chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px; margin-bottom: 8px; scrollbar-width: none }
+.genre-chips::-webkit-scrollbar { display: none }
+.genre-chips .q { white-space: nowrap }
+.genre-chips .q.on { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.artist-scroll { display: grid; grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: clamp(96px, 11vw, 132px); overflow-x: auto; scrollbar-width: none; padding-bottom: 8px }
+.artist-scroll::-webkit-scrollbar { display: none }

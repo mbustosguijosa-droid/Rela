@@ -77,17 +77,17 @@ const floorTex = () => canvasTex(512, 512, (g) => {
   for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(255,255,255,${rnd() * 0.025})`; g.fillRect(rnd() * 512, rnd() * 512, 2, 2); }
   g.strokeStyle = "rgba(0,0,0,.5)"; g.lineWidth = 2; g.strokeRect(0, 0, 512, 512);
 }, [10, 10]);
-const dawTex = () => canvasTex(1024, 576, (g) => {
-  g.fillStyle = "#100e13"; g.fillRect(0, 0, 1024, 576);
-  g.fillStyle = "#1b1920"; g.fillRect(0, 0, 1024, 40); g.fillRect(0, 40, 170, 536);
+const dawTex = (W = 1024) => canvasTex(W, 576, (g) => {
+  g.fillStyle = "#100e13"; g.fillRect(0, 0, W, 576);
+  g.fillStyle = "#1b1920"; g.fillRect(0, 0, W, 40); g.fillRect(0, 40, 170, 536);
   g.fillStyle = "#a77bff"; g.font = "600 18px Figtree, sans-serif"; g.fillText("new_song_v7 · 92 BPM", 190, 27);
-  g.fillStyle = "rgba(255,255,255,.4)"; g.fillText("REC ●", 930, 27);
+  g.fillStyle = "rgba(255,255,255,.4)"; g.fillText("REC ●", W - 94, 27);
   const cols = ["#a77bff", "#ff6f91", "#2fbfa6", "#ffd23f", "#7d5cff", "#5f9cff", "#c58bff"];
   for (let tr = 0; tr < 7; tr++) {
     const y = 60 + tr * 72, c = cols[tr % cols.length];
     g.fillStyle = c; g.fillRect(12, y + 10, 8, 46); g.fillStyle = "rgba(255,255,255,.45)"; g.fillRect(30, y + 22, 90, 8); g.fillRect(30, y + 38, 60, 6);
     let x = 180 + (tr * 37) % 120;
-    while (x < 1000) {
+    while (x < W - 24) {
       const w = 80 + ((tr * 53 + x) % 170);
       g.fillStyle = c + "38"; g.fillRect(x, y, w, 62); g.strokeStyle = c; g.lineWidth = 1.5; g.beginPath();
       for (let k = 0; k < w; k += 3) { const a = Math.abs(Math.sin((x + k) * 0.13 + tr)) * Math.abs(Math.sin((x + k) * 0.021)) * 26; g.moveTo(x + k, y + 31 - a); g.lineTo(x + k, y + 31 + a); }
@@ -385,7 +385,12 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   const blobTex = canvasTex(128, 128, (g) => { const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, "rgba(0,0,0,.9)"); r.addColorStop(0.55, "rgba(0,0,0,.4)"); r.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = r; g.fillRect(0, 0, 128, 128); });
   const blob = (w: number, h: number, x: number, z: number, y = 0.004, rot = 0, opacity = 0.6) => {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity, depthWrite: false }));
-    m.rotation.set(-Math.PI / 2, 0, rot); m.position.set(x, y, z); scene.add(m);
+    m.rotation.set(-Math.PI / 2, 0, rot); m.position.set(x, y, z); scene.add(m); return m;
+  };
+  /** Sombra de contacto del tamaño real del objeto (huella en el suelo/mesa), más oscura en el centro. */
+  const contactShadow = (o: THREE.Object3D, opacity = 0.65, y = 0) => {
+    const b = new THREE.Box3().setFromObject(o), c = b.getCenter(new THREE.Vector3()), s = b.getSize(new THREE.Vector3());
+    blob(s.x * 1.25, s.z * 1.35, c.x, c.z, y + 0.004, 0, opacity);
   };
   /** Halo luminoso falso (sustituye al bloom, que es caro). */
   const halo = (color: string, size: number, pos: THREE.Vector3, opacity = 0.5) => {
@@ -442,10 +447,10 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   // Quien canta: silueta a contraluz que se balancea al ritmo
   const singerPivot = new THREE.Group(); singerPivot.position.set(BX + 0.35, BY, BZ - 1.15); scene.add(singerPivot);
   const singer = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 2.18), new THREE.MeshBasicMaterial({ map: singerTex(Math.floor(Math.random() * SILHOUETTES.length)), transparent: true, toneMapped: false, fog: false, depthWrite: false }));
-  singer.position.y = 1.09; singerPivot.add(singer);
+  singer.scale.setScalar(1.18); singer.position.y = 1.29; singerPivot.add(singer);
   // Su sombra proyectada en la pared del fondo de la cabina, más grande y difusa
   const shadow = new THREE.Mesh(singer.geometry, new THREE.MeshBasicMaterial({ map: (singer.material as THREE.MeshBasicMaterial).map, color: "#000000", transparent: true, opacity: 0.38, toneMapped: false, fog: false, depthWrite: false }));
-  shadow.scale.setScalar(1.25); shadow.position.set(BX + 0.85, BY + 1.3, BZ - 2.56); scene.add(shadow);
+  shadow.scale.setScalar(1.45); shadow.position.set(BX + 0.85, BY + 1.5, BZ - 2.56); scene.add(shadow);
   // Micro con antipop
   const micMat = new THREE.MeshBasicMaterial({ color: "#07050a", fog: false });
   const micStand = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.7, 8), micMat); micStand.position.set(BX - 0.55, BY + 0.85, BZ - 0.8); scene.add(micStand);
@@ -525,7 +530,8 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   daw.add(dawScreen);
   const bezel = new THREE.Mesh(new RoundedBoxGeometry(2.0, 1.17, 0.06, 2, 0.02), frameMat); bezel.position.z = -0.035; daw.add(bezel);
   const dstand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.55, 0.06), frameMat); dstand.position.set(0, -0.78, -0.07); daw.add(dstand);
-  const playhead = new THREE.Mesh(new THREE.PlaneGeometry(0.006, 0.98), new THREE.MeshBasicMaterial({ color: "#ffffff", toneMapped: false })); playhead.position.set(0, -0.02, 0.002); daw.add(playhead);
+  let phX0 = -0.7, phX1 = 0.9;
+  let playhead = new THREE.Mesh(new THREE.PlaneGeometry(0.006, 0.98), new THREE.MeshBasicMaterial({ color: "#ffffff", toneMapped: false })); playhead.position.set(0, -0.02, 0.002); daw.add(playhead);
   daw.position.set(2.15, 1.05, -0.95); daw.rotation.y = -0.38; scene.add(daw);
   halo("#8e8cff", 3.2, new THREE.Vector3(2.15, 1.05, -1.0), 0.12);
 
@@ -567,7 +573,7 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
     const cushion = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.095, 16, 64), leather); cushion.rotation.x = Math.PI / 2; cushion.scale.y = 1.2; cushion.position.y = 0.08;
     cup.add(yoke, shell, cap, ring, dot, cushion); cup.position.set(side * bandR, 0, 0); phones.add(cup);
   });
-  phones.scale.setScalar(0.66); phones.position.set(-1.95, 0, 0.8); phones.rotation.y = 0.55; scene.add(phones); blob(1.9, 1.3, -1.9, 0.85, 0.004, -0.5, 0.6);
+  phones.scale.setScalar(0.66); phones.position.set(-1.95, 0, 0.8); phones.rotation.y = 0.55; scene.add(phones); const phonesShadow = blob(1.9, 1.3, -1.9, 0.85, 0.004, -0.5, 0.6);
 
   /* Móvil de pie en su soporte, bajo el foco */
   const phone = new THREE.Group();
@@ -607,7 +613,13 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   const from = new THREE.Vector3(bandR, 0.1, 0.48).applyMatrix4(phones.matrixWorld);
   const jack = new THREE.Vector3(0, 0.04, bottomZ + 0.2);
   const curve = new THREE.CatmullRomCurve3([from, new THREE.Vector3(from.x + 0.1, 0.03, from.z + 0.6), new THREE.Vector3(-1.2, 0.028, bottomZ + 0.8), new THREE.Vector3(-0.3, 0.028, bottomZ + 0.6), jack]);
-  scene.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 160, 0.022, 10), rubber));
+  let cable = new THREE.Mesh(new THREE.TubeGeometry(curve, 160, 0.022, 10), rubber); scene.add(cable);
+  /** Rehace el cable desde un punto de los cascos hasta el conector del móvil. */
+  const buildCable = (start: THREE.Vector3) => {
+    scene.remove(cable); cable.geometry.dispose();
+    const c = new THREE.CatmullRomCurve3([start, new THREE.Vector3(start.x + 0.15, 0.022, start.z + 0.35), new THREE.Vector3((start.x - 0.1) * 0.6, 0.022, bottomZ + 0.75), new THREE.Vector3(-0.25, 0.022, bottomZ + 0.55), jack]);
+    cable = new THREE.Mesh(new THREE.TubeGeometry(c, 200, 0.02, 10), rubber); scene.add(cable);
+  };
   const plug = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.22, 16), rubber); plug.rotation.x = Math.PI / 2 - 0.35; plug.position.set(0, 0.07, bottomZ + 0.12); scene.add(plug);
 
   /* Un vaso de lean (double cup) a la derecha */
@@ -679,16 +691,54 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
       meshesOf(m).forEach((p) => { const mat = p.material as THREE.MeshStandardMaterial; mat.envMapIntensity = 1.4; if (mat.metalness < 0.5 && mat.color.r > 0.5) { mat.metalness = 0.9; mat.roughness = 0.22; } });
       phone.add(holder); body.visible = false; glassTop.visible = false;
     }),
-    // Cascos reales tumbados en la mesa
-    loadGLB("/models/headphones.glb").then((m) => {
+    // Cascos reales tumbados sobre la mesa, con su sombra de contacto y el cable al móvil
+    loadGLB("/models/headphones2.glb").then((m) => {
       if (!m) return;
       const inner = new THREE.Group(); inner.add(m); inner.rotation.x = -Math.PI / 2;
-      const box = new THREE.Box3().setFromObject(inner), sz = box.getSize(new THREE.Vector3()), k = 1.4 / sz.x;
-      const holder = new THREE.Group(); holder.add(inner);
+      inner.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(inner), sz = box.getSize(new THREE.Vector3()), k = 1.15 / sz.x;
       inner.position.set(-(box.min.x + sz.x / 2), -box.min.y, -(box.min.z + sz.z / 2));
-      holder.scale.setScalar(k); holder.position.set(phones.position.x - 0.05, 0, phones.position.z - 0.2); holder.rotation.y = phones.rotation.y + 0.15;
-      meshesOf(m).forEach((p) => { (p.material as THREE.MeshStandardMaterial).envMapIntensity = 1.3; });
-      scene.add(holder); phones.visible = false;
+      const holder = new THREE.Group(); holder.add(inner); holder.scale.setScalar(k);
+      holder.position.set(-1.62, 0, 0.42); holder.rotation.y = 0.45;
+      meshesOf(m).forEach((p) => { const mat = p.material as THREE.MeshStandardMaterial; mat.envMapIntensity = 1.3; mat.side = THREE.FrontSide; });
+      scene.add(holder); phones.visible = false; phonesShadow.visible = false;
+      holder.updateMatrixWorld(true);
+      contactShadow(holder, 0.75);
+      // el cable sale del auricular más cercano al móvil
+      const wb = new THREE.Box3().setFromObject(holder);
+      buildCable(new THREE.Vector3(wb.max.x - 0.12, 0.05, wb.max.z - 0.18));
+    }),
+    // Monitor ultrapanorámico con la canción produciéndose en pantalla
+    loadGLB("/models/monitor.glb").then((m) => {
+      if (!m) return;
+      const holder = new THREE.Group(); const inner = new THREE.Group(); inner.add(m); inner.rotation.y = -Math.PI / 2; holder.add(inner);
+      holder.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(holder), sz = box.getSize(new THREE.Vector3()), k = 2.5 / sz.x;
+      inner.position.set(-(box.min.x + sz.x / 2), -box.min.y, -(box.min.z + sz.z / 2));
+      const scr = meshesOf(m).find((p) => (p.material as THREE.Material).name === "Screen");
+      if (scr) {
+        const tex = dawTex(1280); tex.flipY = false;
+        scr.material = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false, color: "#d6cfe0" });
+        holder.updateMatrixWorld(true);
+        const sb = new THREE.Box3().setFromObject(scr);
+        playhead = new THREE.Mesh(new THREE.PlaneGeometry(0.02, (sb.max.y - sb.min.y) * 0.8), playhead.material);
+        playhead.position.set(0, (sb.min.y + sb.max.y) / 2 - (sb.max.y - sb.min.y) * 0.02, sb.max.z + 0.01);
+        phX0 = sb.min.x + (sb.max.x - sb.min.x) * 0.2; phX1 = sb.max.x - (sb.max.x - sb.min.x) * 0.03;
+        holder.add(playhead);
+      }
+      meshesOf(m).forEach((p) => { if (p !== scr) (p.material as THREE.MeshStandardMaterial).envMapIntensity = 1.2; });
+      holder.scale.setScalar(k); holder.position.set(2.05, 0, -1.05); holder.rotation.y = -0.38;
+      scene.add(holder); daw.visible = false;
+      holder.updateMatrixWorld(true); contactShadow(holder, 0.6);
+    }),
+    // Sofá Chesterfield al fondo
+    loadGLB("/models/sofa.glb").then((m) => {
+      if (!m) return;
+      const box = new THREE.Box3().setFromObject(m), sz = box.getSize(new THREE.Vector3()), k = 3.2 / sz.x;
+      m.position.set(-(box.min.x + sz.x / 2), -box.min.y, -(box.min.z + sz.z / 2));
+      const holder = new THREE.Group(); holder.add(m); holder.scale.setScalar(k);
+      holder.position.copy(sofa.position); scene.add(holder); sofa.visible = false;
+      holder.updateMatrixWorld(true); contactShadow(holder, 0.7, FLOOR);
     }),
   ]);
 
@@ -726,7 +776,7 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
     neonMat.opacity = n; neonHalo.material.opacity = n * 0.22; neonLight.intensity = 8 * n;
     // Cabina: luz al ritmo y quien canta se balancea
     boothLight.intensity = 18 + beat * 7; boothHalo.material.opacity = 0.26 + beat * 0.08; (boothBeam.material as THREE.MeshBasicMaterial).opacity = 0.11 + beat * 0.04;
-    singerPivot.rotation.z = Math.sin(t * (Math.PI * 2) * (BPM / 60) / 2) * 0.035; singer.position.y = 1.09 + beat * 0.012;
+    singerPivot.rotation.z = Math.sin(t * (Math.PI * 2) * (BPM / 60) / 2) * 0.035; singer.position.y = 1.29 + beat * 0.012;
     // Medidores de la mesa y altavoces
     for (let i = 0; i < ch; i++) {
       const lv = 0.15 + Math.abs(Math.sin(t * (2.1 + i * 0.37) + i)) * 0.5 * (0.6 + beat * 0.6);
@@ -735,7 +785,7 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
     meters.instanceMatrix.needsUpdate = true;
     woofers.forEach((w) => { w.scale.y = 1 + beat * 0.6; });
     // Reproducción en el ordenador
-    playhead.position.x = -0.95 + 0.25 + (((t * 0.08) % 1) * 1.6);
+    playhead.position.x = phX0 + ((t * 0.08) % 1) * (phX1 - phX0);
     // Polvo
     dust.rotation.y = Math.sin(t * 0.05) * 0.08; dust.position.y = Math.sin(t * 0.2) * 0.08;
     phoneHalo.material.opacity = 0.14 + Math.sin(t * 1.6) * 0.03;

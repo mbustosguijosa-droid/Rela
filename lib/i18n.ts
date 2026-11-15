@@ -37,6 +37,9 @@ const es = {
     title: "Buscar", resultsFor: "Resultados para", anyRecord: "Busca cualquier disco",
     intro: "Todo el catálogo de Deezer: álbumes, singles y EPs, desde lo más escuchado hasta artistas con un puñado de oyentes.",
     artists: "Artistas", records: "Discos", all: "Todo", albums: "Álbumes", singles: "Singles y EPs", none: "No hay resultados. Prueba con otro nombre.",
+    explore: "Explora el catálogo", exploreIntro: "Lo más escuchado, lo recién salido y los artistas del momento. Elige un género o busca lo que quieras.",
+    topAlbums: (g: string) => `Lo más escuchado · ${g}`, topArtists: "Artistas del momento", fresh: "Recién salido en la escena", ph: "Busca un disco, un single o un artista…",
+    genres: { all: "Todo", rap: "Rap / Hip hop", pop: "Pop", latin: "Latino", rnb: "R&B", electro: "Electrónica", alt: "Alternativo", rock: "Rock", dance: "Dance", jazz: "Jazz", metal: "Metal", classical: "Clásica" } as Record<string, string>,
   },
   album: {
     notFound: "Disco no encontrado", metaDesc: (t: string, a: string) => `Puntúa ${t} de ${a} canción a canción y lee qué opina la gente en Rela.`,
@@ -218,6 +221,9 @@ const en: Dict = {
     title: "Search", resultsFor: "Results for", anyRecord: "Search any record",
     intro: "The whole Deezer catalogue: albums, singles and EPs, from the biggest hits to artists with a handful of listeners.",
     artists: "Artists", records: "Records", all: "All", albums: "Albums", singles: "Singles & EPs", none: "No results. Try another name.",
+    explore: "Explore the catalogue", exploreIntro: "The most played, the newest releases and the artists of the moment. Pick a genre or search for anything.",
+    topAlbums: (g) => `Most played · ${g}`, topArtists: "Artists of the moment", fresh: "Fresh from the scene", ph: "Search a record, a single or an artist…",
+    genres: { all: "All", rap: "Rap / Hip hop", pop: "Pop", latin: "Latin", rnb: "R&B", electro: "Electronic", alt: "Alternative", rock: "Rock", dance: "Dance", jazz: "Jazz", metal: "Metal", classical: "Classical" },
   },
   album: {
     notFound: "Record not found", metaDesc: (t, a) => `Rate ${t} by ${a} track by track and see what people think on Rela.`,

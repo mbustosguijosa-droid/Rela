@@ -84,10 +84,22 @@ export async function getTopTracks(id: string | number, limit = 3) {
   return r?.data ?? [];
 }
 
-export async function getChartAlbums(limit = 12) {
-  const r = await get<{ data: AlbumSummary[] }>(`/chart/0/albums?limit=${limit}`);
+export async function getChartAlbums(limit = 12, genre = 0) {
+  const r = await get<{ data: AlbumSummary[] }>(`/chart/${genre}/albums?limit=${limit}`);
   return r?.data ?? [];
 }
+
+export async function getChartArtists(limit = 12, genre = 0) {
+  // El ranking por género de Deezer devuelve el global; para un género se usan sus artistas destacados
+  const r = await get<{ data: Artist[] }>(genre ? `/genre/${genre}/artists` : `/chart/0/artists?limit=${limit}`);
+  return (r?.data ?? []).slice(0, limit);
+}
+
+/** Géneros del catálogo (id de Deezer) para Explorar. */
+export const GENRES: { id: number; k: string }[] = [
+  { id: 0, k: "all" }, { id: 116, k: "rap" }, { id: 132, k: "pop" }, { id: 197, k: "latin" }, { id: 165, k: "rnb" },
+  { id: 106, k: "electro" }, { id: 85, k: "alt" }, { id: 152, k: "rock" }, { id: 113, k: "dance" }, { id: 129, k: "jazz" }, { id: 464, k: "metal" }, { id: 98, k: "classical" },
+];
 
 /** Ejecuta tareas de pocas en pocas para no pasar el límite de Deezer (50 peticiones cada 5 s). */
 export async function pool<T, R>(items: T[], size: number, fn: (x: T) => Promise<R>): Promise<R[]> {
