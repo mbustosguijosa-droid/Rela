@@ -10,3 +10,5 @@ next-env.d.ts
 
 # Archivos temporales de impeccable
 .impeccable/live/
+.impeccable/config.local.json
+.impeccable/hook.cache.json
