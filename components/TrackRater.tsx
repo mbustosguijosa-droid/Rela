@@ -6,6 +6,7 @@ import { saveRating, setLoop, toggleTop4 } from "@/app/actions";
 import { cls, f1 } from "@/lib/format";
 import { useT } from "./I18n";
 import { ShareRating } from "./ShareRating";
+import { AlbumCurve, ScoreStrip } from "./ScoreStrip";
 
 export type RatingState = { tracks: Record<number, number>; overall: number | null; fav: number | null; listened: boolean; liked: boolean };
 const empty: RatingState = { tracks: {}, overall: null, fav: null, listened: false, liked: false };
@@ -91,9 +92,8 @@ export function TrackRater({ albumId, tracks, links, initial, loggedIn, inTop4, 
                   </a>
                   <button className={`star ${r.fav === i ? "on" : ""}`} aria-label={t.rater.favOf(tr.title)} aria-pressed={r.fav === i}
                     onClick={() => update((x) => ({ ...x, fav: x.fav === i ? null : i }))}>★</button>
-                  <input type="range" min={1} max={10} step={0.5} value={v ?? 5.5} className={v == null ? "unset" : ""}
-                    style={{ ["--p" as string]: v == null ? "0%" : pct(v) }} aria-label={t.rater.scoreOf(tr.title)}
-                    onChange={(e) => { const val = +e.target.value; update((x) => ({ ...x, listened: true, tracks: { ...x.tracks, [i]: val } })); }} />
+                  <ScoreStrip value={v ?? null} label={t.rater.scoreOf(tr.title)} hint={t.rater.tapToRate} clearLabel={t.rater.clearScore}
+                    onChange={(val) => update((x) => { const tracks = { ...x.tracks }; if (val == null) delete tracks[i]; else tracks[i] = val; return { ...x, listened: true, tracks }; })} />
                   <output className={`score s-${cls(v)}`}>{f1(v)}</output>
                 </li>
               );
@@ -108,6 +108,7 @@ export function TrackRater({ albumId, tracks, links, initial, loggedIn, inTop4, 
           <div className="my-score"><span className={`score s-${cls(score)}`}>{f1(score)}</span><span className="of">/10</span></div>
           <p className="sub">{vals.length ? <>{t.rater.avgOf(vals.length, tracks.length)} <b>{f1(avg)}</b></> : t.rater.rateToAvg}
             {r.overall != null && vals.length > 0 && <> · <button className="linkbtn" onClick={() => update((x) => ({ ...x, overall: null }))}>{t.rater.useAvg}</button></>}</p>
+          <AlbumCurve scores={r.tracks} count={tracks.length} fav={r.fav} label={t.rater.curve} />
           <label className="lbl" htmlFor="overall">{t.rater.final}</label>
           <input id="overall" type="range" min={1} max={10} step={0.1} value={score ?? 5.5} className={score == null ? "unset" : ""}
             style={{ ["--p" as string]: score == null ? "0%" : pct(score) }}

@@ -1,7 +1,7 @@
 /* Rela · sistema visual (portado del boceto) */
 :root {
-  --bg: #121016; --surface: #1b1821; --surface-2: #26222e; --line: #363042;
-  --fg: #efebf3; --muted: #9c95aa;
+  --bg: #0e0b11; --surface: #17131b; --surface-2: #221c28; --line: #2f2837;
+  --fg: #f1ecf5; --muted: #a59bb2;
   --accent: #8b5cf6; --accent-ink: #ffffff; --accent-text: #b79bff; --like: #ff6f91;
   --hi: #5fd39b; --mid: #ffc04d; --lo: #ff7f7f;
   --t-under: #b6e35a; --t-culto: #6cc4ff; --t-conocido: #b49bff; --t-main: #9c95aa;
@@ -12,17 +12,6 @@
   --f-mono: "Figtree", system-ui, sans-serif;
   --maxw: 1120px;
   color-scheme: dark;
-}
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f2f1f6; --surface: #ffffff; --surface-2: #e9e6ef; --line: #d6d1df;
-    --fg: #17141c; --muted: #625b70;
-    --accent: #7c3aed; --accent-ink: #ffffff; --accent-text: #6d28d9; --like: #d9365f;
-    --hi: #1d8a57; --mid: #a06400; --lo: #c63a3a;
-    --t-under: #4f7d00; --t-culto: #0a6fae; --t-conocido: #6a4bc4; --t-main: #625b70;
-    --shadow: 0 18px 40px -22px rgba(40,20,60,.35);
-    color-scheme: light;
-  }
 }
 
 * { box-sizing: border-box }
@@ -600,7 +589,7 @@ body { background:
 .share-toggle input { width: 20px; height: 20px; accent-color: var(--accent); margin-top: 2px }
 .share-toggle span { display: flex; flex-direction: column; font-size: 14px }
 .small-note { font-size: 13px; line-height: 1.5 }
-.track.focus { background: color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 10px; box-shadow: inset 3px 0 0 var(--accent) }
+.track.focus { background: color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 10px }
 .logo-sub { font-family: var(--f-body); font-weight: 500; font-size: .62em; letter-spacing: .01em; margin-left: 4px; color: var(--muted) }
 .lfm-steps { width: 100%; font-size: 14px; border-top: 1px solid var(--line); padding-top: 12px }
 .lfm-steps ol { margin: 0 0 10px; padding-left: 20px; display: grid; gap: 6px }
@@ -663,3 +652,107 @@ input, textarea { caret-color: var(--accent) }
   .poster:hover .cover, .poster.play:hover .cover, .q:hover { transform: none }
   .poster.play:hover .rate-chip { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent-text) }
 }
+
+/* =====================================================================
+   El estudio de noche: la web continúa la entrada 3D
+   ===================================================================== */
+:root { --slat-a: #18121c; --slat-b: #120d15; --led-off: #3a3143; --led-on: #b98cff; --lamp: #ffb36b; --key-top: rgba(255,255,255,.16); --key-bottom: rgba(0,0,0,.42) }
+
+/* Fondo: pared de listones de madera arriba (como el fondo del estudio), tira de luz morada y lámpara cálida */
+body { background: var(--bg) }
+body::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: 640px; pointer-events: none;
+  background:
+    radial-gradient(420px 260px at 88% 40px, color-mix(in srgb, var(--lamp) 12%, transparent), transparent 70%),
+    radial-gradient(1200px 300px at 30% 0, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    repeating-linear-gradient(90deg, var(--slat-a) 0 13px, var(--slat-b) 13px 15px);
+  -webkit-mask-image: linear-gradient(#000 0, #000 35%, transparent 100%); mask-image: linear-gradient(#000 0, #000 35%, transparent 100%) }
+body { position: relative; isolation: isolate }
+
+/* Cabecera: una mesa de mezclas a todo el ancho */
+.top { position: sticky; top: 0; padding-top: 0; pointer-events: auto; background: linear-gradient(#1a151e, #120e15); border-bottom: 1px solid #000;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 1px 0 color-mix(in srgb, var(--led-on) 28%, transparent), 0 12px 30px -18px color-mix(in srgb, var(--accent) 70%, transparent) }
+.top .bar { height: 62px; padding: 0; border: 0; border-radius: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none }
+.nav { gap: 2px; padding: 0; background: none; border-radius: 0; margin-left: 8px; align-self: stretch; align-items: stretch }
+.nav-link { padding: 0 14px; border-radius: 0; background: none; box-shadow: none; color: var(--muted); font-weight: 600; font-size: 13.5px; letter-spacing: .01em; gap: 9px; border-left: 1px solid rgba(255,255,255,.04) }
+.nav-link:last-child { border-right: 1px solid rgba(255,255,255,.04) }
+.nav-link::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--led-off); box-shadow: inset 0 1px 1px rgba(0,0,0,.6); transition: background-color .2s var(--ease-out), box-shadow .2s var(--ease-out) }
+.nav-link:hover { color: var(--fg); background: none }
+.nav-link:hover::before { background: color-mix(in srgb, var(--led-on) 45%, var(--led-off)) }
+.nav-link.on { color: var(--fg); background: linear-gradient(transparent, color-mix(in srgb, var(--accent) 10%, transparent)); box-shadow: none }
+.nav-link.on::before { background: var(--led-on); box-shadow: 0 0 6px 1px var(--led-on), 0 0 14px 2px color-mix(in srgb, var(--accent) 55%, transparent) }
+
+/* Buscador: la pantallita del aparato */
+.search input, .hero-search { background: #09070b; border: 1px solid #2a2331; box-shadow: inset 0 2px 6px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.05) }
+.search input { border-radius: 8px; height: 38px }
+.search input:focus { outline: none; border-color: color-mix(in srgb, var(--led-on) 60%, #2a2331); box-shadow: inset 0 2px 6px rgba(0,0,0,.7), 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent) }
+.search input::placeholder, .hero-search input::placeholder { color: color-mix(in srgb, var(--muted) 75%, transparent) }
+.hero-search { border-radius: 14px }
+
+/* Botones: teclas físicas que se hunden */
+.btn { border-radius: 10px; background: linear-gradient(#231d29, #1a151f); border: 1px solid #000; color: var(--fg);
+  box-shadow: inset 0 1px 0 var(--key-top), inset 0 -2px 0 var(--key-bottom), 0 2px 6px -2px rgba(0,0,0,.6);
+  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), filter 160ms var(--ease-out) }
+.btn:hover { filter: brightness(1.12); border-color: #000 }
+.btn.primary { background: linear-gradient(#7c3aed, #6227d4); border-color: #2e0f7a; color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(30,8,80,.45), 0 6px 18px -8px color-mix(in srgb, var(--accent) 90%, transparent) }
+.btn:active, .btn.primary:active { transform: translateY(1px); box-shadow: inset 0 1px 0 var(--key-top), inset 0 0 0 var(--key-bottom), 0 1px 2px rgba(0,0,0,.6) }
+.btn.on { background: linear-gradient(#2a2232, #211a28); box-shadow: inset 0 2px 4px rgba(0,0,0,.6), 0 0 0 1px color-mix(in srgb, var(--led-on) 40%, transparent) }
+
+/* Accesos rápidos: pads de caja de ritmos */
+.quick { gap: 10px }
+.q { border-radius: 10px; background: linear-gradient(#211b27, #18131d); border: 1px solid #000; color: var(--fg);
+  box-shadow: inset 0 1px 0 var(--key-top), inset 0 -2px 0 var(--key-bottom); transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out) }
+.q:hover { transform: none; border-color: #000; box-shadow: inset 0 1px 0 var(--key-top), inset 0 -2px 0 var(--key-bottom), 0 0 0 1px color-mix(in srgb, var(--led-on) 35%, transparent) }
+.q .qi { background: #0b080d; color: var(--led-on); border-radius: 6px; box-shadow: inset 0 1px 3px rgba(0,0,0,.8) }
+.q:active { transform: translateY(1px); box-shadow: inset 0 1px 0 var(--key-top) }
+.q.q-accent { background: linear-gradient(#7c3aed, #6227d4); border-color: #2e0f7a; color: #fff }
+.q.q-accent .qi { background: rgba(0,0,0,.25); color: #fff }
+
+/* Barra inferior del móvil: la misma mesa, con pilotos sobre cada icono */
+@media (max-width: 760px) {
+  .top .bar { height: 56px }
+  .tabs { left: 0; right: 0; bottom: 0; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); border-radius: 0; border: 0; border-top: 1px solid #000;
+    background: linear-gradient(#1a151e, #110d14); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 -1px 0 color-mix(in srgb, var(--led-on) 22%, transparent) }
+  .tab { border-radius: 0; padding: 10px 2px 4px; background: none }
+  .tab::before { content: ""; position: absolute; top: 2px; left: 50%; width: 16px; height: 3px; margin-left: -8px; border-radius: 2px; background: var(--led-off) }
+  .tab.on { background: none; color: var(--fg) }
+  .tab.on::before { background: var(--led-on); box-shadow: 0 0 8px 1px var(--led-on) }
+  main { padding-bottom: 84px }
+}
+
+/* Página del disco: barra de 10 segmentos, curva del disco y orden en móvil */
+.track { grid-template-columns: 28px minmax(0, 1fr) 30px 30px minmax(150px, 230px) 46px }
+.strip-wrap { position: relative; display: flex; align-items: center; gap: 6px; min-width: 0 }
+.strip { position: relative; flex: 1; display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; height: 30px; padding: 7px 0; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; border-radius: 6px }
+.strip .seg { position: relative; display: block; border-radius: 3px; background: #09070b; box-shadow: inset 0 1px 2px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.04); overflow: hidden }
+.strip .seg i { position: absolute; inset: 0; transform-origin: left; background: var(--strip, var(--accent)); box-shadow: 0 0 8px color-mix(in srgb, var(--strip, var(--accent)) 60%, transparent); transition: transform 120ms var(--ease-out) }
+.strip.t-hi { --strip: var(--hi) } .strip.t-mid { --strip: var(--mid) } .strip.t-lo { --strip: var(--lo) }
+.strip.empty .seg { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--muted) 28%, transparent) }
+.strip-hint { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; font-weight: 600; color: var(--muted); pointer-events: none; opacity: .85 }
+.strip:hover .seg { box-shadow: inset 0 1px 2px rgba(0,0,0,.8), 0 0 0 1px color-mix(in srgb, var(--led-on) 25%, transparent) }
+.strip.empty:hover .strip-hint { color: var(--fg) }
+.strip:focus-visible { outline-offset: 3px }
+.strip-clear { position: absolute; right: -22px; width: 20px; height: 20px; border: 0; background: none; color: var(--muted); font-size: 16px; line-height: 1; border-radius: 50%; opacity: 0; transition: opacity 120ms var(--ease-out) }
+.track:hover .strip-clear, .strip-clear:focus-visible { opacity: 1 }
+@media (hover: none) { .strip-clear { opacity: .7 } }
+.track output { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums }
+@media (max-width: 520px) { .track { grid-template-columns: 22px minmax(0, 1fr) 28px 28px 44px } .track .strip-wrap { grid-column: 2 / 6; grid-row: 2; padding-right: 24px } .strip-clear { right: 0 } }
+.curve { margin: 2px 0 0; display: grid; gap: 6px }
+.curve svg { width: 100%; height: 64px; display: block; border-radius: 8px; background: #09070b; box-shadow: inset 0 1px 4px rgba(0,0,0,.8); padding: 6px }
+.curve rect { fill: var(--muted) } .curve .c-none { fill: color-mix(in srgb, var(--muted) 25%, transparent) }
+.curve .c-hi { fill: var(--hi) } .curve .c-mid { fill: var(--mid) } .curve .c-lo { fill: var(--lo) } .curve .c-fav { filter: drop-shadow(0 0 3px #fff) }
+.curve figcaption { font-size: 12px; color: var(--muted) }
+@media (max-width: 900px) { .col-side { order: 0 } }
+.tier { font-size: 12px }
+.sleeve-tag { font-size: 12px }
+
+.hint-mouse { display: none }
+@media (hover: hover) and (pointer: fine) { .hint-mouse { display: inline } .hint-touch { display: none } }
+.strip.empty { border-radius: 8px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--muted) 30%, transparent); background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 3px), color-mix(in srgb, var(--muted) 14%, transparent) calc(10% - 3px) 10%) }
+.strip.empty .seg { visibility: hidden }
+.strip.empty:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--led-on) 55%, transparent) }
+/* Selector de idioma: interruptor de aparato, con la opción activa iluminada */
+.lang { background: #09070b; border: 1px solid #2a2331; border-radius: 8px; padding: 2px; box-shadow: inset 0 2px 5px rgba(0,0,0,.7) }
+.lang button { background: none; border: 0; border-radius: 6px; color: var(--muted); font-weight: 700; font-size: 12px; letter-spacing: .04em }
+.lang button.on { background: linear-gradient(#2a2232, #1e1825); color: var(--led-on); box-shadow: inset 0 1px 0 var(--key-top), 0 0 10px -2px color-mix(in srgb, var(--led-on) 70%, transparent) }
+.nav-link, .nav-link.on { border-radius: 0 }

@@ -136,7 +136,7 @@ export function Intro({ me, friends = [], top4 = [] }: { me: Me; friends?: Frien
           <span className="il il3">{t.intro.l3}</span>
         </div>
         <div className="intro-cta">
-          <button type="button" className="intro-enter" onClick={() => enter()}><span className="pulse" />{t.intro.hint}</button>
+          <button type="button" className="intro-enter" onClick={() => enter()}><span className="pulse" /><span className="hint-touch">{t.intro.hint}</span><span className="hint-mouse">{t.intro.hintMouse}</span></button>
           <button type="button" className="intro-skip" onClick={finish}>{t.intro.skip}</button>
         </div>
       </div>

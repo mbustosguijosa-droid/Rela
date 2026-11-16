@@ -50,7 +50,7 @@ const es = {
     friendsRated: (a: number, b: number) => `${a} de ${b} lo han puntuado`, noFriendRated: "Ninguna persona que sigues lo ha puntuado todavía.",
   },
   rater: {
-    rateTracks: "Puntúa canción a canción", rateTracksSub: "Desliza para poner nota del 1 al 10. Marca tu favorita con la estrella.",
+    rateTracks: "Puntúa canción a canción", rateTracksSub: "Toca o arrastra en la barra para poner nota del 1 al 10. Marca tu favorita con la estrella.", tapToRate: "Toca para puntuar", clearScore: "Quitar la nota", curve: "La curva del disco",
     rateTrack: "Puntúa la canción", rateTrackSub: "Desliza para poner nota del 1 al 10.",
     lyricsOf: (t: string) => `Letra de ${t} en Genius`, lyrics: "Letra en Genius", favOf: (t: string) => `Marcar ${t} como favorita`, scoreOf: (t: string) => `Nota de ${t}`,
     yourScore: "Tu nota", avgOf: (a: number, b: number) => `Media de ${a} de ${b} canciones:`, rateToAvg: "Puntúa las canciones y calculamos la media.",
@@ -149,7 +149,7 @@ const es = {
     tipMobile: "En el móvil se abre el menú de compartir: elige Instagram, TikTok o WhatsApp.",
     ogTitle: (h: string, s: string, title: string) => `@${h} le ha puesto un ${s} a ${title}`,
   },
-  intro: { l1: "Descubre música.", l2: "Puntúala canción a canción.", l3: "Conoce gente con tu mismo oído.", skip: "Saltar intro", hint: "Toca el móvil para entrar", enter: "Entrar", you: "Tú", google: "Google", email: "Email", explore: "Explorar", nobody: "Nadie más conectado ahora", top4: "Tu top 4", noFriends: "Aún no sigues a nadie · Buscar amigos", profile: "Perfil" },
+  intro: { l1: "Descubre música.", l2: "Puntúala canción a canción.", l3: "Conoce gente con tu mismo oído.", skip: "Saltar intro", hint: "Toca el móvil para entrar", hintMouse: "Haz clic en el móvil para entrar", enter: "Entrar", you: "Tú", google: "Google", email: "Email", explore: "Explorar", nobody: "Nadie más conectado ahora", top4: "Tu top 4", noFriends: "Aún no sigues a nadie · Buscar amigos", profile: "Perfil" },
   music: {
     title: "Tu música", sub: "Conecta tu música y Rela Music sabrá lo que escuchas: tus últimas escuchas para puntuarlas con un toque, tus temas y artistas del mes y lo que suena ahora.",
     settings: "Conectar música", spotify: "Spotify", lastfm: "Last.fm",
@@ -234,7 +234,7 @@ const en: Dict = {
     friendsRated: (a, b) => `${a} of ${b} have rated it`, noFriendRated: "Nobody you follow has rated it yet.",
   },
   rater: {
-    rateTracks: "Rate it track by track", rateTracksSub: "Slide to score from 1 to 10. Star your favourite.",
+    rateTracks: "Rate it track by track", rateTracksSub: "Tap or drag on the bar to score from 1 to 10. Star your favourite.", tapToRate: "Tap to rate", clearScore: "Remove score", curve: "The album curve",
     rateTrack: "Rate the song", rateTrackSub: "Slide to score from 1 to 10.",
     lyricsOf: (t) => `Lyrics of ${t} on Genius`, lyrics: "Lyrics on Genius", favOf: (t) => `Mark ${t} as favourite`, scoreOf: (t) => `Score for ${t}`,
     yourScore: "Your score", avgOf: (a, b) => `Average of ${a} of ${b} songs:`, rateToAvg: "Rate the songs and we'll work out the average.",
@@ -333,7 +333,7 @@ const en: Dict = {
     tipMobile: "On your phone the share menu opens: pick Instagram, TikTok or WhatsApp.",
     ogTitle: (h, s, title) => `@${h} gave ${title} a ${s}`,
   },
-  intro: { l1: "Discover music.", l2: "Rate it track by track.", l3: "Meet people who hear it like you.", skip: "Skip intro", hint: "Tap the phone to enter", enter: "Enter", you: "You", google: "Google", email: "Email", explore: "Explore", nobody: "Nobody else online right now", top4: "Your top 4", noFriends: "You don't follow anyone yet · Find friends", profile: "Profile" },
+  intro: { l1: "Discover music.", l2: "Rate it track by track.", l3: "Meet people who hear it like you.", skip: "Skip intro", hint: "Tap the phone to enter", hintMouse: "Click the phone to enter", enter: "Enter", you: "You", google: "Google", email: "Email", explore: "Explore", nobody: "Nobody else online right now", top4: "Your top 4", noFriends: "You don't follow anyone yet · Find friends", profile: "Profile" },
   music: {
     title: "Your music", sub: "Connect your music and Rela Music will know what you listen to: your latest plays to rate with one tap, your top tracks and artists of the month and what's playing now.",
     settings: "Connect music", spotify: "Spotify", lastfm: "Last.fm",

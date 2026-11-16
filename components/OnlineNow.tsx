@@ -11,6 +11,8 @@ export function OnlineNow({ me }: { me: Me }) {
   const { t } = useT();
   const online = useOnline(me);
   const people = online.filter((u) => !u.anon).slice(0, 5);
+  // Con 0 o 1 persona (tú) el contador transmite "aquí no hay nadie": mejor no mostrarlo
+  if (online.length < 2) return null;
   return (
     <span className="online-now" aria-live="polite">
       <i />
