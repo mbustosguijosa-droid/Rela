@@ -5,6 +5,8 @@ import { I18nProvider, LangSwitch } from "@/components/I18n";
 import { getT } from "@/lib/i18n-server";
 import { headers } from "next/headers";
 import { BRAND } from "@/lib/brand";
+import { cookies } from "next/headers";
+import { ACCENT_COOKIE, inkFor, isHex } from "@/lib/accent";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -17,13 +19,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   width: "device-width", initialScale: 1, viewportFit: "cover",
-  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#121016" }, { media: "(prefers-color-scheme: light)", color: "#f2f1f6" }],
+  themeColor: [{ color: "#0e0b11" }],
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { lang, t } = await getT();
+  const [{ lang, t }, jar] = await Promise.all([getT(), cookies()]);
+  const raw = decodeURIComponent(jar.get(ACCENT_COOKIE)?.value ?? "");
+  const accent = isHex(raw) ? raw : null;
+  const accentStyle = accent ? ({ ["--accent" as string]: accent, ["--accent-ink" as string]: inkFor(accent) } as React.CSSProperties) : undefined;
   return (
-    <html lang={lang} suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning style={accentStyle}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

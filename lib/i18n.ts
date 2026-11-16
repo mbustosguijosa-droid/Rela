@@ -176,6 +176,10 @@ const es = {
     connectTitle: "Conecta tu música", connectText: "Enlaza tu Spotify (u otra app) a través de Last.fm: verás aquí lo último que has escuchado para puntuarlo con un toque, y Rela Music te recomendará según tus gustos.", connectCta: "Conectar música",
     becauseListen: (n: string) => `Porque escuchas a ${n}`, open: "Abrir", empty: "Aún no hay escuchas. Pon algo en Spotify y vuelve en un rato.",
   },
+  theme: {
+    pick: "Elige tu color", custom: "Otro color…", reset: "Volver al morado",
+    names: { purple: "Morado", pink: "Rosa", red: "Rojo", orange: "Naranja", amber: "Ámbar", lime: "Lima", green: "Verde", teal: "Turquesa", sky: "Celeste", blue: "Azul" } as Record<string, string>,
+  },
   notFound: { title: "No encontramos esta página", text: "Puede que el disco ya no esté en el catálogo.", other: "Busca otro" },
   time: { now: "ahora", m: (n: number) => `hace ${n} min`, h: (n: number) => `hace ${n} h`, d: (n: number) => `hace ${n} d`, mo: (n: number) => `hace ${n} mes`, y: (n: number) => `hace ${n} a` },
   errors: {
@@ -359,6 +363,10 @@ const en: Dict = {
     friendsNow: "Your friends listening", friendsNowSub: "Live, what's playing right now", live: "Now", via: (s) => `via ${s}`,
     connectTitle: "Connect your music", connectText: "Link your Spotify (or another app) through Last.fm: you'll see what you've just listened to here so you can rate it with one tap, and Rela Music will recommend music based on your taste.", connectCta: "Connect music",
     becauseListen: (n) => `Because you listen to ${n}`, open: "Open", empty: "No plays yet. Play something on Spotify and come back in a bit.",
+  },
+  theme: {
+    pick: "Pick your colour", custom: "Another colour…", reset: "Back to purple",
+    names: { purple: "Purple", pink: "Pink", red: "Red", orange: "Orange", amber: "Amber", lime: "Lime", green: "Green", teal: "Teal", sky: "Sky", blue: "Blue" },
   },
   notFound: { title: "We couldn't find this page", text: "The record may no longer be in the catalogue.", other: "Search for another" },
   time: { now: "now", m: (n) => `${n} min ago`, h: (n) => `${n} h ago`, d: (n) => `${n} d ago`, mo: (n) => `${n} mo ago`, y: (n) => `${n} y ago` },

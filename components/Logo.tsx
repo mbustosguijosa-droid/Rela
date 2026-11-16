@@ -14,9 +14,9 @@ export function LogoMark({ size = 32, tile = false }: { size?: number; tile?: bo
   if (!tile) return <svg viewBox="0 0 32 32" width={size} height={size} aria-hidden="true" className="logo-mark">{glyph}</svg>;
   return (
     <svg viewBox="0 0 32 32" width={size} height={size} aria-hidden="true" className="logo-mark tile">
-      <defs><linearGradient id="lm-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#a47dff" /><stop offset="1" stopColor="#5b2bd6" /></linearGradient></defs>
+      <defs><linearGradient id="lm-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style={{ stopColor: "color-mix(in srgb, var(--accent) 78%, white)" }} /><stop offset="1" style={{ stopColor: "color-mix(in srgb, var(--accent) 72%, black)" }} /></linearGradient></defs>
       <rect width="32" height="32" rx="8.5" fill="url(#lm-g)" />
-      <g color="#fff" transform="translate(0 -0.6)">{glyph}</g>
+      <g style={{ color: "var(--accent-ink)" }} transform="translate(0 -0.6)">{glyph}</g>
     </svg>
   );
 }

@@ -3,6 +3,9 @@ import { BRAND } from "@/lib/brand";
 import { LogoMark } from "./Logo";
 import { Avatar } from "./Avatar";
 import { LangSwitch } from "./I18n";
+import { AccentPicker } from "./AccentPicker";
+import { cookies } from "next/headers";
+import { ACCENT_COOKIE, DEFAULT_ACCENT } from "@/lib/accent";
 import { NavLinks } from "./NavLinks";
 import { getViewer } from "@/lib/auth";
 import { getT } from "@/lib/i18n-server";
@@ -35,6 +38,7 @@ export async function Header() {
             {I.search}
             <input name="q" type="search" placeholder={t.nav.searchPh} aria-label={t.nav.searchLabel} autoComplete="off" />
           </form>
+          <AccentPicker initial={decodeURIComponent((await cookies()).get(ACCENT_COOKIE)?.value ?? DEFAULT_ACCENT)} />
           <LangSwitch />
           {user ? (
             <Link href="/perfil" className="me-chip" aria-label={t.nav.myProfile}><Avatar p={profile} size={36} ring /></Link>

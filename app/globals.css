@@ -2,7 +2,7 @@
 :root {
   --bg: #0e0b11; --surface: #17131b; --surface-2: #221c28; --line: #2f2837;
   --fg: #f1ecf5; --muted: #a59bb2;
-  --accent: #8b5cf6; --accent-ink: #ffffff; --accent-text: #b79bff; --like: #ff6f91;
+  --accent: #8b5cf6; --accent-ink: #ffffff; --accent-text: color-mix(in srgb, var(--accent) 62%, white); --like: #ff6f91;
   --hi: #5fd39b; --mid: #ffc04d; --lo: #ff7f7f;
   --t-under: #b6e35a; --t-culto: #6cc4ff; --t-conocido: #b49bff; --t-main: #9c95aa;
   --logo: #FFD23F; --logo-shade: #E89B00; --logo-line: #1b1424;
@@ -30,7 +30,7 @@ h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; lette
 .top .wrap { display: flex; align-items: center; gap: 20px; height: 60px }
 .logo { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 600; font-size: 23px; letter-spacing: -.035em }
 .logo svg { width: 30px; height: 30px; flex: none }
-.logo-mark.tile { border-radius: 9px; box-shadow: 0 6px 16px -8px rgba(91,43,214,.7), inset 0 0 0 1px rgba(255,255,255,.12) }
+.logo-mark.tile { border-radius: 9px; box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--accent) 75%, transparent), inset 0 0 0 1px rgba(255,255,255,.12) }
 .nav { display: flex; gap: 4px }
 .nav a { padding: 7px 12px; border-radius: 99px; color: var(--muted); font-weight: 500 }
 .nav a:hover { color: var(--fg) }
@@ -317,8 +317,8 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 .intro.go .intro-copy { opacity: 0; transform: translateY(-24px) }
 .intro.go .intro-cta { opacity: 0 !important; animation: none }
 .intro-enter { display: inline-flex; align-items: center; gap: 12px; height: 52px; padding: 0 24px 0 18px; border-radius: 99px; border: 1px solid rgba(255,235,215,.25); background: rgba(18,12,26,.55); color: #fbf3ea; font: 600 16px var(--f-body); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); cursor: pointer; box-shadow: 0 18px 40px -18px rgba(0,0,0,.8) }
-.intro-enter:hover { background: rgba(139,92,246,.25); border-color: #a77bff }
-.intro-enter .pulse { width: 10px; height: 10px; border-radius: 50%; background: #a77bff; box-shadow: 0 0 0 0 rgba(139,92,246,.7); animation: pulse 1.6s ease-out infinite }
+.intro-enter:hover { background: color-mix(in srgb, var(--accent) 25%, transparent); border-color: var(--accent-text) }
+.intro-enter .pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--accent-text); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); animation: pulse 1.6s ease-out infinite }
 .intro-skip { border: 0; background: none; color: rgba(251,243,234,.6); font: 500 13px var(--f-body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer }
 @media (min-width: 900px) and (min-aspect-ratio: 5/4) {
   .intro-copy { left: auto; width: min(560px, 46vw); align-items: flex-end; text-align: right; padding: 40px 48px 90px 20px; background: radial-gradient(120% 100% at 100% 0%, rgba(9,7,12,.8), rgba(9,7,12,.35) 60%, transparent 80%) }
@@ -330,7 +330,7 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 @keyframes fade-out { from { opacity: 1 } to { opacity: 0 } }
 @keyframes eq { from { transform: scaleY(.4) } to { transform: scaleY(1) } }
 @keyframes tapring { 0% { opacity: .9; transform: scale(1) } 100% { opacity: 0; transform: scale(1.18) } }
-@keyframes pulse { to { box-shadow: 0 0 0 12px rgba(139,92,246,0) } }
+@keyframes pulse { to { box-shadow: 0 0 0 12px transparent } }
 @keyframes intro-fade { to { opacity: 0; visibility: hidden } }
 @media (prefers-reduced-motion: reduce) {
   .intro-desk, .il, .intro-cta, .intro .tapring, .intro .eqb rect, .intro-enter .pulse { animation: none !important; opacity: 1; filter: none; transform: none }
@@ -503,7 +503,7 @@ body { background:
 .sleeve img::after { content: "" }
 .sleeve::after { content: ""; position: absolute; inset: 0; border-radius: 6px; background: linear-gradient(115deg, rgba(255,255,255,.22), rgba(255,255,255,0) 38%, rgba(0,0,0,.18)); pointer-events: none; transform: translateZ(1px) }
 .sleeve .disc { position: absolute; inset: 3%; border-radius: 50%; transform: translateZ(-3px); transition: transform .6s cubic-bezier(.2,.8,.2,1);
-  background: radial-gradient(circle, #1a130e 0 2.5%, #a77bff 3% 17%, #0d0c0e 17.5% 19%, transparent 19.5%), repeating-radial-gradient(circle, #121014 0 2px, #1b181d 2px 3px), #0e0d10;
+  background: radial-gradient(circle, #1a130e 0 2.5%, var(--accent-text) 3% 17%, #0d0c0e 17.5% 19%, transparent 19.5%), repeating-radial-gradient(circle, #121014 0 2px, #1b181d 2px 3px), #0e0d10;
   box-shadow: 0 20px 30px -16px rgba(0,0,0,.8) }
 .sleeve:hover .disc, .sleeve:focus-visible .disc { transform: translateX(46%) translateZ(-3px) rotate(160deg) }
 .sleeve.fav .disc { background: radial-gradient(circle, #1a130e 0 2.5%, #ffd23f 3% 17%, #0d0c0e 17.5% 19%, transparent 19.5%), repeating-radial-gradient(circle, #121014 0 2px, #1b181d 2px 3px), #0e0d10 }
@@ -656,7 +656,7 @@ input, textarea { caret-color: var(--accent) }
 /* =====================================================================
    El estudio de noche: la web continúa la entrada 3D
    ===================================================================== */
-:root { --slat-a: #18121c; --slat-b: #120d15; --led-off: #3a3143; --led-on: #b98cff; --lamp: #ffb36b; --key-top: rgba(255,255,255,.16); --key-bottom: rgba(0,0,0,.42) }
+:root { --key-a: color-mix(in srgb, var(--accent) 88%, black); --key-b: color-mix(in srgb, var(--accent) 70%, black); --key-edge: color-mix(in srgb, var(--accent) 35%, black); --slat-a: #18121c; --slat-b: #120d15; --led-off: #3a3143; --led-on: color-mix(in srgb, var(--accent) 68%, white); --lamp: #ffb36b; --key-top: rgba(255,255,255,.16); --key-bottom: rgba(0,0,0,.42) }
 
 /* Fondo: pared de listones de madera arriba (como el fondo del estudio), tira de luz morada y lámpara cálida */
 body { background: var(--bg) }
@@ -693,7 +693,7 @@ body { position: relative; isolation: isolate }
   box-shadow: inset 0 1px 0 var(--key-top), inset 0 -2px 0 var(--key-bottom), 0 2px 6px -2px rgba(0,0,0,.6);
   transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), filter 160ms var(--ease-out) }
 .btn:hover { filter: brightness(1.12); border-color: #000 }
-.btn.primary { background: linear-gradient(#7c3aed, #6227d4); border-color: #2e0f7a; color: #fff;
+.btn.primary { background: linear-gradient(var(--key-a), var(--key-b)); border-color: var(--key-edge); color: var(--accent-ink);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(30,8,80,.45), 0 6px 18px -8px color-mix(in srgb, var(--accent) 90%, transparent) }
 .btn:active, .btn.primary:active { transform: translateY(1px); box-shadow: inset 0 1px 0 var(--key-top), inset 0 0 0 var(--key-bottom), 0 1px 2px rgba(0,0,0,.6) }
 .btn.on { background: linear-gradient(#2a2232, #211a28); box-shadow: inset 0 2px 4px rgba(0,0,0,.6), 0 0 0 1px color-mix(in srgb, var(--led-on) 40%, transparent) }
@@ -705,7 +705,7 @@ body { position: relative; isolation: isolate }
 .q:hover { transform: none; border-color: #000; box-shadow: inset 0 1px 0 var(--key-top), inset 0 -2px 0 var(--key-bottom), 0 0 0 1px color-mix(in srgb, var(--led-on) 35%, transparent) }
 .q .qi { background: #0b080d; color: var(--led-on); border-radius: 6px; box-shadow: inset 0 1px 3px rgba(0,0,0,.8) }
 .q:active { transform: translateY(1px); box-shadow: inset 0 1px 0 var(--key-top) }
-.q.q-accent { background: linear-gradient(#7c3aed, #6227d4); border-color: #2e0f7a; color: #fff }
+.q.q-accent { background: linear-gradient(var(--key-a), var(--key-b)); border-color: var(--key-edge); color: var(--accent-ink) }
 .q.q-accent .qi { background: rgba(0,0,0,.25); color: #fff }
 
 /* Barra inferior del móvil: la misma mesa, con pilotos sobre cada icono */
@@ -756,3 +756,21 @@ body { position: relative; isolation: isolate }
 .lang button { background: none; border: 0; border-radius: 6px; color: var(--muted); font-weight: 700; font-size: 12px; letter-spacing: .04em }
 .lang button.on { background: linear-gradient(#2a2232, #1e1825); color: var(--led-on); box-shadow: inset 0 1px 0 var(--key-top), 0 0 10px -2px color-mix(in srgb, var(--led-on) 70%, transparent) }
 .nav-link, .nav-link.on { border-radius: 0 }
+
+/* Selector de color */
+.accent-pick { position: relative; flex: none }
+.accent-btn { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; background: #09070b; border: 1px solid #2a2331; box-shadow: inset 0 2px 5px rgba(0,0,0,.7); padding: 0 }
+.accent-dot { width: 16px; height: 16px; border-radius: 50%; box-shadow: 0 0 10px -1px var(--accent), inset 0 1px 0 rgba(255,255,255,.35) }
+.accent-pop { position: absolute; right: 0; top: calc(100% + 10px); z-index: 60; width: 236px; padding: 14px; border-radius: 14px; background: linear-gradient(#1d1722, #151119); border: 1px solid #000;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 24px 50px -16px rgba(0,0,0,.85); display: grid; gap: 12px; transform-origin: top right; animation: pop-in 180ms var(--ease-out) }
+.accent-pop b { font-size: 13px }
+.accent-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px }
+.accent-sw { aspect-ratio: 1; border-radius: 50%; border: 0; padding: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 0 0 1px rgba(0,0,0,.6); transition: transform 160ms var(--ease-out) }
+.accent-sw:active { transform: scale(.92) }
+.accent-sw.on { box-shadow: 0 0 0 2px #151119, 0 0 0 4px var(--fg) }
+.accent-custom { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer }
+.accent-custom input { width: 34px; height: 26px; border: 1px solid #2a2331; border-radius: 6px; background: #09070b; padding: 2px; cursor: pointer }
+.accent-reset { justify-self: start; font-size: 13px }
+@keyframes pop-in { from { opacity: 0; transform: scale(.96) translateY(-4px) } }
+@media (prefers-reduced-motion: reduce) { .accent-pop { animation: none } }
+@media (max-width: 760px) { .accent-btn { width: 32px; height: 32px } .accent-pop { right: -60px } }
