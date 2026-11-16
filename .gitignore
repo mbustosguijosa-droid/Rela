@@ -7,3 +7,6 @@ next-env.d.ts
 .vercel
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
+
+# Archivos temporales de impeccable
+.impeccable/live/
