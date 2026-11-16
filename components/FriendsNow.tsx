@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useT } from "./I18n";
 import { Avatar } from "./Avatar";
+import { Icon } from "./Icon";
 import { timeAgoT } from "@/lib/i18n";
 
 type Who = { id: string; handle: string; name: string; avatar_url: string | null; accent: string };
@@ -44,7 +45,7 @@ export function FriendsNow({ title, sub }: { title: string; sub: string }) {
           <div key={r.user_id} className={`fnow-card ${r.is_playing ? "live" : ""}`}>
             <Link href={href(r)} className="fnow-cover" aria-label={`${t.music.rate}: ${r.track}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              {r.cover ? <img src={r.cover} alt="" loading="lazy" /> : <span>♪</span>}
+              {r.cover ? <img src={r.cover} alt="" loading="lazy" /> : <Icon name="music" size={22} />}
               {r.is_playing && <i className="eq"><b /><b /><b /></i>}
             </Link>
             <div className="fnow-txt">

@@ -15,7 +15,10 @@ export async function generateMetadata(): Promise<Metadata> {
     applicationName: BRAND.name, appleWebApp: { title: BRAND.short, capable: true }, openGraph: { siteName: BRAND.name, type: "website" } };
 }
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
+export const viewport: Viewport = {
+  width: "device-width", initialScale: 1, viewportFit: "cover",
+  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#121016" }, { media: "(prefers-color-scheme: light)", color: "#f2f1f6" }],
+};
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { lang, t } = await getT();
@@ -28,9 +31,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..800,50..100;1,9..144,400..700,50..100&family=Figtree:wght@400;500;600;700;800&display=swap" />
       </head>
       <body>
+        <a className="skip" href="#contenido">{t.nav.skip}</a>
         <I18nProvider lang={lang}>
           <Header />
-          <main>{children}</main>
+          <main id="contenido" tabIndex={-1}>{children}</main>
           <TabBar />
           <footer className="wrap" style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
             <span>{t.footer.beta}</span><a href="/privacidad">{t.footer.privacy}</a><a href="/terminos">{t.footer.terms}</a>

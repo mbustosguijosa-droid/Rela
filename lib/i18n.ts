@@ -7,7 +7,7 @@ export const LOCALE: Record<Lang, string> = { es: "es-ES", en: "en-GB" };
 
 const es = {
   meta: { tagline: "Puntúa tu música canción a canción", description: "Rela Music es el sitio para la gente que vive la música: puntúa tus discos y singles canción a canción, descubre artistas de tu nicho, conecta tu Spotify y comparte tus notas con tus amigos." },
-  nav: { home: "Inicio", explore: "Explorar", friends: "Amigos", myProfile: "Mi perfil", profile: "Perfil", search: "Buscar", enter: "Entrar", searchPh: "Álbumes, singles o artistas", searchLabel: "Buscar", homeLabel: "Rela Music, inicio", main: "Principal", tabs: "Pestañas" },
+  nav: { home: "Inicio", explore: "Explorar", friends: "Amigos", myProfile: "Mi perfil", profile: "Perfil", search: "Buscar", enter: "Entrar", searchPh: "Álbumes, singles o artistas", searchLabel: "Buscar", homeLabel: "Rela Music, inicio", main: "Principal", tabs: "Pestañas", skip: "Saltar al contenido" },
   footer: { beta: "Rela Music · for real music lovers · versión en pruebas. Catálogo: Deezer.", privacy: "Privacidad", terms: "Términos", language: "Idioma" },
   kind: { album: "Álbum", single: "Single", ep: "EP", compile: "Recopilatorio", disc: "Disco" } as Record<string, string>,
   tier: { under: "Underground", culto: "De culto", conocido: "Conocido", main: "Mainstream" } as Record<string, string>,
@@ -191,7 +191,7 @@ export type Dict = typeof es;
 
 const en: Dict = {
   meta: { tagline: "Rate your music track by track", description: "Rela Music is the place for people who live music: rate your albums and singles track by track, discover artists from your niche, connect your Spotify and share your scores with your friends." },
-  nav: { home: "Home", explore: "Explore", friends: "Friends", myProfile: "My profile", profile: "Profile", search: "Search", enter: "Sign in", searchPh: "Albums, singles or artists", searchLabel: "Search", homeLabel: "Rela Music, home", main: "Main", tabs: "Tabs" },
+  nav: { home: "Home", explore: "Explore", friends: "Friends", myProfile: "My profile", profile: "Profile", search: "Search", enter: "Sign in", searchPh: "Albums, singles or artists", searchLabel: "Search", homeLabel: "Rela Music, home", main: "Main", tabs: "Tabs", skip: "Skip to content" },
   footer: { beta: "Rela Music · for real music lovers · beta version. Catalogue: Deezer.", privacy: "Privacy", terms: "Terms", language: "Language" },
   kind: { album: "Album", single: "Single", ep: "EP", compile: "Compilation", disc: "Record" },
   tier: { under: "Underground", culto: "Cult", conocido: "Known", main: "Mainstream" },

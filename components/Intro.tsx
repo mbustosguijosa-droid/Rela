@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Icon } from "./Icon";
 import { useRouter } from "next/navigation";
 import { useT } from "./I18n";
 import { useOnline } from "@/lib/presence";
@@ -15,7 +16,7 @@ type Friend = { id: string; handle: string; name: string; avatar_url: string | n
 export function ReplayIntro({ label }: { label: string }) {
   return (
     <button type="button" className="q" onClick={() => { document.documentElement.classList.add("show-intro"); window.dispatchEvent(new Event("rela:intro")); }}>
-      <span className="qi">▶</span>{label}
+      <span className="qi"><Icon name="play" filled size={14} /></span>{label}
     </button>
   );
 }

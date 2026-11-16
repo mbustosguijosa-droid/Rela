@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "./Icon";
 import type { Dict } from "@/lib/i18n";
 import { timeAgoT } from "@/lib/i18n";
 import type { Play, Playlist, Snapshot, TopArtist } from "@/lib/music";
@@ -23,13 +24,13 @@ export function PlayRow({ plays, t, scores, showTime = true }: { plays: Play[]; 
         return (
           <Link key={i + p.track + (p.at ?? "")} className="poster play" href={playHref(p)}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {p.cover ? <img className="cover" src={p.cover} alt={t.common.coverOf(p.album || p.track)} loading="lazy" /> : <div className="cover ph">♪</div>}
+            {p.cover ? <img className="cover" src={p.cover} alt={t.common.coverOf(p.album || p.track)} loading="lazy" /> : <div className="cover ph"><Icon name="music" size={28} /></div>}
             <div><div className="t">{p.track}</div><div className="a">{p.artist}</div></div>
             <div className="m play-m">
               {showTime && p.at && <span>{timeAgoT(t, p.at)}</span>}
               {sc !== undefined
                 ? <span className={`score s-${cls(sc)}`} title={t.music.rated}>{f1(sc)}</span>
-                : <span className="rate-chip">★ {t.music.rate}</span>}
+                : <span className="rate-chip"><Icon name="star" size={13} filled /> {t.music.rate}</span>}
             </div>
           </Link>
         );
@@ -44,7 +45,7 @@ export function ArtistRow({ artists }: { artists: TopArtist[] }) {
       {artists.map((a, i) => {
         const inner = <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          {a.image ? <img src={a.image} alt="" loading="lazy" /> : <span className="ph">♪</span>}
+          {a.image ? <img src={a.image} alt="" loading="lazy" /> : <span className="ph"><Icon name="music" size={24} /></span>}
           <b>{a.name}</b><small className="muted">#{i + 1}</small>
         </>;
         return a.deezer ? <Link key={a.name} className="artist-card" href={`/artista/${a.deezer}`}>{inner}</Link>
@@ -60,7 +61,7 @@ export function PlaylistRow({ lists, t }: { lists: Playlist[]; t: Dict }) {
       {lists.map((p, i) => (
         <a key={i} className="poster" href={p.url ?? "#"} target="_blank" rel="noopener">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          {p.image ? <img className="cover" src={p.image} alt="" loading="lazy" /> : <div className="cover ph">♪</div>}
+          {p.image ? <img className="cover" src={p.image} alt="" loading="lazy" /> : <div className="cover ph"><Icon name="music" size={28} /></div>}
           <div className="t">{p.name}</div>
           <div className="m">{p.tracks != null ? t.music.songs(p.tracks) : t.music.open} ↗</div>
         </a>
@@ -74,13 +75,13 @@ export function NowCard({ p, t, source }: { p: Play; t: Dict; source: Snapshot["
   return (
     <Link className={`now-card ${p.now ? "live" : ""}`} href={playHref(p)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {p.cover ? <img src={p.cover} alt="" /> : <span className="ph">♪</span>}
+      {p.cover ? <img src={p.cover} alt="" /> : <span className="ph"><Icon name="music" size={24} /></span>}
       <span className="nc-txt">
         <small>{p.now ? <><i className="eq"><b /><b /><b /></i>{t.music.nowPlaying}</> : <>{t.music.lastPlayed}{p.at ? ` · ${timeAgoT(t, p.at)}` : ""}</>}</small>
         <b>{p.track}</b><span className="muted">{p.artist}</span>
       </span>
       <SourceIcon s={source} />
-      <span className="rate-chip">★ {t.music.rate}</span>
+      <span className="rate-chip"><Icon name="star" size={13} filled /> {t.music.rate}</span>
     </Link>
   );
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "@/components/Icon";
 import { Suspense } from "react";
 import { ListenSection, ListenSkeleton } from "@/components/ListenSection";
 import { FriendsNow } from "@/components/FriendsNow";
@@ -90,12 +91,12 @@ export default async function Home() {
           </form>
           <div style={{ marginTop: 18 }}><OnlineNow me={meLite} /></div>
           <div className="quick">
-            <Link href="/buscar" className="q"><span className="qi">★</span>{t.home.qRate}</Link>
-            <Link href="/amigos" className="q"><span className="qi">☺</span>{t.home.qFriends}</Link>
+            <Link href="/buscar" className="q"><span className="qi"><Icon name="star" /></span>{t.home.qRate}</Link>
+            <Link href="/amigos" className="q"><span className="qi"><Icon name="users" /></span>{t.home.qFriends}</Link>
             {user ? <>
-              <Link href="/mensajes" className="q"><span className="qi">✉</span>{t.home.qMessages}{unread > 0 && <span className="badge-n">{unread}</span>}</Link>
-              <Link href="/perfil" className="q"><span className="qi">◎</span>{t.home.qProfile}</Link>
-            </> : <Link href="/entrar" className="q q-accent"><span className="qi">+</span>{t.home.qEnter}</Link>}
+              <Link href="/mensajes" className="q"><span className="qi"><Icon name="mail" /></span>{t.home.qMessages}{unread > 0 && <span className="badge-n">{unread}</span>}</Link>
+              <Link href="/perfil" className="q"><span className="qi"><Icon name="user" /></span>{t.home.qProfile}</Link>
+            </> : <Link href="/entrar" className="q q-accent"><span className="qi"><Icon name="plus" /></span>{t.home.qEnter}</Link>}
             <ReplayIntro label={t.home.replay} />
           </div>
         </div>

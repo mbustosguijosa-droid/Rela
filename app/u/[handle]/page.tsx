@@ -10,6 +10,7 @@ import { Avatar } from "@/components/Avatar";
 import { FollowButton } from "@/components/FollowButton";
 import { ReviewCard } from "@/components/ReviewCard";
 import { getT } from "@/lib/i18n-server";
+import { Icon } from "@/components/Icon";
 import { Suspense } from "react";
 import { ProfileMusic } from "@/components/ProfileMusic";
 
@@ -110,7 +111,7 @@ export default async function ProfilePage({ params }: Props) {
             )}
           </div>
           <div className="p-actions">
-            {own ? <><Link className="btn" href="/perfil/editar">{t.profile.edit}</Link><Link className="btn" href="/perfil/musica">♪ {t.music.settings}</Link></>
+            {own ? <><Link className="btn" href="/perfil/editar">{t.profile.edit}</Link><Link className="btn" href="/perfil/musica"><Icon name="music" size={16} /> {t.music.settings}</Link></>
               : <><FollowButton userId={p.id} initial={myFollowing.includes(p.id)} loggedIn={!!user} /><Link className="btn" href={user ? `/mensajes/${p.handle}` : `/entrar?next=/mensajes/${p.handle}`}>{t.dm.message}</Link></>}
           </div>
         </section>
