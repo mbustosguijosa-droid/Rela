@@ -31,7 +31,7 @@ const es = {
     qRate: "Puntuar un disco", qFriends: "Amigos", qMessages: "Mensajes", qProfile: "Mi perfil", qEnter: "Crear mi perfil",
     replay: "Ver la intro", online: (n: number) => `${n} ${n === 1 ? "conectado" : "conectados"}`, fanFav: "Tus favoritos", fanDrop: "Nuevo en tu nicho", fanNew: "Recién salido",
     apps: { fresh: "Novedades", forYou: "Para ti", reviews: "Reseñas", friends: "Amigos", messages: "Mensajes", profile: "Perfil" } as Record<string, string>,
-    onlineNow: "Ahora en Rela", freshSub: "Lo último de tus artistas y de la escena", trendingSub: "Lo que más se está comentando",
+    onlineNow: "Ahora en Rela", anonVisitors: (n: number) => (n === 1 ? "1 visitante sin cuenta" : `${n} visitantes sin cuenta`), anonHint: "Están viendo la web sin haber iniciado sesión", freshSub: "Lo último de tus artistas y de la escena", trendingSub: "Lo que más se está comentando",
   },
   search: {
     title: "Buscar", resultsFor: "Resultados para", anyRecord: "Busca cualquier disco",
@@ -219,7 +219,7 @@ const en: Dict = {
     qRate: "Rate a record", qFriends: "Friends", qMessages: "Messages", qProfile: "My profile", qEnter: "Create my profile",
     replay: "Watch the intro", online: (n) => `${n} online`, fanFav: "Your favourites", fanDrop: "New in your niche", fanNew: "Just out",
     apps: { fresh: "New", forYou: "For you", reviews: "Reviews", friends: "Friends", messages: "Messages", profile: "Profile" },
-    onlineNow: "On Rela now", freshSub: "The latest from your artists and the scene", trendingSub: "What people are talking about",
+    onlineNow: "On Rela now", anonVisitors: (n) => (n === 1 ? "1 visitor without an account" : `${n} visitors without an account`), anonHint: "Browsing without signing in", freshSub: "The latest from your artists and the scene", trendingSub: "What people are talking about",
   },
   search: {
     title: "Search", resultsFor: "Results for", anyRecord: "Search any record",

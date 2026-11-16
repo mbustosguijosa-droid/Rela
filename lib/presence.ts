@@ -17,7 +17,8 @@ function start(me: Me) {
   const sb = supabaseBrowser(); if (!sb) return;
   let key = me?.id;
   if (!key) {
-    try { key = sessionStorage.getItem("rela:anon") ?? undefined; if (!key) { key = "anon-" + Math.random().toString(36).slice(2, 10); sessionStorage.setItem("rela:anon", key); } }
+    // Una sola clave por navegador (localStorage): varias pestañas de la misma persona cuentan como una
+    try { key = localStorage.getItem("rela:anon") ?? undefined; if (!key) { key = "anon-" + Math.random().toString(36).slice(2, 10); localStorage.setItem("rela:anon", key); } }
     catch { key = "anon-" + Math.random().toString(36).slice(2, 10); }
   }
   channel = sb.channel("rela-online", { config: { presence: { key } } });
