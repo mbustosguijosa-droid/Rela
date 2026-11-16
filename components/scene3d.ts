@@ -692,23 +692,30 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
       meshesOf(m).forEach((p) => { const mat = p.material as THREE.MeshStandardMaterial; mat.envMapIntensity = 1.4; if (mat.metalness < 0.5 && mat.color.r > 0.5) { mat.metalness = 0.9; mat.roughness = 0.22; } });
       phone.add(holder); body.visible = false; glassTop.visible = false;
     }),
-    // Cascos reales de pie sobre la mesa (apoyados en los auriculares), con sombra y el cable al móvil
+    // Cascos reales tumbados en plano sobre la mesa: los auriculares giran por su articulación (como al dejarlos de verdad)
     loadGLB("/models/headphones2.glb").then((m) => {
       if (!m) return;
-      m.updateMatrixWorld(true);
-      const box = new THREE.Box3().setFromObject(m), sz = box.getSize(new THREE.Vector3()), k = 1.05 / sz.x;
-      m.position.set(-(box.min.x + sz.x / 2), -box.min.y, -(box.min.z + sz.z / 2));
-      const holder = new THREE.Group(); holder.add(m); holder.scale.setScalar(k);
-      holder.position.set(-1.75, 0, 0.45); holder.rotation.y = 0.75;
-      meshesOf(m).forEach((p) => { const mat = p.material as THREE.MeshStandardMaterial; mat.envMapIntensity = 1.3; });
+      const bone = (n: string) => m.getObjectByName(n) ?? m.getObjectByName(n.replace(".", ""));
+      const L = bone("Shell.L"), R = bone("Shell.R");
+      if (L) L.rotation.y += Math.PI / 2;
+      if (R) R.rotation.y -= Math.PI / 2;
+      // las varillas de ajuste no siguen al giro de los auriculares: se ocultan para que no asomen
+      meshesOf(m).forEach((p) => { p.frustumCulled = false; const mat = p.material as THREE.MeshStandardMaterial; mat.envMapIntensity = 1.3; if (p.geometry.getAttribute("position").count <= 40 || /^Cylinder00[23]$/.test(p.name)) p.visible = false; });
+      const inner = new THREE.Group(); inner.add(m); inner.rotation.x = -Math.PI / 2; // almohadillas hacia la mesa
+      const holder = new THREE.Group(); holder.add(inner);
+      holder.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(holder, true), sz = box.getSize(new THREE.Vector3()), k = 1.25 / sz.x;
+      inner.position.set(-(box.min.x + sz.x / 2), -box.min.y, -(box.min.z + sz.z / 2));
+      holder.scale.setScalar(k); holder.position.set(-1.75, 0, 0.5); holder.rotation.y = -0.35; // diadema hacia el fondo
       scene.add(holder); phones.visible = false; phonesShadow.visible = false;
       holder.updateMatrixWorld(true);
-      // sombra bajo cada auricular y una más suave bajo el conjunto
-      [-1, 1].forEach((side) => { const c = new THREE.Vector3(side * sz.x * 0.4, 0, 0).applyMatrix4(holder.matrixWorld); blob(0.55, 0.55, c.x, c.z, 0.005, 0, 0.8); });
-      contactShadow(holder, 0.35);
-      // el cable sale de la parte baja del auricular más cercano al móvil
-      const a1 = new THREE.Vector3(sz.x * 0.42, sz.y * 0.1, 0).applyMatrix4(holder.matrixWorld), a2 = new THREE.Vector3(-sz.x * 0.42, sz.y * 0.1, 0).applyMatrix4(holder.matrixWorld);
-      const start = a1.distanceTo(jack) < a2.distanceTo(jack) ? a1 : a2;
+      // sombra suave del conjunto y una más oscura bajo cada auricular
+      contactShadow(holder, 0.45);
+      [-1, 1].forEach((side) => { const c = new THREE.Vector3(side * sz.x * 0.36, 0, sz.z * 0.15 - (box.min.z + sz.z / 2) * 0).applyMatrix4(holder.matrixWorld); blob(0.62, 0.62, c.x, c.z, 0.005, 0, 0.75); });
+      // el cable sale del auricular más cercano al móvil
+      const cups = [-1, 1].map((side) => new THREE.Vector3(side * sz.x * 0.36, 0.05 / k, 0).applyMatrix4(holder.matrixWorld));
+      const start = cups[0].distanceTo(jack) < cups[1].distanceTo(jack) ? cups[0] : cups[1];
+      start.y = 0.06;
       buildCable(start);
     }),
     // Monitor ultrapanorámico con la canción produciéndose en pantalla

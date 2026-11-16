@@ -37,16 +37,30 @@ export type Album = AlbumSummary & {
   link: string;
 };
 
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Pide algo a Deezer. Si Deezer está saturado (límite de 50 peticiones cada 5 s) responde con un error
+ * que antes se quedaba guardado en caché una hora y hacía desaparecer artistas y discos: ahora se reintenta
+ * sin caché, con esperas cortas, y los errores nunca se dan por buenos.
+ */
 async function get<T>(path: string, revalidate = 3600): Promise<T | null> {
-  try {
-    const res = await fetch(API + path, { next: { revalidate } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (data && typeof data === "object" && "error" in data) return null;
-    return data as T;
-  } catch {
-    return null;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const res = await fetch(API + path, attempt === 0 ? { next: { revalidate } } : { cache: "no-store" });
+      if (!res.ok) { await wait(300 * (attempt + 1)); continue; }
+      const data = await res.json();
+      if (data && typeof data === "object" && "error" in data) {
+        const code = (data as { error?: { code?: number } }).error?.code;
+        if (code === 800) return null; // no existe de verdad
+        await wait(400 * (attempt + 1)); continue; // saturado u otro fallo temporal: reintentar
+      }
+      return data as T;
+    } catch {
+      await wait(300 * (attempt + 1));
+    }
   }
+  return null;
 }
 
 export async function searchAlbums(q: string, limit = 24) {
@@ -116,7 +130,7 @@ const NOISE = /\b(live|en vivo|directo|demo|tour|tiny desk|first take|remix|vers
 /** Lanzamientos más recientes de una lista de artistas (para "Novedades"). */
 export async function getLatestFrom(artistIds: number[], perArtist = 1) {
   const today = new Date().toISOString().slice(0, 10);
-  const lists = await pool(artistIds, 6, async (id) => {
+  const lists = await pool(artistIds, 4, async (id) => {
     const [artist, releases] = await Promise.all([getArtist(id), getArtistReleases(id)]);
     return releases
       .filter((a) => a.release_date && a.release_date <= today && !NOISE.test(a.title))
