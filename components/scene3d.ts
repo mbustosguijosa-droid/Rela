@@ -894,8 +894,9 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
       // Con "reducir movimiento" activado (muy habitual en Windows) se hace igual, pero más corta
       going = { p: 0, ms: reduce ? 800 : 1500, done };
       // Si aún estaba cargando, se arranca ya: mejor entrar con la escena a medias que no responder
-      if (!started) { started = true; ready = true; renderer.domElement.style.opacity = "1"; alive = true; last = 0; cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); }
-      else if (!alive) { alive = true; last = 0; raf = requestAnimationFrame(loop); }
+      if (!started) { started = true; ready = true; renderer.domElement.style.opacity = "1"; }
+      // Arranca siempre el bucle: con "reducir animaciones" (Windows) la escena está quieta y no había bucle que moviera la cámara
+      alive = true; last = 0; cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
     },
     dispose() {
       alive = false; cancelAnimationFrame(raf); window.removeEventListener("resize", onResize);
