@@ -33,7 +33,7 @@ export function ShareRating({ album, r, viewer, onClose }: { album: Album; r: Ra
   const cv = useRef<HTMLCanvasElement>(null);
   const [fmt, setFmt] = useState<Fmt>("story");
   const [sty, setSty] = useState<Sty>("color");
-  const [content, setContent] = useState<"all" | "summary">(album.tracks.length > 1 ? "all" : "summary");
+  const [content, setContent] = useState<"all" | "summary" | "curve">(album.tracks.length > 1 ? "all" : "summary");
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const vals = Object.values(r.tracks);
@@ -72,6 +72,27 @@ export function ShareRating({ album, r, viewer, onClose }: { album: Album; r: Ra
     const worst = rated.length > 1 ? rated.reduce((m, x) => (x[1] < m[1] ? x : m)) : null;
     const top = [...rated].sort((a, b) => b[1] - a[1]).slice(0, 3);
     const full = content === "all" && album.tracks.length > 1;
+    const curve = content === "curve" && album.tracks.length > 1;
+
+    /** La curva del disco: una barra por canción, alta según la nota, la favorita con estrella. */
+    const curveChart = (x0: number, y0: number, w: number, h: number) => {
+      const n = album.tracks.length, gap = Math.max(4, Math.min(16, (w / n) * 0.22)), bw = (w - gap * (n - 1)) / n, base = y0 + h;
+      c.strokeStyle = paper ? "rgba(23,20,28,.12)" : "rgba(255,255,255,.12)"; c.lineWidth = 2;
+      c.fillStyle = mute; c.font = `500 22px ${mono}`; c.textAlign = "right";
+      [10, 8, 6, 4, 2].forEach((g) => { const y = base - (g / 10) * h; c.beginPath(); c.setLineDash([6, 10]); c.moveTo(x0, y); c.lineTo(x0 + w, y); c.stroke(); c.setLineDash([]); c.fillText(String(g), x0 - 14, y + 8); });
+      c.textAlign = "left";
+      album.tracks.forEach((_, i) => {
+        const v = r.tracks[i] ?? null, x = x0 + i * (bw + gap), bh = v == null ? 8 : (v / 10) * h;
+        const g = c.createLinearGradient(0, base - bh, 0, base); const col = scoreCol(v, paper);
+        g.addColorStop(0, col); g.addColorStop(1, col + (paper ? "66" : "55"));
+        c.fillStyle = v == null ? (paper ? "rgba(23,20,28,.15)" : "rgba(255,255,255,.15)") : g;
+        roundRect(c, x, base - bh, bw, bh, Math.min(14, bw * 0.3, bh / 2)); c.fill();
+        const isFav = (favR && favR[0] === i) || (!favR && best && best[0] === i);
+        if (v != null && bw > 34) { c.fillStyle = ink; c.font = `700 ${Math.min(30, bw * 0.42)}px ${mono}`; c.textAlign = "center"; c.fillText(f1(v), x + bw / 2, base - bh - 14); }
+        if (isFav) { c.fillStyle = scoreCol(10, paper); c.font = `700 ${Math.min(40, bw * 0.6)}px ${body}`; c.textAlign = "center"; c.fillText("★", x + bw / 2, base - bh - (bw > 34 ? 52 : 14)); }
+        c.fillStyle = mute; c.font = `500 ${Math.min(24, bw * 0.45)}px ${mono}`; c.textAlign = "center"; c.fillText(String(i + 1), x + bw / 2, base + 34); c.textAlign = "left";
+      });
+    };
 
     const trackList = (x0: number, y0: number, w: number, h: number, cols: number) => {
       const n = album.tracks.length, rows = Math.ceil(n / cols), gap = 24, cw = (w - (cols - 1) * gap) / cols;
@@ -98,7 +119,22 @@ export function ShareRating({ album, r, viewer, onClose }: { album: Album; r: Ra
     if (fmt === "story") {
       logo(80, 130, 44);
       c.fillStyle = mute; c.font = `600 26px ${body}`; c.textAlign = "right"; c.fillText(full ? t.share.trackByTrack : t.share.myScore, W - 80, 122); c.textAlign = "left";
-      if (full) {
+      if (curve) {
+        c.save(); c.shadowColor = "rgba(0,0,0,.5)"; c.shadowBlur = 40; c.shadowOffsetY = 18; if (cover) c.drawImage(cover, 80, 190, 310, 310); c.restore();
+        c.fillStyle = ink; c.font = `800 58px ${disp}`; const y = wrap(c, album.title, 420, 250, 580, 62, 2);
+        c.fillStyle = mute; c.font = `500 32px ${body}`; c.fillText(fit(c, album.artist, 580), 420, y + 2);
+        c.fillStyle = scoreCol(score, paper); c.font = `600 120px ${mono}`; c.fillText(f1(score), 412, 492);
+        const sw = c.measureText(f1(score)).width; c.fillStyle = mute; c.font = `500 36px ${mono}`; c.fillText("/10", 412 + sw + 8, 492);
+        c.fillStyle = mute; c.font = `700 26px ${body}`; c.fillText(t.share.curveTitle, 80, 640);
+        c.font = `500 26px ${body}`; c.fillText(t.share.curveHint, 80, 680);
+        curveChart(124, 790, W - 204, 640);
+        if (top.length) {
+          c.fillStyle = mute; c.font = `700 24px ${body}`; c.fillText(t.share.topTracks, 80, 1560);
+          top.slice(0, 2).forEach(([i, v], k) => { c.fillStyle = ink; c.font = `500 32px ${body}`; c.fillText(fit(c, `${i + 1}. ${album.tracks[i]}`, 760), 80, 1610 + k * 50); c.fillStyle = scoreCol(v, paper); c.font = `600 32px ${mono}`; c.textAlign = "right"; c.fillText(f1(v), W - 80, 1610 + k * 50); c.textAlign = "left"; });
+        }
+        await avatar(80, 1790, 72); c.fillStyle = ink; c.font = `700 32px ${body}`; c.fillText("@" + handle, 172, 1838);
+        c.fillStyle = mute; c.font = `500 26px ${body}`; c.textAlign = "right"; c.fillText(t.share.cta, W - 80, 1838); c.textAlign = "left";
+      } else if (full) {
         c.save(); c.shadowColor = "rgba(0,0,0,.5)"; c.shadowBlur = 40; c.shadowOffsetY = 18; if (cover) c.drawImage(cover, 80, 190, 310, 310); c.restore();
         c.fillStyle = ink; c.font = `800 58px ${disp}`; const y = wrap(c, album.title, 420, 250, 580, 62, 2);
         c.fillStyle = mute; c.font = `500 32px ${body}`; c.fillText(fit(c, album.artist, 580), 420, y + 2);
@@ -120,6 +156,16 @@ export function ShareRating({ album, r, viewer, onClose }: { album: Album; r: Ra
         await avatar(90, 1815, 70); c.fillStyle = ink; c.font = `700 32px ${body}`; c.fillText("@" + handle, 180, 1862);
         c.fillStyle = mute; c.font = `500 26px ${body}`; c.textAlign = "right"; c.fillText(t.share.ctaShort, W - 90, 1860); c.textAlign = "left";
       }
+    } else if (curve) {
+      c.save(); c.shadowColor = "rgba(0,0,0,.5)"; c.shadowBlur = 30; c.shadowOffsetY = 14; if (cover) c.drawImage(cover, 60, 60, 210, 210); c.restore();
+      c.fillStyle = ink; c.font = `800 48px ${disp}`; const y = wrap(c, album.title, 300, 112, 470, 52, 2);
+      c.fillStyle = mute; c.font = `500 28px ${body}`; c.fillText(fit(c, album.artist, 470), 300, y);
+      c.fillStyle = scoreCol(score, paper); c.font = `600 96px ${mono}`; c.textAlign = "right"; c.fillText(f1(score), W - 60, 190); c.textAlign = "left";
+      logo(W - 200, 252, 28);
+      c.fillStyle = mute; c.font = `700 22px ${body}`; c.fillText(t.share.curveTitle, 60, 340);
+      curveChart(100, 420, W - 160, 460);
+      await avatar(60, 985, 60); c.fillStyle = ink; c.font = `700 28px ${body}`; c.fillText("@" + handle, 136, 1025);
+      c.fillStyle = mute; c.font = `500 22px ${body}`; c.textAlign = "right"; c.fillText(t.share.cta, W - 60, 1025); c.textAlign = "left";
     } else if (full) {
       c.save(); c.shadowColor = "rgba(0,0,0,.5)"; c.shadowBlur = 30; c.shadowOffsetY = 14; if (cover) c.drawImage(cover, 60, 60, 210, 210); c.restore();
       c.fillStyle = ink; c.font = `800 48px ${disp}`; const y = wrap(c, album.title, 300, 112, 470, 52, 2);
@@ -187,8 +233,8 @@ export function ShareRating({ album, r, viewer, onClose }: { album: Album; r: Ra
         <div className="opts">
           <h2 id="share-title">{t.share.title}</h2>
           <p>{t.share.intro}</p>
-          {album.tracks.length > 1 && <div><div className="lbl">{t.share.content}</div><div className="seg">{chip(content, setContent, "all", t.share.allTracks)}{chip(content, setContent, "summary", t.share.summary)}</div>
-            {missing && content === "all" && <p style={{ fontSize: 12, marginTop: 8 }}>{t.share.missing}</p>}</div>}
+          {album.tracks.length > 1 && <div><div className="lbl">{t.share.content}</div><div className="seg">{chip(content, setContent, "all", t.share.allTracks)}{chip(content, setContent, "summary", t.share.summary)}{chip(content, setContent, "curve", t.share.curveOpt)}</div>
+            {missing && content !== "summary" && <p style={{ fontSize: 12, marginTop: 8 }}>{t.share.missing}</p>}</div>}
           <div><div className="lbl">{t.share.format}</div><div className="seg">{chip(fmt, setFmt, "story", t.share.story)}{chip(fmt, setFmt, "post", t.share.post)}</div></div>
           <div><div className="lbl">{t.share.style}</div><div className="seg">{chip(sty, setSty, "color", t.share.sColor)}{chip(sty, setSty, "dark", t.share.sDark)}{chip(sty, setSty, "paper", t.share.sPaper)}</div></div>
           <div className="share-to">

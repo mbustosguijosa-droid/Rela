@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { addReply, report, toggleReaction } from "@/app/actions";
+import { addReply, toggleReaction } from "@/app/actions";
+import { ReportButton } from "./ReportButton";
 import { Avatar } from "./Avatar";
 import { cls, f1, nf } from "@/lib/format";
 import { timeAgoT, translateUrl } from "@/lib/i18n";
@@ -83,7 +84,7 @@ export function ReviewCard({ rv, viewer, showRelease = false }: { rv: ReviewView
             {replies.map((rp) => (
               <div className="reply" key={rp.id}>
                 <Link href={rp.author ? `/u/${rp.author.handle}` : "#"}><Avatar p={rp.author} size={26} /></Link>
-                <div><b>{rp.author?.name || rp.author?.handle}</b><small>{timeAgoT(t, rp.created_at)}</small><p>{rp.body}<a className="tr-link" href={translateUrl(rp.body, lang)} target="_blank" rel="noopener" title={t.common.translateTitle}>{t.common.translate}</a></p></div>
+                <div><b>{rp.author?.name || rp.author?.handle}</b><small>{timeAgoT(t, rp.created_at)}</small>{viewer && rp.author && rp.author.id !== viewer.id && <ReportButton type="reply" id={rp.id} done={t.grow.reportedReply} />}<p>{rp.body}<a className="tr-link" href={translateUrl(rp.body, lang)} target="_blank" rel="noopener" title={t.common.translateTitle}>{t.common.translate}</a></p></div>
               </div>
             ))}
             {viewer ? (
@@ -92,7 +93,7 @@ export function ReviewCard({ rv, viewer, showRelease = false }: { rv: ReviewView
                 <button className="btn sm primary" disabled={pending || !text.trim()}>{t.reviews.reply}</button>
               </form>
             ) : <p className="muted" style={{ fontSize: 13, margin: 0 }}><Link className="linkbtn" href="/entrar">{t.reviews.enter}</Link> {t.reviews.toReply}</p>}
-            {viewer && !isMine && <button className="linkbtn" style={{ alignSelf: "flex-start", color: "var(--muted)" }} onClick={() => start(async () => { const r = await report("review", rv.id); flash(r.ok ? t.reviews.reported : r.error); })}>{t.reviews.report}</button>}
+            {viewer && !isMine && <ReportButton type="review" id={rv.id} label={t.reviews.report} />}
           </div>
         )}
       </div>

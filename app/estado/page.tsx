@@ -30,7 +30,7 @@ async function runChecks(): Promise<Check[]> {
             : `Error: ${error.message}`
           : "Conecta y las tablas existen.",
       });
-      const tables = ["releases", "ratings", "track_ratings", "reviews", "review_reactions", "replies", "follows", "reports", "artist_follows", "messages", "blocks", "music_links", "now_playing", "music_snapshots"];
+      const tables = ["releases", "ratings", "track_ratings", "reviews", "review_reactions", "replies", "follows", "reports", "artist_follows", "messages", "blocks", "music_links", "now_playing", "music_snapshots", "notifications", "admins"];
       const missing: string[] = [];
       for (const t of tables) {
         const { error: e } = await sb!.from(t).select("*", { count: "exact", head: true });

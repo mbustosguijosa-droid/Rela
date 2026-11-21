@@ -10,6 +10,7 @@ import { NavLinks } from "./NavLinks";
 import { getViewer } from "@/lib/auth";
 import { getT } from "@/lib/i18n-server";
 import { unreadCount } from "@/lib/messages";
+import { unreadNotifs } from "@/lib/community";
 
 const I = {
   home: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z" strokeLinejoin="round" /></svg>,
@@ -21,7 +22,7 @@ const I = {
 
 export async function Header() {
   const [{ sb, user, profile }, { t }] = await Promise.all([getViewer(), getT()]);
-  const unread = sb && user ? await unreadCount(sb, user.id) : 0;
+  const [unread, notifs] = sb && user ? await Promise.all([unreadCount(sb, user.id), unreadNotifs(sb, user.id)]) : [0, 0];
   const items = [
     { href: "/", label: t.nav.home },
     { href: "/buscar", label: t.nav.explore },
@@ -38,6 +39,12 @@ export async function Header() {
             {I.search}
             <input name="q" type="search" placeholder={t.nav.searchPh} aria-label={t.nav.searchLabel} autoComplete="off" />
           </form>
+          {user && (
+            <Link href="/avisos" className="bell" aria-label={notifs ? `${t.grow.notifs}: ${notifs}` : t.grow.notifs}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z" strokeLinejoin="round" /><path d="M10 20.5a2.2 2.2 0 0 0 4 0" strokeLinecap="round" /></svg>
+              {notifs > 0 && <span className="badge-n">{notifs > 9 ? "9+" : notifs}</span>}
+            </Link>
+          )}
           <AccentPicker initial={decodeURIComponent((await cookies()).get(ACCENT_COOKIE)?.value ?? DEFAULT_ACCENT)} />
           <LangSwitch />
           {user ? (

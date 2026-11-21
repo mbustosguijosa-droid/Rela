@@ -11,8 +11,12 @@ export type Profile = {
 export const getViewer = cache(async () => {
   const sb = await supabaseServer();
   if (!sb) return { sb: null, user: null, profile: null } as const;
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return { sb, user: null, profile: null } as const;
+  // getClaims comprueba la sesión sin ir a internet (firma del token) cuando el proyecto usa claves asimétricas;
+  // antes, getUser hacía un viaje a Supabase en cada página y cada clic.
+  const { data } = await sb.auth.getClaims();
+  const sub = data?.claims?.sub;
+  if (!sub) return { sb, user: null, profile: null } as const;
+  const user = { id: sub, email: (data.claims.email as string | undefined) ?? null };
   const { data: profile } = await sb.from("profiles").select("*").eq("id", user.id).maybeSingle<Profile>();
   return { sb, user, profile } as const;
 });

@@ -352,8 +352,11 @@ async function drawScreen(g: CanvasRenderingContext2D, info: ScreenInfo): Promis
 export function createScene(container: HTMLElement, initial: ScreenInfo, onAction: (a: ScreenAction) => void) {
   let info = initial;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const maxDpr = Math.min(window.devicePixelRatio || 1, 2);
-  let dpr = Math.min(maxDpr, 1.5);
+  // Calidad máxima: en ordenador se pinta a 2x aunque la pantalla sea 1x (supermuestreo = bordes y texturas nítidos);
+  // si el equipo no llega a 60 fps, el bucle la baja sola.
+  const touch = matchMedia("(pointer: coarse)").matches;
+  const maxDpr = touch ? Math.min(window.devicePixelRatio || 1, 2) : 2;
+  let dpr = touch ? Math.min(maxDpr, 1.5) : maxDpr;
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(dpr);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -754,7 +757,7 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
 
   /* Cámara quieta de frente: mesa delante y el estudio abriéndose al fondo */
   const target = new THREE.Vector3(), startPos = new THREE.Vector3();
-  let going: { start: number; done: () => void } | null = null;
+  let going: { p: number; ms: number; done: () => void } | null = null;
   function fit() {
     const w = container.clientWidth, h = container.clientHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h;
@@ -818,7 +821,10 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
     (window as unknown as { __relaFrame?: number }).__relaFrame = Math.round(dt);
     if (!reduce || going) ambient(now);
     if (going) {
-      const p = Math.min(1, (now - going.start) / 1500), e = ease(p);
+      // El avance se suma por fotograma con un tope: si el equipo da un tirón (cargar la página de detrás,
+      // compilar algo), la animación se ralentiza en vez de saltarse entera.
+      going.p = Math.min(1, going.p + Math.min(dt, 34) / going.ms);
+      const p = going.p, e = ease(p);
       camera.position.lerpVectors(fromPos, endPos, e);
       camera.up.lerpVectors(fromUp, endUp, e).normalize();
       camera.lookAt(tmp.lerpVectors(fromLook, endLook, e));
@@ -836,7 +842,18 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
   fit();
   renderer.domElement.style.opacity = "0";
   renderer.domElement.style.transition = "opacity .5s ease";
-  Promise.race([models, new Promise((r) => setTimeout(r, 5000))]).then(() => renderer.compileAsync(scene, camera)).catch(() => null).then(() => {
+  // Filtrado anisótropo al máximo: las texturas inclinadas (mesa, suelo, pantallas) no se emborronan
+  const aniso = renderer.capabilities.getMaxAnisotropy();
+  const sharpen = () => scene.traverse((o) => {
+    const m = (o as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
+    (Array.isArray(m) ? m : m ? [m] : []).forEach((x) => {
+      (["map", "normalMap", "roughnessMap", "metalnessMap", "emissiveMap", "aoMap"] as const).forEach((k) => {
+        const tex = (x as unknown as Record<string, THREE.Texture | null>)[k];
+        if (tex && tex.anisotropy !== aniso) { tex.anisotropy = aniso; tex.needsUpdate = true; }
+      });
+    });
+  });
+  Promise.race([models, new Promise((r) => setTimeout(r, 5000))]).then(() => { sharpen(); return renderer.compileAsync(scene, camera); }).catch(() => null).then(() => {
     ready = true; t0 = performance.now();
     renderer.domElement.style.opacity = "1";
     if (reduce) { kick(); render(); } else raf = requestAnimationFrame(loop);
@@ -876,7 +893,8 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
       const dist = Math.min((PL - 0.08) / 2 / Math.tan(fovH), (PW - 0.06) / 2 / (Math.tan(fovH) * camera.aspect)) * 0.92;
       fromPos.copy(camera.position); fromUp.copy(camera.up); fromLook.copy(target);
       endLook.copy(center); endPos.copy(center).addScaledVector(normal, dist); endUp.copy(top);
-      going = { start: performance.now(), done };
+      // Con "reducir movimiento" activado (muy habitual en Windows) se hace igual, pero más corta
+      going = { p: 0, ms: reduce ? 800 : 1500, done };
       if (!alive) { alive = true; last = 0; raf = requestAnimationFrame(loop); }
     },
     dispose() {

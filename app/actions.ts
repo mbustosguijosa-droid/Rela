@@ -10,6 +10,9 @@ const E = async () => (await getT()).t.errors;
 
 type Result = { ok: true } | { ok: false; error: string };
 const needLogin = async () => ({ ok: false, error: (await E()).login }) as const;
+/** Texto de error para la persona: el límite anti-spam de la base de datos se traduce. */
+const errText = async (e: { message: string } | null | undefined, fallback = "") =>
+  e?.message?.includes("rate_limit") ? (await getT()).t.grow.tooFast : e?.message || fallback;
 
 async function viewerOrNull() {
   const v = await getViewer();
@@ -27,7 +30,7 @@ export async function saveRating(releaseId: number, r: { tracks: Record<number, 
     user_id: v.user.id, release_id: releaseId, overall: final == null ? null : Math.round(final * 10) / 10,
     manual: r.overall != null, fav_track: r.fav, listened: r.listened, liked: r.liked, updated_at: new Date().toISOString(),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await errText(error) };
   await v.sb.from("track_ratings").delete().eq("user_id", v.user.id).eq("release_id", releaseId);
   const rows = Object.entries(r.tracks).filter(([, s]) => s >= 1 && s <= 10).map(([i, s]) => ({ user_id: v.user.id, release_id: releaseId, track_index: +i, score: s }));
   if (rows.length) { const { error: e2 } = await v.sb.from("track_ratings").insert(rows); if (e2) return { ok: false, error: e2.message }; }
@@ -44,7 +47,7 @@ export async function toggleTop4(releaseId: number): Promise<Result> {
   if (favs.includes(releaseId)) next = favs.filter((x) => x !== releaseId);
   else { if (favs.length >= 4) return { ok: false, error: (await E()).top4Full }; next = [...favs, releaseId]; }
   const { error } = await v.sb.from("profiles").update({ favorites: next }).eq("id", v.user.id);
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await errText(error) };
   revalidatePath("/", "layout");
   return { ok: true };
 }
@@ -52,7 +55,7 @@ export async function toggleTop4(releaseId: number): Promise<Result> {
 export async function setTop4(ids: number[]): Promise<Result> {
   const v = await viewerOrNull(); if (!v) return needLogin();
   const { error } = await v.sb.from("profiles").update({ favorites: ids.slice(0, 4) }).eq("id", v.user.id);
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await errText(error) };
   revalidatePath("/", "layout");
   return { ok: true };
 }
@@ -61,7 +64,7 @@ export async function setLoop(releaseId: number | null): Promise<Result> {
   const v = await viewerOrNull(); if (!v) return needLogin();
   if (releaseId) await ensureRelease(v.sb, releaseId);
   const { error } = await v.sb.from("profiles").update({ loop_release_id: releaseId }).eq("id", v.user.id);
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await errText(error) };
   revalidatePath("/", "layout");
   return { ok: true };
 }
@@ -76,7 +79,7 @@ export async function saveReview(releaseId: number, body: string): Promise<Resul
     if (text.length > 5000) return { ok: false, error: (await E()).reviewLong };
     await ensureRelease(v.sb, releaseId);
     const { error } = await v.sb.from("reviews").upsert({ user_id: v.user.id, release_id: releaseId, body: text, updated_at: new Date().toISOString() }, { onConflict: "user_id,release_id" });
-    if (error) return { ok: false, error: error.message };
+    if (error) return { ok: false, error: await errText(error) };
   }
   revalidatePath(`/album/${releaseId}`);
   return { ok: true };
@@ -90,7 +93,7 @@ export async function toggleReaction(reviewId: string, kind: string, on: boolean
     ? v.sb.from("review_reactions").upsert({ review_id: reviewId, user_id: v.user.id, kind })
     : v.sb.from("review_reactions").delete().eq("review_id", reviewId).eq("user_id", v.user.id).eq("kind", kind);
   const { error } = await q;
-  return error ? { ok: false, error: error.message } : { ok: true };
+  return error ? { ok: false, error: await errText(error) } : { ok: true };
 }
 
 export async function addReply(reviewId: string, body: string): Promise<{ ok: true; reply: { id: string; body: string; created_at: string } } | { ok: false; error: string }> {
@@ -99,13 +102,36 @@ export async function addReply(reviewId: string, body: string): Promise<{ ok: tr
   if (!text) return { ok: false, error: (await E()).writeSomething };
   if (text.length > 1000) return { ok: false, error: (await E()).replyLong };
   const { data, error } = await v.sb.from("replies").insert({ review_id: reviewId, user_id: v.user.id, body: text }).select("id, body, created_at").single();
-  if (error || !data) return { ok: false, error: error?.message ?? (await E()).cantPublish };
+  if (error || !data) return { ok: false, error: await errText(error, (await E()).cantPublish) };
   return { ok: true, reply: data };
 }
 
+const REASONS = ["spam", "odio", "sexual", "suplanta", "otro"];
 export async function report(targetType: "review" | "reply" | "profile" | "conversation", targetId: string, reason = ""): Promise<Result> {
   const v = await viewerOrNull(); if (!v) return needLogin();
-  const { error } = await v.sb.from("reports").insert({ reporter_id: v.user.id, target_type: targetType, target_id: targetId, reason });
+  const { error } = await v.sb.from("reports").insert({ reporter_id: v.user.id, target_type: targetType, target_id: targetId, reason: REASONS.includes(reason) ? reason : "" });
+  if (error?.code === "23505") return { ok: false, error: (await getT()).t.grow.alreadyReported };
+  return error ? { ok: false, error: await errText(error) } : { ok: true };
+}
+
+/* ---------- Avisos ---------- */
+export async function markNotifsRead(): Promise<Result> {
+  const v = await viewerOrNull(); if (!v) return needLogin();
+  const { error } = await v.sb.from("notifications").update({ read: true }).eq("user_id", v.user.id).eq("read", false);
+  if (!error) revalidatePath("/", "layout");
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+/* ---------- Moderación (solo admins; la base de datos lo vuelve a comprobar) ---------- */
+export async function moderate(targetType: "review" | "reply" | "profile" | "conversation", targetId: string, action: "hide" | "restore" | "dismiss"): Promise<Result> {
+  const v = await viewerOrNull(); if (!v) return needLogin();
+  const table = targetType === "review" ? "reviews" : targetType === "reply" ? "replies" : null;
+  if (table && action !== "dismiss") {
+    const { error } = await v.sb.from(table).update({ hidden: action === "hide" }).eq("id", targetId);
+    if (error) return { ok: false, error: error.message };
+  }
+  const { error } = await v.sb.from("reports").update({ status: action === "hide" ? "hidden" : "dismissed" }).eq("target_type", targetType).eq("target_id", targetId);
+  revalidatePath("/moderacion");
   return error ? { ok: false, error: error.message } : { ok: true };
 }
 
@@ -116,7 +142,7 @@ export async function toggleFollow(userId: string, on: boolean): Promise<Result>
   const { error } = on
     ? await v.sb.from("follows").upsert({ follower_id: v.user.id, followee_id: userId })
     : await v.sb.from("follows").delete().eq("follower_id", v.user.id).eq("followee_id", userId);
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await errText(error) };
   revalidatePath("/", "layout");
   return { ok: true };
 }
@@ -144,7 +170,7 @@ export async function sendMessage(toId: string, body: string): Promise<{ ok: tru
   if (error || !data) {
     const m = error?.message ?? "";
     const msg = error?.code === "42P01" || error?.code === "PGRST205" || /messages.*(does not exist|not find)/i.test(m) ? t.dm.sql004
-      : error?.code === "42501" || /row-level security/i.test(m) ? t.dm.cantSend : m || t.dm.cantSend;
+      : error?.code === "42501" || /row-level security/i.test(m) ? t.dm.cantSend : await errText(error, t.dm.cantSend);
     return { ok: false, error: msg };
   }
   return { ok: true, message: data };
@@ -162,7 +188,7 @@ export async function toggleBlock(userId: string, on: boolean): Promise<Result> 
   const { error } = on
     ? await v.sb.from("blocks").upsert({ user_id: v.user.id, blocked_id: userId })
     : await v.sb.from("blocks").delete().eq("user_id", v.user.id).eq("blocked_id", userId);
-  return error ? { ok: false, error: error.message } : { ok: true };
+  return error ? { ok: false, error: await errText(error) } : { ok: true };
 }
 
 /* ---------- Spotify / Last.fm ---------- */
@@ -199,7 +225,7 @@ export async function disconnectMusic(source: "spotify" | "lastfm"): Promise<Res
 export async function setShareListening(on: boolean): Promise<Result> {
   const v = await viewerOrNull(); if (!v) return needLogin();
   const { error } = await v.sb.from("music_links").upsert({ user_id: v.user.id, share_listening: on, updated_at: new Date().toISOString() });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await errText(error) };
   revalidatePath("/", "layout");
   return { ok: true };
 }

@@ -790,3 +790,76 @@ button.online-now:active { transform: translateY(1px) }
 .online-pop li small { font-size: 12px; color: var(--muted) }
 .anon-dot { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; background: #09070b; color: var(--led-on); box-shadow: inset 0 1px 3px rgba(0,0,0,.8) }
 @media (prefers-reduced-motion: reduce) { .online-pop { animation: none } }
+
+/* ===================== Crecimiento: De culto, semana, avisos, moderación ===================== */
+.cult-m { display: flex; align-items: center; gap: 8px }
+.cult-m .tier { font-size: 10px; padding: 1px 7px }
+.level-chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 0 0 8px; font-size: 13px }
+.level-chips > span { margin-right: 4px; text-transform: uppercase; letter-spacing: .08em; font-size: 11px; font-weight: 600 }
+.lv { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 13px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; color: var(--muted); transition: color .15s var(--ease-out, ease), border-color .15s var(--ease-out, ease) }
+.lv::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--line) }
+.lv.culto::before { background: var(--t-culto) } .lv.under::before { background: var(--t-under) }
+.lv.on { color: var(--fg); border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent) }
+.lv.on::before { box-shadow: 0 0 8px currentColor }
+@media (hover: hover) { .lv:hover { color: var(--fg) } }
+
+.weekly { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px }
+@media (max-width: 760px) { .weekly { grid-template-columns: minmax(0, 1fr) } }
+.week-card { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); min-width: 0 }
+.wk-label { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent) }
+.wk-label .muted { letter-spacing: .04em; text-transform: none; font-weight: 500 }
+.wk-rec { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: 14px; align-items: center }
+.wk-rec img { width: 84px; height: 84px; border-radius: 6px; object-fit: cover; box-shadow: 0 10px 24px rgba(0,0,0,.45) }
+.wk-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
+.wk-txt b { font-family: var(--f-display); font-size: 20px; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.wk-txt span, .wk-txt small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.wk-txt small { color: var(--muted); font-size: 12px }
+.score.big { font-size: 34px }
+.wk-empty { margin: 0 }
+.chal-t { font-family: var(--f-display); font-size: 19px; line-height: 1.2 }
+.chal-meter { display: flex; gap: 6px }
+.chal-meter i { flex: 1; height: 10px; border-radius: 3px; background: var(--surface-2); box-shadow: inset 0 1px 2px rgba(0,0,0,.5) }
+.chal-meter i.on { background: var(--accent); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 55%, transparent) }
+.chal-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--muted) }
+.chal.done { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)) }
+.chal.done .chal-foot span { color: var(--fg); font-weight: 600 }
+
+.bell { position: relative; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; color: var(--muted); flex: none }
+.bell svg { width: 21px; height: 21px }
+.bell .badge-n { position: absolute; top: -3px; right: -5px; min-width: 18px; height: 18px; font-size: 10px; padding: 0 5px }
+@media (hover: hover) { .bell:hover { color: var(--fg); background: var(--surface-2) } }
+
+.report { position: relative; display: inline-flex }
+.report-btn { color: var(--muted); font-size: 12px }
+.reply .report { margin-left: 8px }
+.report-pop { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; display: flex; flex-direction: column; min-width: 220px; padding: 6px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); box-shadow: var(--shadow) }
+.p-actions .report-pop { left: auto; right: 0 }
+.report-pop small { padding: 6px 10px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em }
+.report-pop button { text-align: left; border: 0; background: none; color: var(--fg); font: 500 14px var(--f-body); padding: 9px 10px; border-radius: 8px }
+.report-pop button.muted { color: var(--muted) }
+@media (hover: hover) { .report-pop button:hover { background: var(--surface) } }
+
+.notifs { list-style: none; margin: 0; padding: 0 }
+.notif { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 4px; border-bottom: 1px solid var(--line) }
+.notif p { margin: 0; font-size: 14px; line-height: 1.45 }
+.notif p small { display: block; color: var(--muted); font-size: 12px }
+.notif.new { background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%) }
+.notif.new .nt-av { box-shadow: 0 0 0 2px var(--accent); border-radius: 50% }
+.nt-cover { width: 44px; height: 44px; border-radius: 4px; object-fit: cover }
+.nt-quote { display: block; color: var(--muted); font-style: italic; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+
+.mt-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px }
+.mt-list a { display: grid; grid-template-columns: 28px 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 4px; border-radius: 8px }
+.mt-list img { width: 52px; height: 52px; border-radius: 4px; object-fit: cover }
+.mt-n { font-family: var(--f-display); font-size: 24px; font-weight: 700; color: var(--muted); text-align: center }
+.mt-t { display: flex; flex-direction: column; min-width: 0 }
+.mt-t b, .mt-t span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+@media (hover: hover) { .mt-list a:hover { background: var(--surface) } }
+
+.mod-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px }
+.mod-item { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line) }
+.mod-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap }
+.mod-body { margin: 0; white-space: pre-wrap; border-left: 2px solid var(--line); padding-left: 12px }
+.mod-actions { display: flex; gap: 8px; align-items: center }
+.mod-actions .err { color: #ff7f7f }
+.weekly:has(> .week-card:only-child) { grid-template-columns: minmax(0, 1fr) }

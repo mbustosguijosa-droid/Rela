@@ -188,3 +188,46 @@ export async function getNicheDrops(followed: { artist_id: number }[], limit = 6
   const latest = await getLatestFrom(ids.slice(0, 12), 1);
   return latest.slice(0, limit);
 }
+
+/** Generador pseudoaleatorio estable (misma semilla → mismo orden), para que la selección cambie cada día y no en cada visita. */
+export function seeded(seed: number) {
+  let s = seed >>> 0 || 1;
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 2 ** 32; };
+}
+export const dayKey = (d = new Date()) => Math.floor(d.getTime() / 864e5);
+
+export type CultPick = AlbumSummary & { artist: Artist & { nb_fan: number } };
+
+/**
+ * "Hoy en De culto": artistas con menos de 100.000 fans (y más de 300, para evitar perfiles vacíos)
+ * sacados de los relacionados de una semilla, con su último disco. La selección rota cada día.
+ * maxFans = 10_000 para quedarse solo con lo underground.
+ */
+export async function getCultPicks(seedIds: number[], limit = 10, opts: { maxFans?: number; minFans?: number; day?: number } = {}): Promise<CultPick[]> {
+  const maxFans = opts.maxFans ?? 100_000, minFans = opts.minFans ?? 300;
+  const rnd = seeded((opts.day ?? dayKey()) * 7919 + seedIds.length);
+  const seeds = [...new Set(seedIds)].sort(() => rnd() - 0.5).slice(0, 8);
+  const exclude = new Set(seedIds);
+  let all = (await pool(seeds, 4, (id) => getRelated(id, 20))).flat();
+  const small = (a: Artist) => (a.nb_fan ?? 0) >= minFans && (a.nb_fan ?? 0) < maxFans;
+  if (all.filter(small).length < limit) {
+    // Semillas muy famosas: se baja un escalón más, desde sus relacionados más pequeños
+    const step = [...new Map(all.map((a) => [a.id, a])).values()].sort((x, y) => (x.nb_fan ?? 0) - (y.nb_fan ?? 0)).slice(0, 5).map((a) => a.id);
+    all = all.concat((await pool(step, 4, (id) => getRelated(id, 20))).flat());
+  }
+  const seen = new Set<number>();
+  const cands = all.filter((a) => {
+    const f = a.nb_fan ?? 0;
+    if (f < minFans || f >= maxFans || exclude.has(a.id) || seen.has(a.id)) return false;
+    seen.add(a.id); return true;
+  }).sort(() => rnd() - 0.5).slice(0, limit + 4);
+  const today = new Date().toISOString().slice(0, 10);
+  const picks = await pool(cands, 4, async (ar) => {
+    const rel = (await getArtistReleases(ar.id))
+      .filter((x) => x.release_date && x.release_date <= today && !NOISE.test(x.title))
+      .sort((x, y) => (y.release_date ?? "").localeCompare(x.release_date ?? ""));
+    const best = rel.find((x) => x.record_type === "album" || x.record_type === "ep") ?? rel[0];
+    return best ? ({ ...best, artist: { ...ar, nb_fan: ar.nb_fan ?? 0 } } as CultPick) : null;
+  });
+  return picks.filter((p): p is CultPick => !!p).slice(0, limit);
+}

@@ -13,6 +13,8 @@ import { getT } from "@/lib/i18n-server";
 import { Icon } from "@/components/Icon";
 import { Suspense } from "react";
 import { ProfileMusic } from "@/components/ProfileMusic";
+import { ShareTop } from "@/components/ShareTop";
+import { ReportButton } from "@/components/ReportButton";
 
 type Props = { params: Promise<{ handle: string }> };
 
@@ -74,6 +76,10 @@ export default async function ProfilePage({ params }: Props) {
     liked: items.filter((r) => r.liked).length,
   };
   const badges = BADGES.filter((b) => b.test(st)).slice(0, 4);
+  // Top del mes: lo mejor puntuado desde el día 1
+  const now = new Date(), monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const monthName = now.toLocaleDateString(locale, { month: "long" });
+  const monthTop = items.filter((r) => r.overall != null && r.updated_at >= monthStart).sort((a, b) => Number(b.overall) - Number(a.overall)).slice(0, 5);
   const buckets = Array(10).fill(0) as number[];
   scores.forEach((s) => buckets[Math.min(9, Math.max(0, Math.round(s) - 1))]++);
   const mx = Math.max(1, ...buckets), tot = Math.max(1, st.n);
@@ -112,7 +118,7 @@ export default async function ProfilePage({ params }: Props) {
           </div>
           <div className="p-actions">
             {own ? <><Link className="btn" href="/perfil/editar">{t.profile.edit}</Link><Link className="btn" href="/perfil/musica"><Icon name="music" size={16} /> {t.music.settings}</Link></>
-              : <><FollowButton userId={p.id} initial={myFollowing.includes(p.id)} loggedIn={!!user} /><Link className="btn" href={user ? `/mensajes/${p.handle}` : `/entrar?next=/mensajes/${p.handle}`}>{t.dm.message}</Link></>}
+              : <><FollowButton userId={p.id} initial={myFollowing.includes(p.id)} loggedIn={!!user} /><Link className="btn" href={user ? `/mensajes/${p.handle}` : `/entrar?next=/mensajes/${p.handle}`}>{t.dm.message}</Link>{user && <ReportButton type="profile" id={p.id} label={t.grow.reportProfile} done={t.grow.reportedProfile} />}</>}
           </div>
         </section>
 
@@ -123,6 +129,24 @@ export default async function ProfilePage({ params }: Props) {
           <div><b>{nf(followers ?? 0)}</b><span>{t.profile.followers}</span></div>
           <div><b>{nf(followingN ?? 0)}</b><span>{t.profile.following}</span></div>
         </div>
+
+        {monthTop.length > 0 && (
+          <section className="section month-top">
+            <div className="sec-head"><div><h2>{own ? t.grow.monthTop(monthName) : t.grow.monthTopOf(monthName)}</h2><span>{t.grow.monthTopSub}</span></div>
+              {own && <ShareTop month={monthName} handle={p.handle} items={monthTop.map((r) => ({ id: r.releases!.id, title: r.releases!.title, artist: r.releases!.artist_name, cover: r.releases!.cover_url ?? "", score: Number(r.overall) }))} />}</div>
+            <ol className="mt-list">
+              {monthTop.map((r, i) => (
+                <li key={r.release_id}><Link href={`/album/${r.releases!.id}`}>
+                  <span className="mt-n">{i + 1}</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={r.releases!.cover_url ?? ""} alt="" loading="lazy" />
+                  <span className="mt-t"><b>{r.releases!.title}</b><span className="muted">{r.releases!.artist_name}</span></span>
+                  <span className={`score s-${cls(r.overall)}`}>{f1(r.overall)}</span>
+                </Link></li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         {compat && (
           <div className="compat">

@@ -19,20 +19,27 @@ import { cls, f1 } from "@/lib/format";
 import { getT } from "@/lib/i18n-server";
 import { Intro, ReplayIntro } from "@/components/Intro";
 import { unreadCount } from "@/lib/messages";
+import { CultRow } from "@/components/CultRow";
+import { Weekly } from "@/components/Weekly";
+import { getChallenge, getRecordOfWeek } from "@/lib/community";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const [{ sb, user, profile }, { t, locale }] = await Promise.all([getViewer(), getT()]);
-  const [following, followedArtists] = sb ? await Promise.all([getFollowing(sb, user?.id), getFollowedArtists(sb, user?.id)]) : [[], []];
+  // Todo lo que depende solo de quién eres va a la vez (antes eran viajes uno tras otro)
+  const [following, followedArtists, { data: snapRow }, unread] = sb ? await Promise.all([
+    getFollowing(sb, user?.id), getFollowedArtists(sb, user?.id),
+    // Tus gustos según lo que escuchas en Spotify/Last.fm (la última foto guardada, sin esperar a Spotify)
+    user ? sb.from("music_snapshots").select("top_artists").eq("user_id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+    user ? unreadCount(sb, user.id) : Promise.resolve(0),
+  ]) : [[], [], { data: null }, 0];
   const followedIds = followedArtists.map((f) => Number(f.artist_id));
-  // Tus gustos según lo que escuchas en Spotify/Last.fm (la última foto guardada, sin esperar a Spotify)
-  const { data: snapRow } = sb && user ? await sb.from("music_snapshots").select("top_artists").eq("user_id", user.id).maybeSingle() : { data: null };
   const taste = ((snapRow?.top_artists ?? []) as TopArtist[]).filter((a) => a.deezer && !followedIds.includes(a.deezer)).slice(0, 5)
     .map((a) => ({ artist_id: a.deezer!, artist_name: a.name }));
   const tasteIds = new Set(taste.map((a) => a.artist_id));
   const recSources = [...taste, ...followedArtists.map((f) => ({ artist_id: Number(f.artist_id), artist_name: f.artist_name }))];
-  const [fresh, chart, trending, activity, recs] = await Promise.all([
+  const [fresh, chart, trending, activity, recs, week, challenge] = await Promise.all([
     getLatestFrom([...new Set([...followedIds.slice(0, 16), ...SEED_ARTISTS])].slice(0, 30), 1),
     getChartAlbums(12),
     sb ? getReviews(sb, { sort: "hot", limit: 6, viewerId: user?.id, following }) : Promise.resolve([]),
@@ -40,29 +47,33 @@ export default async function Home() {
       ? sb.from("ratings").select("user_id, release_id, overall, liked, updated_at").in("user_id", following).order("updated_at", { ascending: false }).limit(12).then((r) => r.data ?? [])
       : Promise.resolve([]),
     recSources.length ? getRecommendations(recSources, 12) : Promise.resolve([]),
+    sb ? getRecordOfWeek(sb) : Promise.resolve(null),
+    sb && user ? getChallenge(sb, user.id) : Promise.resolve(null),
   ]);
+  // Semillas para "Hoy en De culto": lo que sigues y escuchas; si no hay, la escena de Rela
+  const cultSeeds = recSources.length >= 3 ? recSources.map((r) => r.artist_id) : [...recSources.map((r) => r.artist_id), ...SEED_ARTISTS];
   // Abanico del inicio: tus favoritos + lo nuevo de tu nicho (o lo recién salido si no has entrado)
-  const [favRows, drops] = await Promise.all([
+  const [favRows, drops, feedParts, { data: friendRows }] = await Promise.all([
     sb && profile?.favorites?.length ? releasesByIds(sb, profile.favorites.map(Number)) : Promise.resolve(new Map()),
     recSources.length ? getNicheDrops(recSources, 4) : Promise.resolve([]),
-  ]);
-  let feed: { key: string; rel: { id: number; title: string; cover_url: string | null }; who: { handle: string; name: string; avatar_url: string | null; accent: string }; overall: number | null; liked: boolean }[] = [];
-  if (sb && activity.length) {
-    const [rels, { data: ps }] = await Promise.all([
+    sb && activity.length ? Promise.all([
       releasesByIds(sb, activity.map((a) => Number(a.release_id))),
       sb.from("profiles").select("id, handle, name, avatar_url, accent").in("id", [...new Set(activity.map((a) => a.user_id))]),
-    ]);
+    ]) : Promise.resolve(null),
+    // Para la pantalla del móvil de la entrada: tus amigos
+    sb && following.length ? sb.from("profiles").select("id, handle, name, avatar_url, accent").in("id", following.slice(0, 8)) : Promise.resolve({ data: null }),
+  ]);
+  let feed: { key: string; rel: { id: number; title: string; cover_url: string | null }; who: { handle: string; name: string; avatar_url: string | null; accent: string }; overall: number | null; liked: boolean }[] = [];
+  if (feedParts) {
+    const [rels, { data: ps }] = feedParts;
     feed = activity.map((a) => ({ key: a.user_id + a.release_id, rel: rels.get(Number(a.release_id))!, who: ps!.find((p) => p.id === a.user_id)!, overall: a.overall, liked: a.liked })).filter((f) => f.rel && f.who);
   }
-  const unread = sb && user ? await unreadCount(sb, user.id) : 0;
   const favItems: FanItem[] = (profile?.favorites ?? []).map((id) => favRows.get(Number(id))).filter(Boolean).slice(0, 4)
     .map((r) => ({ id: r.id, cover: r.cover_url ?? "", title: r.title, artist: r.artist_name, tag: t.home.fanFav, kind: "fav" as const }));
   const dropItems: FanItem[] = drops.map((a) => ({ id: a.id, cover: a.cover_big ?? a.cover_medium, title: a.title, artist: a.artist?.name ?? "", tag: t.home.fanDrop, kind: "drop" as const }));
   let fanItems: FanItem[] = [...favItems, ...dropItems];
   if (fanItems.length < 3) fanItems = [...fanItems, ...fresh.slice(0, 6 - fanItems.length).map((a) => ({ id: a.id, cover: a.cover_big ?? a.cover_medium, title: a.title, artist: a.artist?.name ?? "", tag: t.home.fanNew, kind: "new" as const }))];
   fanItems = fanItems.slice(0, 7);
-  // Para la pantalla del móvil de la entrada: tus amigos y tu top 4
-  const { data: friendRows } = sb && following.length ? await sb.from("profiles").select("id, handle, name, avatar_url, accent").in("id", following.slice(0, 8)) : { data: null };
   const introFriends = (friendRows ?? []).map((f: { id: string; handle: string; name: string; avatar_url: string | null; accent: string }) => ({ id: f.id, handle: f.handle, name: f.name || f.handle, avatar_url: f.avatar_url, accent: f.accent }));
   const introTop4 = favItems.map((f) => ({ id: f.id, cover: f.cover, title: f.title }));
   const meLite = user && profile ? { id: user.id, name: profile.name, handle: profile.handle, avatar_url: profile.avatar_url, accent: profile.accent } : null;
@@ -109,6 +120,12 @@ export default async function Home() {
           <div className="row">{fresh.slice(0, 16).map((a) => <Poster key={a.id} a={a} meta={<div className="m">{fmtDate(a.release_date!, locale)}</div>} />)}</div>
         ) : <p className="empty">{t.home.freshError}</p>}
       </section>
+
+      <Weekly week={week} challenge={challenge} t={t} />
+
+      <Suspense fallback={<ListenSkeleton title={t.grow.cultToday} />}>
+        <CultRow seeds={cultSeeds} t={t} locale={locale} title={t.grow.cultToday} sub={t.grow.cultTodaySub} />
+      </Suspense>
 
       {user && (
         <section className="section">

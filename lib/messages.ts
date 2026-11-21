@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null };
@@ -27,7 +28,7 @@ export async function getThread(sb: SupabaseClient, me: string, other: string, l
   return ((data ?? []) as Msg[]).reverse();
 }
 
-export async function unreadCount(sb: SupabaseClient, me: string) {
+export const unreadCount = cache(async function unreadCount(sb: SupabaseClient, me: string) {
   const { count, error } = await sb.from("messages").select("*", { count: "exact", head: true }).eq("recipient_id", me).is("read_at", null);
   return error ? 0 : count ?? 0;
-}
+});

@@ -34,10 +34,11 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-  await supabase.auth.getUser();
+  // Solo refresca la sesión si el token ha caducado; si no, no sale a internet
+  await supabase.auth.getClaims();
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/img|api/og|models/|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|glb|mp3|ico|woff2?)$).*)"],
 };

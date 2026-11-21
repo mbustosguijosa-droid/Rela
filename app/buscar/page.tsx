@@ -4,14 +4,15 @@ import { GENRES, getChartAlbums, getChartArtists, getLatestFrom, searchAlbums, s
 import { SEED_ARTISTS } from "@/lib/seed";
 import { fmtDate } from "@/components/Poster";
 import { Poster } from "@/components/Poster";
+import { CultRow } from "@/components/CultRow";
 import { getT } from "@/lib/i18n-server";
 
 export async function generateMetadata(): Promise<Metadata> { const { t } = await getT(); return { title: t.search.title }; }
 
-type Props = { searchParams: Promise<{ q?: string; tipo?: string; genero?: string }> };
+type Props = { searchParams: Promise<{ q?: string; tipo?: string; genero?: string; nivel?: string }> };
 
 export default async function Buscar({ searchParams }: Props) {
-  const { q = "", tipo = "todo", genero = "0" } = await searchParams;
+  const { q = "", tipo = "todo", genero = "0", nivel = "todo" } = await searchParams;
   const query = q.trim();
   const { t, locale } = await getT();
   const genre = GENRES.find((g) => String(g.id) === genero) ?? GENRES[0];
@@ -31,7 +32,7 @@ export default async function Buscar({ searchParams }: Props) {
           <button className="btn primary" type="submit">{t.nav.search}</button>
         </form>
       </section>
-      {!query && <Catalog genre={genre} t={t} locale={locale} />}
+      {!query && <Catalog genre={genre} level={nivel === "culto" || nivel === "under" ? nivel : "todo"} t={t} locale={locale} />}
       {query && (
         <>
           {artists.length > 0 && (
@@ -64,42 +65,60 @@ export default async function Buscar({ searchParams }: Props) {
 }
 
 /** Catálogo para explorar sin buscar: géneros, lo más escuchado, artistas del momento y lo recién salido. */
-async function Catalog({ genre, t, locale }: { genre: (typeof GENRES)[number]; t: Awaited<ReturnType<typeof getT>>["t"]; locale: string }) {
+async function Catalog({ genre, level, t, locale }: { genre: (typeof GENRES)[number]; level: "todo" | "culto" | "under"; t: Awaited<ReturnType<typeof getT>>["t"]; locale: string }) {
   const [albums, artists, fresh] = await Promise.all([
-    getChartAlbums(30, genre.id),
+    level === "todo" ? getChartAlbums(30, genre.id) : Promise.resolve([]),
     getChartArtists(12, genre.id),
-    genre.id === 0 ? getLatestFrom(SEED_ARTISTS.slice(0, 24), 1) : Promise.resolve([]),
+    genre.id === 0 && level === "todo" ? getLatestFrom(SEED_ARTISTS.slice(0, 24), 1) : Promise.resolve([]),
   ]);
+  // Semillas para lo pequeño: la escena de Rela en "Todo"; en un género, sus artistas destacados
+  const seeds = genre.id === 0 ? SEED_ARTISTS : artists.map((a) => a.id);
+  const href = (g: number, lv: string) => { const p = new URLSearchParams(); if (g) p.set("genero", String(g)); if (lv !== "todo") p.set("nivel", lv); const q = p.toString(); return q ? `/buscar?${q}` : "/buscar"; };
+  const gName = t.search.genres[genre.k];
   return (
     <>
       <nav className="genre-chips" aria-label={t.search.explore}>
-        {GENRES.map((g) => <Link key={g.id} href={g.id ? `/buscar?genero=${g.id}` : "/buscar"} className={`q ${g.id === genre.id ? "on" : ""}`} aria-current={g.id === genre.id ? "page" : undefined}>{t.search.genres[g.k]}</Link>)}
+        {GENRES.map((g) => <Link key={g.id} href={href(g.id, level)} className={`q ${g.id === genre.id ? "on" : ""}`} aria-current={g.id === genre.id ? "page" : undefined}>{t.search.genres[g.k]}</Link>)}
       </nav>
-      {fresh.length > 0 && (
-        <section className="section">
-          <div className="sec-head"><h2>{t.search.fresh}</h2></div>
-          <div className="row">{fresh.slice(0, 16).map((a) => <Poster key={a.id} a={a} meta={<div className="m">{fmtDate(a.release_date!, locale)}</div>} />)}</div>
-        </section>
+      <nav className="level-chips" aria-label={t.grow.level}>
+        <span className="muted">{t.grow.level}</span>
+        {([["todo", t.grow.lvAll], ["culto", t.grow.lvCulto], ["under", t.grow.lvUnder]] as const).map(([k, l]) => (
+          <Link key={k} href={href(genre.id, k)} className={`lv ${k} ${level === k ? "on" : ""}`} aria-current={level === k ? "page" : undefined}>{l}</Link>
+        ))}
+      </nav>
+      {level !== "todo" ? (
+        <CultRow grid seeds={seeds} t={t} locale={locale} limit={24} maxFans={level === "under" ? 10_000 : 100_000} minFans={level === "culto" ? 10_000 : undefined}
+          title={level === "under" ? `${t.grow.underToday} · ${gName}` : t.grow.cultGenre(gName)} sub={level === "under" ? t.grow.underTodaySub : t.grow.cultTodaySub} />
+      ) : (
+        <>
+          {fresh.length > 0 && (
+            <section className="section">
+              <div className="sec-head"><h2>{t.search.fresh}</h2></div>
+              <div className="row">{fresh.slice(0, 16).map((a) => <Poster key={a.id} a={a} meta={<div className="m">{fmtDate(a.release_date!, locale)}</div>} />)}</div>
+            </section>
+          )}
+          <CultRow seeds={seeds} t={t} locale={locale} title={t.grow.cultGenre(gName)} sub={t.grow.cultTodaySub} />
+          {artists.length > 0 && (
+            <section className="section">
+              <div className="sec-head"><h2>{t.search.topArtists}</h2></div>
+              <div className="artist-row artist-scroll">
+                {artists.map((ar) => (
+                  <Link key={ar.id} className="artist-card" href={`/artista/${ar.id}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ar.picture_big ?? ar.picture_medium} alt="" loading="lazy" />
+                    <b>{ar.name}</b>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+          <section className="section">
+            <div className="sec-head"><h2>{t.search.topAlbums(gName)}</h2><span>{albums.length}</span></div>
+            {albums.length ? <div className="grid">{albums.map((a) => <Poster key={a.id} a={a} />)}</div>
+              : <p className="empty">{t.home.freshError}</p>}
+          </section>
+        </>
       )}
-      {artists.length > 0 && (
-        <section className="section">
-          <div className="sec-head"><h2>{t.search.topArtists}</h2></div>
-          <div className="artist-row artist-scroll">
-            {artists.map((ar) => (
-              <Link key={ar.id} className="artist-card" href={`/artista/${ar.id}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={ar.picture_big ?? ar.picture_medium} alt="" loading="lazy" />
-                <b>{ar.name}</b>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-      <section className="section">
-        <div className="sec-head"><h2>{t.search.topAlbums(t.search.genres[genre.k])}</h2><span>{albums.length}</span></div>
-        {albums.length ? <div className="grid">{albums.map((a) => <Poster key={a.id} a={a} />)}</div>
-          : <p className="empty">{t.home.freshError}</p>}
-      </section>
     </>
   );
 }

@@ -66,8 +66,8 @@ export function Intro({ me, friends = [], top4 = [] }: { me: Me; friends?: Frien
     if (go) return;
     setGo(true);
     const done = () => { if (to) router.push(to); setTimeout(finish, to ? 60 : 120); };
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!scene.current || reduce) { setTimeout(done, 250); return; }
+    // Antes, con "reducir movimiento" (activado por defecto en muchos Windows) se saltaba la animación del móvil
+    if (!scene.current) { setTimeout(done, 250); return; }
     scene.current.enter(done);
   }, [go, finish, router]);
 
