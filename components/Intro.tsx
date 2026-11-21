@@ -65,7 +65,10 @@ export function Intro({ me, friends = [], top4 = [] }: { me: Me; friends?: Frien
   const enter = useCallback((to?: string) => {
     if (go) return;
     setGo(true);
-    const done = () => { if (to) router.push(to); setTimeout(finish, to ? 60 : 120); };
+    let ended = false;
+    const done = () => { if (ended) return; ended = true; clearTimeout(safety); if (to) router.push(to); setTimeout(finish, to ? 60 : 120); };
+    // Red de seguridad: si por lo que sea la animación no termina (gráfica lenta, modelos sin cargar), se entra igual
+    const safety = setTimeout(done, 4000);
     // Antes, con "reducir movimiento" (activado por defecto en muchos Windows) se saltaba la animación del móvil
     if (!scene.current) { setTimeout(done, 250); return; }
     scene.current.enter(done);
