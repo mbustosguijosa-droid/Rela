@@ -1,8 +1,8 @@
 /** Color secundario de la web, elegido por cada persona (se guarda en una cookie). */
 export const ACCENT_COOKIE = "accent";
-export const DEFAULT_ACCENT = "#8b5cf6";
+export const DEFAULT_ACCENT = "#ff6a3d";
 export const ACCENT_PRESETS: { hex: string; k: string }[] = [
-  { hex: "#8b5cf6", k: "purple" }, { hex: "#ec4899", k: "pink" }, { hex: "#ef4444", k: "red" }, { hex: "#f97316", k: "orange" },
+  { hex: "#ff6a3d", k: "coral" }, { hex: "#8b5cf6", k: "purple" }, { hex: "#ec4899", k: "pink" }, { hex: "#ef4444", k: "red" }, { hex: "#f97316", k: "orange" },
   { hex: "#f59e0b", k: "amber" }, { hex: "#a3e635", k: "lime" }, { hex: "#22c55e", k: "green" }, { hex: "#14b8a6", k: "teal" },
   { hex: "#38bdf8", k: "sky" }, { hex: "#3b82f6", k: "blue" },
 ];

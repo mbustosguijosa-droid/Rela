@@ -1,8 +1,8 @@
 /* Rela · sistema visual (portado del boceto) */
 :root {
-  --bg: #0e0b11; --surface: #17131b; --surface-2: #221c28; --line: #2f2837;
-  --fg: #f1ecf5; --muted: #a59bb2;
-  --accent: #8b5cf6; --accent-ink: #ffffff; --accent-text: color-mix(in srgb, var(--accent) 62%, white); --like: #ff6f91;
+  --bg: #0f0d0d; --surface: #181514; --surface-2: #231f1d; --line: #312b28;
+  --fg: #f4efea; --muted: #a9a09a;
+  --accent: #ff6a3d; --accent-ink: #ffffff; --accent-text: color-mix(in srgb, var(--accent) 62%, white); --like: #ff6f91;
   --hi: #5fd39b; --mid: #ffc04d; --lo: #ff7f7f;
   --t-under: #b6e35a; --t-culto: #6cc4ff; --t-conocido: #b49bff; --t-main: #9c95aa;
   --logo: #FFD23F; --logo-shade: #E89B00; --logo-line: #1b1424;
@@ -658,14 +658,23 @@ input, textarea { caret-color: var(--accent) }
    ===================================================================== */
 :root { --key-a: color-mix(in srgb, var(--accent) 88%, black); --key-b: color-mix(in srgb, var(--accent) 70%, black); --key-edge: color-mix(in srgb, var(--accent) 35%, black); --slat-a: #18121c; --slat-b: #120d15; --led-off: #3a3143; --led-on: color-mix(in srgb, var(--accent) 68%, white); --lamp: #ffb36b; --key-top: rgba(255,255,255,.16); --key-bottom: rgba(0,0,0,.42) }
 
-/* Fondo: pared de listones de madera arriba (como el fondo del estudio), tira de luz morada y lámpara cálida */
+/* Fondo: un vinilo enorme asomando por la esquina de arriba (surcos + el brillo que gira al moverse la luz) */
 body { background: var(--bg) }
-body::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: 640px; pointer-events: none;
+body::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: 900px; pointer-events: none;
+  --vx: calc(100% - 120px); --vy: 120px;
   background:
-    radial-gradient(420px 260px at 88% 40px, color-mix(in srgb, var(--lamp) 12%, transparent), transparent 70%),
-    radial-gradient(1200px 300px at 30% 0, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
-    repeating-linear-gradient(90deg, var(--slat-a) 0 13px, var(--slat-b) 13px 15px);
-  -webkit-mask-image: linear-gradient(#000 0, #000 35%, transparent 100%); mask-image: linear-gradient(#000 0, #000 35%, transparent 100%) }
+    /* agujero, etiqueta (con el color de cada persona) y su borde */
+    radial-gradient(circle at var(--vx) var(--vy), var(--bg) 0 7px, color-mix(in srgb, var(--accent) 62%, black) 8px 96px, color-mix(in srgb, var(--accent) 45%, black) 97px 100px, #0b0a09 101px 118px, transparent 119px),
+    /* brillo del vinilo */
+    conic-gradient(from 210deg at var(--vx) var(--vy), transparent 0 6%, rgba(255,255,255,.075) 12%, transparent 18% 56%, rgba(255,255,255,.055) 62%, transparent 68%),
+    /* surcos */
+    repeating-radial-gradient(circle at var(--vx) var(--vy), rgba(255,255,255,.05) 0 1px, transparent 1.6px 5px),
+    /* disco */
+    radial-gradient(circle at var(--vx) var(--vy), #151211 0 640px, #0b0a09 641px 646px, transparent 647px),
+    radial-gradient(900px 420px at 15% -60px, color-mix(in srgb, var(--accent) 11%, transparent), transparent 70%);
+  opacity: .9;
+  -webkit-mask-image: linear-gradient(#000 0, #000 45%, transparent 100%); mask-image: linear-gradient(#000 0, #000 45%, transparent 100%) }
+@media (max-width: 900px) { body::before { --vx: calc(100% + 60px); --vy: 40px; height: 620px; opacity: .7 } }
 body { position: relative; isolation: isolate }
 
 /* Cabecera: una mesa de mezclas a todo el ancho */

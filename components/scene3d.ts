@@ -29,7 +29,7 @@ export type ScreenInfo = {
   bg: string;
 };
 
-const ACC = "#a77bff"; // morado de Rela
+const ACC = "#ff6a3d"; // coral de Rela
 const proxied = (u: string) => (u.startsWith("/") ? u : `/api/img?u=${encodeURIComponent(u)}`);
 const imgCache = new Map<string, Promise<HTMLImageElement | null>>();
 function loadImg(src: string) {
@@ -767,7 +767,7 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
 
   /* Bucle: animaciones ambientales; la calidad se ajusta si el dispositivo va justo */
   let ready = false, hits: Hit[] = [], raf = 0, alive = true, last = 0, t0 = performance.now(), frames = 0, slow = 0, fast = 0;
-  let neonOn = 0; // momento en que el neón ha terminado de encenderse
+  let neonOn = 0, started = false; // momento en que el neón ha terminado de encenderse
   const render = () => { if (ready) renderer.render(scene, camera); };
   const fromPos = new THREE.Vector3(), fromUp = new THREE.Vector3(), fromLook = new THREE.Vector3(), endLook = new THREE.Vector3(), endPos = new THREE.Vector3(), endUp = new THREE.Vector3(), tmp = new THREE.Vector3();
   const BPM = 92, beatMs = 60000 / BPM;
@@ -851,7 +851,8 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
     });
   });
   Promise.race([models, new Promise((r) => setTimeout(r, 5000))]).then(() => { sharpen(); return renderer.compileAsync(scene, camera); }).catch(() => null).then(() => {
-    ready = true; t0 = performance.now();
+    if (started) return; // ya arrancó al tocar el móvil antes de terminar de cargar
+    started = true; ready = true; t0 = performance.now();
     renderer.domElement.style.opacity = "1";
     if (reduce) { kick(); render(); } else raf = requestAnimationFrame(loop);
   });
@@ -892,7 +893,9 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
       endLook.copy(center); endPos.copy(center).addScaledVector(normal, dist); endUp.copy(top);
       // Con "reducir movimiento" activado (muy habitual en Windows) se hace igual, pero más corta
       going = { p: 0, ms: reduce ? 800 : 1500, done };
-      if (!alive) { alive = true; last = 0; raf = requestAnimationFrame(loop); }
+      // Si aún estaba cargando, se arranca ya: mejor entrar con la escena a medias que no responder
+      if (!started) { started = true; ready = true; renderer.domElement.style.opacity = "1"; alive = true; last = 0; cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); }
+      else if (!alive) { alive = true; last = 0; raf = requestAnimationFrame(loop); }
     },
     dispose() {
       alive = false; cancelAnimationFrame(raf); window.removeEventListener("resize", onResize);
