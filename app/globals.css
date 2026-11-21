@@ -334,7 +334,7 @@ footer { padding-block: 40px 30px; color: var(--muted); font-size: 13px }
 @keyframes intro-fade { to { opacity: 0; visibility: hidden } }
 @media (prefers-reduced-motion: reduce) {
   .intro-desk, .il, .intro-cta, .intro .tapring, .intro .eqb rect, .intro-enter .pulse { animation: none !important; opacity: 1; filter: none; transform: none }
-  .intro-desk { transition: none } .intro.go .intro-desk { transform: none } .intro.go { animation: intro-fade .2s ease forwards }
+  .intro-desk { transition: none } .intro.go .intro-desk { transform: none }
 }
 
 /* ---------- Compartir ---------- */

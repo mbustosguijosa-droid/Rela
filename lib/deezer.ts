@@ -37,7 +37,34 @@ export type Album = AlbumSummary & {
   link: string;
 };
 
+import { unstable_cache } from "next/cache";
+
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Cola para Deezer: como mucho 40 peticiones cada 5 s y 6 a la vez desde este servidor.
+ * Sin ella, el inicio pedía de golpe más de lo que Deezer permite y las listas llegaban vacías.
+ */
+const sent: number[] = [];
+let inFlight = 0;
+async function slot() {
+  for (;;) {
+    const now = Date.now();
+    while (sent.length && now - sent[0] > 5000) sent.shift();
+    if (sent.length < 40 && inFlight < 6) { sent.push(now); inFlight++; return; }
+    await wait(sent.length >= 40 ? 5000 - (now - sent[0]) + 20 : 40);
+  }
+}
+async function deezerFetch(url: string, init: RequestInit & { next?: { revalidate: number } }) {
+  await slot();
+  try { return await fetch(url, init); } finally { inFlight--; }
+}
+
+/** Guarda una hora un resultado caro; si sale vacío (Deezer falló), no lo guarda y lo reintenta la próxima vez. */
+export function cached<A extends unknown[], R>(fn: (...a: A) => Promise<R[]>, key: string, revalidate = 3600) {
+  const c = unstable_cache(async (...a: A) => { const r = await fn(...a); if (!r.length) throw new Error("empty"); return r; }, [key], { revalidate });
+  return async (...a: A): Promise<R[]> => { try { return await c(...a); } catch { return []; } };
+}
 
 /**
  * Pide algo a Deezer. Si Deezer está saturado (límite de 50 peticiones cada 5 s) responde con un error
@@ -47,7 +74,7 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function get<T>(path: string, revalidate = 3600): Promise<T | null> {
   for (let attempt = 0; attempt < 4; attempt++) {
     try {
-      const res = await fetch(API + path, attempt === 0 ? { next: { revalidate } } : { cache: "no-store" });
+      const res = await deezerFetch(API + path, attempt === 0 ? { next: { revalidate } } : { cache: "no-store" });
       if (!res.ok) { await wait(300 * (attempt + 1)); continue; }
       const data = await res.json();
       if (data && typeof data === "object" && "error" in data) {
@@ -128,7 +155,7 @@ export async function pool<T, R>(items: T[], size: number, fn: (x: T) => Promise
 const NOISE = /\b(live|en vivo|directo|demo|tour|tiny desk|first take|remix|version|versión)\b/i;
 
 /** Lanzamientos más recientes de una lista de artistas (para "Novedades"). */
-export async function getLatestFrom(artistIds: number[], perArtist = 1) {
+async function getLatestFromRaw(artistIds: number[], perArtist = 1) {
   const today = new Date().toISOString().slice(0, 10);
   const lists = await pool(artistIds, 4, async (id) => {
     const [artist, releases] = await Promise.all([getArtist(id), getArtistReleases(id)]);
@@ -162,7 +189,7 @@ export type Recommendation = { track: TopTrack; because: Artist };
  * Recomendaciones "de tu nicho": artistas parecidos a los que sigues (que aún no sigues)
  * y una canción destacada de cada uno, alternando entre los artistas de origen.
  */
-export async function getRecommendations(followed: { artist_id: number; artist_name: string }[], limit = 12): Promise<Recommendation[]> {
+async function getRecommendationsRaw(followed: { artist_id: number; artist_name: string }[], limit = 12): Promise<Recommendation[]> {
   const sources = followed.slice(0, 8);
   const followedIds = new Set(followed.map((f) => Number(f.artist_id)));
   const relatedLists = await pool(sources, 4, async (f) => (await getRelated(f.artist_id, 6)).map((a) => ({ a, because: { id: Number(f.artist_id), name: f.artist_name } as Artist })));
@@ -180,7 +207,7 @@ export async function getRecommendations(followed: { artist_id: number; artist_n
 }
 
 /** Lanzamientos recientes de artistas parecidos a los que sigues ("nuevo en tu nicho"). */
-export async function getNicheDrops(followed: { artist_id: number }[], limit = 6) {
+async function getNicheDropsRaw(followed: { artist_id: number }[], limit = 6) {
   const followedIds = new Set(followed.map((f) => Number(f.artist_id)));
   const related = await pool(followed.slice(0, 6), 3, (f) => getRelated(f.artist_id, 4));
   const ids: number[] = [];
@@ -203,16 +230,16 @@ export type CultPick = AlbumSummary & { artist: Artist & { nb_fan: number } };
  * sacados de los relacionados de una semilla, con su último disco. La selección rota cada día.
  * maxFans = 10_000 para quedarse solo con lo underground.
  */
-export async function getCultPicks(seedIds: number[], limit = 10, opts: { maxFans?: number; minFans?: number; day?: number } = {}): Promise<CultPick[]> {
+async function getCultPicksRaw(seedIds: number[], limit = 10, opts: { maxFans?: number; minFans?: number; day?: number } = {}): Promise<CultPick[]> {
   const maxFans = opts.maxFans ?? 100_000, minFans = opts.minFans ?? 300;
   const rnd = seeded((opts.day ?? dayKey()) * 7919 + seedIds.length);
-  const seeds = [...new Set(seedIds)].sort(() => rnd() - 0.5).slice(0, 8);
+  const seeds = [...new Set(seedIds)].sort(() => rnd() - 0.5).slice(0, 6);
   const exclude = new Set(seedIds);
   let all = (await pool(seeds, 4, (id) => getRelated(id, 20))).flat();
   const small = (a: Artist) => (a.nb_fan ?? 0) >= minFans && (a.nb_fan ?? 0) < maxFans;
   if (all.filter(small).length < limit) {
     // Semillas muy famosas: se baja un escalón más, desde sus relacionados más pequeños
-    const step = [...new Map(all.map((a) => [a.id, a])).values()].sort((x, y) => (x.nb_fan ?? 0) - (y.nb_fan ?? 0)).slice(0, 5).map((a) => a.id);
+    const step = [...new Map(all.map((a) => [a.id, a])).values()].sort((x, y) => (x.nb_fan ?? 0) - (y.nb_fan ?? 0)).slice(0, 3).map((a) => a.id);
     all = all.concat((await pool(step, 4, (id) => getRelated(id, 20))).flat());
   }
   const seen = new Set<number>();
@@ -220,7 +247,7 @@ export async function getCultPicks(seedIds: number[], limit = 10, opts: { maxFan
     const f = a.nb_fan ?? 0;
     if (f < minFans || f >= maxFans || exclude.has(a.id) || seen.has(a.id)) return false;
     seen.add(a.id); return true;
-  }).sort(() => rnd() - 0.5).slice(0, limit + 4);
+  }).sort(() => rnd() - 0.5).slice(0, limit + 2);
   const today = new Date().toISOString().slice(0, 10);
   const picks = await pool(cands, 4, async (ar) => {
     const rel = (await getArtistReleases(ar.id))
@@ -231,3 +258,8 @@ export async function getCultPicks(seedIds: number[], limit = 10, opts: { maxFan
   });
   return picks.filter((p): p is CultPick => !!p).slice(0, limit);
 }
+
+export const getLatestFrom = cached(getLatestFromRaw, "getLatestFrom");
+export const getRecommendations = cached(getRecommendationsRaw, "getRecommendations");
+export const getNicheDrops = cached(getNicheDropsRaw, "getNicheDrops");
+export const getCultPicks = cached(getCultPicksRaw, "getCultPicks");
