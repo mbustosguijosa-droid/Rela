@@ -352,19 +352,9 @@ async function drawScreen(g: CanvasRenderingContext2D, info: ScreenInfo): Promis
 export function createScene(container: HTMLElement, initial: ScreenInfo, onAction: (a: ScreenAction) => void) {
   let info = initial;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // Calidad máxima: en ordenador se pinta a 2x aunque la pantalla sea 1x (supermuestreo = bordes y texturas nítidos);
-  // si el equipo no llega a 60 fps, el bucle la baja sola.
-  const touch = matchMedia("(pointer: coarse)").matches;
-  const maxDpr = touch ? Math.min(window.devicePixelRatio || 1, 2) : 2;
-  // Se empieza con la nitidez de la pantalla y se sube a 2x solo si el equipo va sobrado (ver el bucle)
-  let dpr = Math.min(maxDpr, Math.max(1, window.devicePixelRatio || 1), 1.5);
+  const maxDpr = Math.min(window.devicePixelRatio || 1, 2);
+  let dpr = Math.min(maxDpr, 1.5);
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-  // Sin tarjeta gráfica (aceleración por hardware desactivada) se pinta a la mitad para que se mueva
-  try {
-    const gl = renderer.getContext(), ext = gl.getExtension("WEBGL_debug_renderer_info");
-    const name = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : "";
-    if (/swiftshader|llvmpipe|software|basic render/i.test(name)) dpr = 0.6;
-  } catch { /* sin datos de la gráfica */ }
   renderer.setPixelRatio(dpr);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
@@ -819,13 +809,11 @@ export function createScene(container: HTMLElement, initial: ScreenInfo, onActio
     // Máximo ~60 fps; si el dispositivo va lento, baja resolución y quita el polvo
     if (dt < 15) return;
     last = now;
-    if (ready && frames++ > 10) {
-      // Ajuste rápido: si va justo baja la resolución enseguida (también durante la animación de entrar),
-      // y si va sobrado la sube poco a poco hasta 2x para que se vea lo más nítido posible
-      if (dt > 26) { slow++; fast = 0; } else if (dt < 19) { fast++; slow = 0; }
-      if (slow > (going ? 3 : 8) && dpr > 0.6) { dpr = Math.max(0.6, dpr - (dt > 60 ? 0.5 : 0.25)); renderer.setPixelRatio(dpr); fit(); slow = 0; }
-      else if (slow > 8 && dust.visible) { dust.visible = false; slow = 0; }
-      else if (!going && fast > 90 && dpr < maxDpr) { dpr = Math.min(maxDpr, dpr + 0.25); renderer.setPixelRatio(dpr); fit(); fast = 0; }
+    if (ready && frames++ > 20 && !going) {
+      if (dt > 28) { slow++; fast = 0; } else if (dt < 18) { fast++; slow = 0; }
+      if (slow > 25 && dpr > 1) { dpr = Math.max(1, dpr - 0.25); renderer.setPixelRatio(dpr); fit(); slow = 0; }
+      else if (slow > 25 && dust.visible) { dust.visible = false; slow = 0; }
+      else if (fast > 120 && dpr < maxDpr) { dpr = Math.min(maxDpr, dpr + 0.25); renderer.setPixelRatio(dpr); fit(); fast = 0; }
     }
     (window as unknown as { __relaFrame?: number }).__relaFrame = Math.round(dt);
     if (!reduce || going) ambient(now);
