@@ -108,6 +108,7 @@ export default async function Home() {
               <Link href="/mensajes" className="q"><span className="qi"><Icon name="mail" /></span>{t.home.qMessages}{unread > 0 && <span className="badge-n">{unread}</span>}</Link>
               <Link href="/perfil" className="q"><span className="qi"><Icon name="user" /></span>{t.home.qProfile}</Link>
             </> : <Link href="/entrar" className="q"><span className="qi"><Icon name="plus" /></span>{t.home.qEnter}</Link>}
+            <Link href="/pro" className="q q-accent"><span className="qi"><Icon name="star" filled /></span>{t.pro.qPro}</Link>
             <ReplayIntro label={t.home.replay} />
           </div>
         </div>

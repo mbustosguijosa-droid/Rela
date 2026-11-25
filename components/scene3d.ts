@@ -351,7 +351,9 @@ async function drawScreen(g: CanvasRenderingContext2D, info: ScreenInfo): Promis
 /* ---------- Escena ---------- */
 export function createScene(container: HTMLElement, initial: ScreenInfo, onAction: (a: ScreenAction) => void) {
   let info = initial;
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // La escena siempre se mueve (luces, medidores, neón), también con "reducir animaciones" de Windows:
+  // son movimientos suaves y sin ellos la entrada parecía rota. Solo se respeta para no marear con la cámara.
+  const reduce = false;
   const maxDpr = Math.min(window.devicePixelRatio || 1, 2);
   let dpr = Math.min(maxDpr, 1.5);
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });

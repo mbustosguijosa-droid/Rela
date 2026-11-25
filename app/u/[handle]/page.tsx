@@ -15,6 +15,7 @@ import { Suspense } from "react";
 import { ProfileMusic } from "@/components/ProfileMusic";
 import { ShareTop } from "@/components/ShareTop";
 import { ReportButton } from "@/components/ReportButton";
+import { activePlans } from "@/lib/billing";
 
 type Props = { params: Promise<{ handle: string }> };
 
@@ -59,7 +60,7 @@ export default async function ProfilePage({ params }: Props) {
     getReviews(sb, { userId: p.id, sort: "hot", limit: 6, viewerId: user?.id }),
     sb.from("reviews").select("*", { count: "exact", head: true }).eq("user_id", p.id),
   ]);
-  const artistsFollowed = await getFollowedArtists(sb, p.id);
+  const [artistsFollowed, plans] = await Promise.all([getFollowedArtists(sb, p.id), activePlans(sb, p.id)]);
   const items = ((rated ?? []) as unknown as RatedRow[]).filter((r) => r.releases);
   const favIds = (p.favorites ?? []).map(Number);
   const extra = await releasesByIds(sb, [...favIds, ...(p.loop_release_id ? [Number(p.loop_release_id)] : [])]);
@@ -105,7 +106,7 @@ export default async function ProfilePage({ params }: Props) {
         <section className="p-head">
           <Avatar p={p} size={132} ring />
           <div className="p-id">
-            <h1>{name}</h1>
+            <h1>{name}{plans.includes("artist") ? <span className="plan-badge artist">★ {t.pro.badgeArtist}</span> : plans.includes("pro") ? <span className="plan-badge">★ {t.pro.badgePro}</span> : null}</h1>
             <div className="handle">@{p.handle}{p.city ? ` · ${p.city}` : ""}</div>
             {p.bio && <p className="bio">{p.bio}</p>}
             {loop && (

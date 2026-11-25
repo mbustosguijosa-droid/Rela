@@ -40,7 +40,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
       ) : (
         <form onSubmit={byEmail} className="login-email">
           <label className="lbl" htmlFor="email">{t.login.email}</label>
-          <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={lang === "en" ? "you@email.com" : "tu@email.com"} autoComplete="email" />
+          <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={lang === "es" ? "tu@email.com" : "you@email.com"} autoComplete="email" />
           <button className="btn primary" disabled={state === "sending"}>{state === "sending" ? t.login.sending : t.login.sendLink}</button>
         </form>
       )}

@@ -1,20 +1,26 @@
 // Textos de la web en español e inglés.
 // Para añadir un texto: ponlo en `es` y su traducción en `en` con la misma clave.
 
-export type Lang = "es" | "en";
-export const LANGS: Lang[] = ["es", "en"];
-export const LOCALE: Record<Lang, string> = { es: "es-ES", en: "en-GB" };
+import { fr } from "./i18n-fr";
+import { pt } from "./i18n-pt";
+import { it } from "./i18n-it";
+import { de } from "./i18n-de";
+
+export type Lang = "es" | "en" | "fr" | "pt" | "it" | "de";
+export const LANGS: Lang[] = ["es", "en", "fr", "pt", "it", "de"];
+export const LANG_NAMES: Record<Lang, string> = { es: "Español", en: "English", fr: "Français", pt: "Português", it: "Italiano", de: "Deutsch" };
+export const LOCALE: Record<Lang, string> = { es: "es-ES", en: "en-GB", fr: "fr-FR", pt: "pt-BR", it: "it-IT", de: "de-DE" };
 
 const es = {
   meta: { tagline: "Puntúa tu música canción a canción", description: "Rela Music es el sitio para la gente que vive la música: puntúa tus discos y singles canción a canción, descubre artistas de tu nicho, conecta tu Spotify y comparte tus notas con tus amigos." },
   nav: { home: "Inicio", explore: "Explorar", friends: "Amigos", myProfile: "Mi perfil", profile: "Perfil", search: "Buscar", enter: "Entrar", searchPh: "Álbumes, singles o artistas", searchLabel: "Buscar", homeLabel: "Rela Music, inicio", main: "Principal", tabs: "Pestañas", skip: "Saltar al contenido" },
   grow: {
-    cultToday: "Hoy en De culto", cultTodaySub: "Artistas con menos de 100.000 fans cerca de lo que escuchas. Cambia cada día.",
+    cultToday: "Hoy en De culto", cultTodaySub: "Artistas pequeños, cerca de lo que escuchas. Una selección nueva cada día.",
     underToday: "Underground de verdad", underTodaySub: "Menos de 10.000 fans: lo que todavía no te ha recomendado nadie.",
     cultGenre: (g: string) => `Hoy en De culto · ${g}`, level: "Nivel", lvAll: "Todo", lvCulto: "De culto", lvUnder: "Underground",
     fans: (n: string) => `${n} fans`, noCult: "Hoy no hemos encontrado nada en este nivel. Prueba con otro género.",
     week: "Disco de la semana", weekSub: "El más puntuado por la comunidad en los últimos 7 días",
-    weekStats: (n: number, avg: string) => `${n} ${n === 1 ? "nota" : "notas"} · media ${avg}`, weekEmpty: "Esta semana aún no hay notas. La tuya puede decidir el disco de la semana.",
+    weekStats: (n: number, avg: string) => `${n} ${n === 1 ? "nota" : "notas"} · media ${avg}`, weekEmpty: "Aún no hay notas esta semana. Puntúa un disco y quizá lo conviertas en el disco de la semana.",
     challenge: "Reto de la semana", challengeDone: "Reto completado. El lunes llega otro.", progress: (a: number, b: number) => `${a} de ${b}`,
     ends: (d: number) => (d <= 1 ? "Termina hoy" : `Quedan ${d} días`), challengeCta: "Buscar discos",
     challenges: { culto: "Puntúa 3 discos de artistas De culto", tracks: "Puntúa 3 discos canción a canción", year: "Puntúa 2 discos salidos este año", review: "Escribe 2 reseñas", under: "Puntúa un disco underground (menos de 10.000 fans)" } as Record<string, string>,
@@ -33,7 +39,27 @@ const es = {
     modEmpty: "No hay denuncias pendientes.", modNo: "Esta página es solo para moderar.", hide: "Ocultar", restore: "Mostrar de nuevo", dismiss: "Descartar",
     reportsN: (n: number) => `${n} ${n === 1 ? "denuncia" : "denuncias"}`, gone: "El contenido ya no existe.", isHidden: "Oculto",
   },
-  footer: { beta: "Rela Music · for real music lovers · versión en pruebas. Catálogo: Deezer.", privacy: "Privacidad", terms: "Términos", language: "Idioma" },
+  pro: {
+    nav: "Pro", metaTitle: "Planes · Rela Pro y Artist Pro", kicker: "Planes",
+    title: "Más Rela para quien escucha y para quien crea.",
+    sub: "Rela es gratis y lo seguirá siendo. Con Rela Pro apoyas una web independiente y desbloqueas extras. Con Artist Pro tu música llega a quien de verdad la va a escuchar.",
+    monthly: "Mensual", yearly: "Anual", save: (n: number) => `Hasta −${n} %`, perMonth: "/mes", perYear: "/año", equiv: (x: string) => `Equivale a ${x} al mes`,
+    listener: "Para oyentes", artist: "Para artistas", proName: "Rela Pro", artistName: "Artist Pro", popular: "El más elegido",
+    proPitch: "Para quien vive la música y quiere sacarle todo a su diario.",
+    artistPitch: "Para artistas emergentes que quieren llegar a oyentes de su nicho.",
+    proFeatures: [["Insignia Pro en tu perfil", ""], ["Nunca verás anuncios", ""], ["Tu año en Rela: tus discos, notas y artistas en una tarjeta para compartir", "soon"], ["Estadísticas de tu oído: tu curva media, tu nivel underground y cómo cambian tus notas", "soon"], ["Acceso anticipado a todo lo nuevo", ""], ["Apoyas una web independiente hecha desde la escena", ""]] as [string, string][],
+    artistFeatures: [["Perfil de artista verificado: te escribimos en 24 h para confirmarlo", ""], ["Insignia Artist Pro", ""], ["Tus estrenos en «Novedades» y «Hoy en De culto», siempre marcados como patrocinados", "soon"], ["Estadísticas de tus discos: qué canción gusta más y dónde cae la nota", "soon"], ["Jurado Rela: oyentes veteranos puntúan tu disco canción a canción", "soon"], ["Enlaces a tu merch, entradas y Bandcamp en tu página", "soon"]] as [string, string][],
+    soon: "Pronto", buyPro: "Hazte Pro", buyArtist: "Empieza con Artist Pro", active: "Es tu plan", manage: "Gestionar suscripción", loginFirst: "Entra y suscríbete",
+    freeTitle: "Gratis, siempre", freeItems: ["Puntuar canción a canción", "Reseñas y debates", "Amigos y mensajes", "Hoy en De culto y recomendaciones", "Compartir tus notas en stories"],
+    trustTitle: "Pagar nunca compra notas", trustText: "Ningún plan cambia puntuaciones, rankings ni el disco de la semana. Lo patrocinado siempre va marcado.",
+    faqTitle: "Preguntas frecuentes",
+    faq: [["¿Rela deja de ser gratis?", "No. Puntuar, reseñar, seguir a tus amigos y descubrir música será siempre gratis."], ["¿Un artista puede pagar para tener mejor nota?", "No. Las notas son de la gente. Artist Pro da visibilidad, siempre marcada como patrocinada, y nunca toca notas ni rankings."], ["¿Puedo cancelar cuando quiera?", "Sí, desde «Gestionar suscripción». Conservas el plan hasta el final del periodo que ya pagaste."], ["¿Cómo se paga?", "Con tarjeta, Apple Pay o Google Pay a través de Stripe. Rela nunca ve los datos de tu tarjeta."], ["Soy artista, ¿cómo se verifica mi perfil?", "Después de suscribirte te escribimos para confirmar que la cuenta es tuya, normalmente con un enlace en tu Instagram o tu web."]] as [string, string][],
+    thanks: (p: string) => `¡Gracias! Ya tienes ${p}.`, thanksPending: "Pago recibido. Tu plan se activará en unos segundos: recarga la página si aún no lo ves.",
+    waitlist: (p: string) => `Los pagos de ${p} se abren muy pronto. Te hemos apuntado y te avisaremos los primeros.`,
+    cancelled: "Pago cancelado. No se te ha cobrado nada.", errorPay: "No hemos podido abrir el pago. Inténtalo de nuevo en un momento.",
+    secure: "Pago seguro con Stripe · Cancela cuando quieras · IVA incluido", badgePro: "Pro", badgeArtist: "Artist Pro", qPro: "Hazte Pro",
+  },
+  footer: { beta: "Rela Music · for real music lovers · Versión beta · Catálogo de Deezer", privacy: "Privacidad", terms: "Términos", language: "Idioma" },
   kind: { album: "Álbum", single: "Single", ep: "EP", compile: "Recopilatorio", disc: "Disco" } as Record<string, string>,
   tier: { under: "Underground", culto: "De culto", conocido: "Conocido", main: "Mainstream" } as Record<string, string>,
   common: {
@@ -43,15 +69,15 @@ const es = {
   },
   home: {
     title1: "Puntúa tus discos.", title2: "Canción a canción.",
-    intro: "Lleva un diario de lo que escuchas, descubre qué opina la gente y comparte tus notas en stories.",
-    createProfile: "Crear mi perfil gratis", fresh: "Novedades · música recién salida", freshError: "No se han podido cargar las novedades. Prueba en un rato.",
-    forYou: "Para ti · canciones de tu nicho", forYouCount: (n: number) => `Según los ${n} artistas que sigues`, forYouOff: "Sigue artistas para activarlo",
+    intro: "Tu diario musical: puntúa cada canción, descubre qué opina la gente y comparte tus notas en stories.",
+    createProfile: "Crear mi perfil gratis", fresh: "Novedades", freshError: "Las novedades no han cargado. Vuelve a intentarlo en un momento.",
+    forYou: "Para ti", forYouCount: (n: number) => `Según los ${n} artistas que sigues`, forYouOff: "Sigue a algún artista y empezaremos a recomendarte",
     because: (n: string) => `Porque sigues a ${n}`, followArtistsTitle: "Sigue a tus artistas favoritos",
-    followArtistsText: "Busca un artista y pulsa “Seguir artista”: aquí te recomendaremos canciones de grupos parecidos, sobre todo pequeños.",
+    followArtistsText: "Busca un artista y pulsa «Seguir artista». Aquí aparecerán canciones de grupos parecidos, sobre todo pequeños.",
     searchArtists: "Buscar artistas", trending: "Reseñas en tendencia", byInteraction: "Ordenadas por interacción",
     noReviews: "Todavía no hay reseñas. Abre un disco, puntúalo y escribe la primera.", friendsNews: "Novedades de tus amigos", manageFriends: "Gestionar amigos",
     friendsNothing: "Tus amigos aún no han puntuado nada.", noFollowing: "Todavía no sigues a nadie.", findFriends: "Busca amigos",
-    chart: "Lo más escuchado ahora", chartSub: "Top de Deezer",
+    chart: "Lo más escuchado ahora", chartSub: "Lo que más suena en Deezer",
     hi: (n: string) => `Hola, ${n}`, whatToday: "¿Qué has escuchado hoy?", searchBig: "Busca un disco, un single o un artista…",
     qRate: "Puntuar un disco", qFriends: "Amigos", qMessages: "Mensajes", qProfile: "Mi perfil", qEnter: "Crear mi perfil",
     replay: "Ver la intro", online: (n: number) => `${n} ${n === 1 ? "conectado" : "conectados"}`, fanFav: "Tus favoritos", fanDrop: "Nuevo en tu nicho", fanNew: "Recién salido",
@@ -246,7 +272,27 @@ const en: Dict = {
     modEmpty: "No pending reports.", modNo: "This page is for moderators only.", hide: "Hide", restore: "Show again", dismiss: "Dismiss",
     reportsN: (n) => `${n} ${n === 1 ? "report" : "reports"}`, gone: "The content no longer exists.", isHidden: "Hidden",
   },
-  footer: { beta: "Rela Music · for real music lovers · beta version. Catalogue: Deezer.", privacy: "Privacy", terms: "Terms", language: "Language" },
+  pro: {
+    nav: "Pro", metaTitle: "Plans · Rela Pro and Artist Pro", kicker: "Plans",
+    title: "More Rela for those who listen and those who create.",
+    sub: "Rela is free and will stay that way. Rela Pro supports an independent site and unlocks extras. Artist Pro gets your music to the people who will really listen to it.",
+    monthly: "Monthly", yearly: "Yearly", save: (n) => `Up to −${n}%`, perMonth: "/mo", perYear: "/yr", equiv: (x) => `That's ${x} a month`,
+    listener: "For listeners", artist: "For artists", proName: "Rela Pro", artistName: "Artist Pro", popular: "Most popular",
+    proPitch: "For people who live music and want the most from their diary.",
+    artistPitch: "For emerging artists who want to reach listeners in their niche.",
+    proFeatures: [["Pro badge on your profile", ""], ["Never see ads", ""], ["Your year in Rela: your records, scores and artists on a card to share", "soon"], ["Stats on your ear: your average curve, your underground level and how your scores change", "soon"], ["Early access to everything new", ""], ["Support an independent site built from the scene", ""]],
+    artistFeatures: [["Verified artist profile: we contact you within 24 h to confirm it", ""], ["Artist Pro badge", ""], ["Your releases in “New releases” and “Today in Cult”, always marked as sponsored", "soon"], ["Stats on your records: which song people like most and where the score drops", "soon"], ["Rela Jury: seasoned listeners rate your record track by track", "soon"], ["Links to your merch, tickets and Bandcamp on your page", "soon"]],
+    soon: "Soon", buyPro: "Go Pro", buyArtist: "Start with Artist Pro", active: "Your plan", manage: "Manage subscription", loginFirst: "Sign in to subscribe",
+    freeTitle: "Free, always", freeItems: ["Rate track by track", "Reviews and debates", "Friends and messages", "Today in Cult and recommendations", "Share your scores in stories"],
+    trustTitle: "Paying never buys scores", trustText: "No plan changes scores, rankings or the record of the week. Sponsored content is always labelled.",
+    faqTitle: "Questions",
+    faq: [["Will Rela stop being free?", "No. Rating, reviewing, following friends and discovering music will always be free."], ["Can an artist pay for a better score?", "No. Scores belong to the people. Artist Pro buys visibility, always labelled as sponsored, and never touches scores or rankings."], ["Can I cancel any time?", "Yes, from “Manage subscription”. You keep your plan until the end of the period you paid for."], ["How do I pay?", "By card, Apple Pay or Google Pay through Stripe. Rela never sees your card details."], ["I'm an artist, how is my profile verified?", "After you subscribe we contact you to confirm the account is yours, usually with a link on your Instagram or website."]],
+    thanks: (p) => `Thank you! You now have ${p}.`, thanksPending: "Payment received. Your plan will be active in a few seconds: reload if you don't see it yet.",
+    waitlist: (p) => `Payments for ${p} open very soon. You're on the list and we'll tell you first.`,
+    cancelled: "Payment cancelled. You haven't been charged.", errorPay: "We couldn't open the payment. Try again in a moment.",
+    secure: "Secure payment with Stripe · Cancel any time · VAT included", badgePro: "Pro", badgeArtist: "Artist Pro", qPro: "Go Pro",
+  },
+  footer: { beta: "Rela Music · for real music lovers · Beta · Catalogue by Deezer", privacy: "Privacy", terms: "Terms", language: "Language" },
   kind: { album: "Album", single: "Single", ep: "EP", compile: "Compilation", disc: "Record" },
   tier: { under: "Underground", culto: "Cult", conocido: "Known", main: "Mainstream" },
   common: {
@@ -256,9 +302,9 @@ const en: Dict = {
   },
   home: {
     title1: "Rate your records.", title2: "Track by track.",
-    intro: "Keep a diary of what you listen to, see what people think and share your scores on stories.",
-    createProfile: "Create my free profile", fresh: "New releases · just out", freshError: "New releases couldn't be loaded. Try again in a while.",
-    forYou: "For you · songs from your niche", forYouCount: (n) => `Based on the ${n} artists you follow`, forYouOff: "Follow artists to turn it on",
+    intro: "Your music diary: rate every track, see what people think and share your scores in stories.",
+    createProfile: "Create my free profile", fresh: "New releases", freshError: "New releases didn't load. Try again in a moment.",
+    forYou: "For you", forYouCount: (n) => `Based on the ${n} artists you follow`, forYouOff: "Follow an artist and we'll start recommending",
     because: (n) => `Because you follow ${n}`, followArtistsTitle: "Follow your favourite artists",
     followArtistsText: "Search for an artist and tap “Follow artist”: we'll recommend songs from similar acts here, especially small ones.",
     searchArtists: "Search artists", trending: "Trending reviews", byInteraction: "Sorted by interaction",
@@ -429,8 +475,19 @@ const en: Dict = {
   },
 };
 
-export const DICTS: Record<Lang, Dict> = { es, en };
-export const isLang = (v: unknown): v is Lang => v === "es" || v === "en";
+/** Traducción parcial: lo que falte sale en inglés. */
+export type DeepPartial<T> = { [K in keyof T]?: T[K] extends (...a: never[]) => unknown ? T[K] : T[K] extends readonly unknown[] ? T[K] : T[K] extends object ? DeepPartial<T[K]> : T[K] };
+function merge<T>(base: T, over: DeepPartial<T>): T {
+  const out = { ...base } as Record<string, unknown>;
+  for (const [k, v] of Object.entries(over as Record<string, unknown>)) {
+    const b = (base as Record<string, unknown>)[k];
+    out[k] = v && typeof v === "object" && !Array.isArray(v) && b && typeof b === "object" && !Array.isArray(b) ? merge(b, v as DeepPartial<typeof b>) : v;
+  }
+  return out as T;
+}
+
+export const DICTS: Record<Lang, Dict> = { es, en, fr: merge(en, fr), pt: merge(en, pt), it: merge(en, it), de: merge(en, de) };
+export const isLang = (v: unknown): v is Lang => typeof v === "string" && (LANGS as string[]).includes(v);
 
 export function timeAgoT(t: Dict, iso: string) {
   const h = (Date.now() - new Date(iso).getTime()) / 3.6e6;

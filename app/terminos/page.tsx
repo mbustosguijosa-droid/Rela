@@ -30,7 +30,7 @@ const C = {
 
 export default async function Terminos() {
   const { lang } = await getT();
-  const c = C[lang];
+  const c = lang === "es" ? C.es : C.en;
   return (
     <div className="wrap legal">
       <section className="hello"><h1>{c.title}</h1><p>{c.updated}</p></section>

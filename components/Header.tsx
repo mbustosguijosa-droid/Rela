@@ -28,6 +28,7 @@ export async function Header() {
     { href: "/buscar", label: t.nav.explore },
     { href: "/amigos", label: t.nav.friends },
     ...(user ? [{ href: "/mensajes", label: t.dm.nav, badge: unread }] : []),
+    { href: "/pro", label: t.pro.nav },
   ];
   return (
     <header className="top">

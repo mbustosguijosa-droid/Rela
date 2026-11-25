@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 import { useRouter } from "next/navigation";
-import { DICTS, LOCALE, type Lang } from "@/lib/i18n";
+import { DICTS, LANG_NAMES, LANGS, LOCALE, type Lang } from "@/lib/i18n";
 
 const Ctx = createContext<Lang>("es");
 
@@ -24,10 +24,13 @@ export function LangSwitch() {
     router.refresh();
   };
   return (
-    <div className="lang" role="group" aria-label={t.footer.language}>
-      {(["es", "en"] as Lang[]).map((l) => (
-        <button key={l} type="button" className={l === lang ? "on" : ""} aria-pressed={l === lang} onClick={() => set(l)}>{l.toUpperCase()}</button>
-      ))}
-    </div>
+    <label className="lang lang-select" title={t.footer.language}>
+      <span className="sr-only">{t.footer.language}</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z" fill="none" stroke="currentColor" strokeWidth="1.7" /></svg>
+      <b aria-hidden="true">{lang.toUpperCase()}</b>
+      <select value={lang} onChange={(e) => set(e.target.value as Lang)} aria-label={t.footer.language}>
+        {LANGS.map((l) => <option key={l} value={l}>{LANG_NAMES[l]}</option>)}
+      </select>
+    </label>
   );
 }

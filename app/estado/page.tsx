@@ -30,7 +30,7 @@ async function runChecks(): Promise<Check[]> {
             : `Error: ${error.message}`
           : "Conecta y las tablas existen.",
       });
-      const tables = ["releases", "ratings", "track_ratings", "reviews", "review_reactions", "replies", "follows", "reports", "artist_follows", "messages", "blocks", "music_links", "now_playing", "music_snapshots", "notifications", "admins"];
+      const tables = ["releases", "ratings", "track_ratings", "reviews", "review_reactions", "replies", "follows", "reports", "artist_follows", "messages", "blocks", "music_links", "now_playing", "music_snapshots", "notifications", "admins", "subscriptions", "billing", "pro_interest"];
       const missing: string[] = [];
       for (const t of tables) {
         const { error: e } = await sb!.from(t).select("*", { count: "exact", head: true });
@@ -77,6 +77,11 @@ async function runChecks(): Promise<Check[]> {
   const adm = !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY);
   checks.push({ name: "Escuchas de amigos en directo (Spotify)", ok: true, detail: adm ? "Clave secreta configurada: se actualiza aunque tus amigos no tengan Rela abierto." : "Sin clave secreta: lo que escuchan tus amigos en Spotify se actualiza cuando ellos abren Rela (opcional)." });
   const a = await getAlbum(302867697);
+  {
+    const miss = ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_PRO_MONTH", "STRIPE_PRICE_PRO_YEAR", "STRIPE_PRICE_ARTIST_MONTH", "STRIPE_PRICE_ARTIST_YEAR", "SUPABASE_SERVICE_ROLE_KEY"]
+      .filter((k) => !(process.env[k] || (k === "SUPABASE_SERVICE_ROLE_KEY" && process.env.SUPABASE_SECRET_KEY)));
+    checks.push({ name: "Pagos (Rela Pro y Artist Pro)", ok: miss.length === 0, detail: miss.length ? `Aún sin activar: faltan ${miss.join(", ")} en Vercel. Mientras tanto, quien pulsa «Comprar» queda apuntado en la lista de espera.` : "Stripe configurado: se puede cobrar." });
+  }
   checks.push({ name: "Catálogo de Deezer", ok: !!a, detail: a ? `Responde (ejemplo: ${a.title})` : "No responde ahora mismo." });
   return checks;
 }
